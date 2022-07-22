@@ -11,7 +11,6 @@
 	--cursive-font-family: "Charmonman", cursive;
 	--fa-font-family: "Font Awesome 6 Free";
 	--default-font-weight: 400;
-	--thin-font-weight: 350;
 	--border-thickness: 1px;
 	--border-radius: 0.5em;
 	--border-color-input: #CCCCCC;
@@ -143,6 +142,9 @@ input[type="checkbox"]:checked + label::after {
 	padding: 0.5em;
 	text-align: center;
 }
+.ability__heading{
+	font-weight: bold;
+}
 .ability__score {
 	flex-grow: 1;
 	width: 100%;
@@ -167,12 +169,14 @@ input[type="checkbox"]:checked + label::after {
 .savingThrows {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	gap: 0.5em;
 	border: var(--border);
 	border-radius: var(--border-radius);
 	padding: 0.5em;
 }
 .savingThrow {
+	align-self: stretch;
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
@@ -182,4 +186,7 @@ input[type="checkbox"]:checked + label::after {
 }
 .savingThrow__heading {
 	flex-grow: 1;
+}
+.savingThrows__heading {
+	font-weight: bold;
 }
