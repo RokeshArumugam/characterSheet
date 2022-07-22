@@ -18,6 +18,7 @@
     --border: var(--border-thickness) solid var(--on-background-color);
 	--transition-duration: 200ms;
 	--paragraph-max-width: 72ch;
+	font-size: 12px;
 }
 @media (prefers-color-scheme: dark) {
     :root {
@@ -69,8 +70,8 @@ main {
 		"abilities bonusesAndSavingThrowsAndSkills . ."
 		"abilities bonusesAndSavingThrowsAndSkills . ."
 		". . . .";
-	gap: 0.75em;
-	padding: 0.75em;
+	gap: 1em;
+	padding: 1em;
     overflow: auto;
 }
 
@@ -105,7 +106,7 @@ input[type="checkbox"] + label {
 	width: var(--diameter);
 	height: var(--diameter);
 	padding: 0em;
-	font-size: 0.5em;
+	font-size: 0.75em;
 }
 input[type="checkbox"]:checked + label::after {
 	content: "\f00c";
@@ -127,23 +128,20 @@ input[type="checkbox"]:checked + label::after {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-evenly;
-	gap: 0.5em;
+	gap: 1em;
 }
 .ability {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 0.25em;
+	gap: 0.5em;
 	border: var(--border);
 	border-radius: var(--border-radius);
 	margin-bottom: 0.75em;
-	width: 5em;
-	height: 5em;
-	padding: 0.25em;
+	width: 6.25em;
+	height: 6.5em;
+	padding: 0.5em;
 	text-align: center;
-}
-.ability__heading {
-	font-size: 0.75em;
 }
 .ability__score {
 	flex-grow: 1;
@@ -152,7 +150,6 @@ input[type="checkbox"]:checked + label::after {
 }
 .ability__modifier {
 	width: 5ch;
-	font-size: 0.75em;
 }
 
 /* Bonuses And Saving Throws And Skills */
@@ -162,7 +159,7 @@ input[type="checkbox"]:checked + label::after {
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
-	gap: 0.5em;
+	gap: 1em;
 }
 
 /* -- Saving Throws */
@@ -172,18 +169,17 @@ input[type="checkbox"]:checked + label::after {
 	flex-direction: column;
 	gap: 0.5em;
 	border: var(--border);
+	border-radius: var(--border-radius);
 	padding: 0.5em;
 }
 .savingThrow {
 	display: flex;
 	align-items: center;
-	gap: 0.25em;
+	gap: 0.5em;
 }
 .savingThrow__modifier {
 	width: 5ch;
-	font-size: 0.75em;
 }
 .savingThrow__heading {
 	flex-grow: 1;
-	font-size: 0.75em;
 }
