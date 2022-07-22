@@ -1,0 +1,130 @@
+:root {
+	--background-color: white;
+	--on-background-color: black;
+	--primary-color: dodgerblue;
+	--on-primary-color: white;
+	--success-color: limegreen;
+	--warning-color: gold;
+	--danger-color: red;
+	--default-font-family: "Helvetica", sans-serif;
+	--serif-font-family: "Garamond", serif;
+	--cursive-font-family: "Charmonman", cursive;
+	--fa-font-family: "Font Awesome 6 Free";
+	--default-font-weight: 400;
+	--thin-font-weight: 350;
+	--border-thickness: 1px;
+	--border-radius: 0.5em;
+    --border: var(--border-thickness) solid var(--on-background-color);
+	--transition-duration: 200ms;
+	--paragraph-max-width: 72ch;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: black;
+        --on-background-color: white;
+    }
+}
+* {
+    margin: 0em;
+    box-sizing: border-box;
+    padding: 0em;
+	font-family: var(--default-font-family);
+}
+body {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	min-height: 100vh;
+	max-height: 100vh;
+	background-color: var(--background-color);
+	color: var(--on-background-color);
+	-webkit-text-size-adjust: 100%;
+}
+
+/* Header and Footer */
+
+header, footer {
+	padding: 1em;
+	padding-left: max(1em, env(safe-area-inset-left));
+	padding-right: max(1em, env(safe-area-inset-right));
+}
+header {
+	padding-top: max(1em, env(safe-area-inset-top));
+}
+footer {
+	padding-bottom: max(1em, env(safe-area-inset-bottom));
+}
+
+/* Main */
+
+main {
+	flex-grow: 1;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(3, 1fr);
+    overflow: auto;
+}
+.abilitiesAndSkills {
+	display: grid;
+	grid-auto-columns: 1fr;
+	grid-template-areas:
+		"abilities savingThrows savingThrows"
+		"abilities skills skills";
+	grid-row: span 2;
+}
+.savingThrows {
+	grid-area: savingThrows;
+}
+.skills {
+	grid-area: skills;
+}
+
+/* Inputs */
+
+input {
+	border: var(--border-thickness) solid #CCCCCC;
+	border-radius: var(--border-radius);
+	outline: none;
+	width: 100%;
+	padding: 0.25em 0.5em;
+	background-color: var(--background-color);
+	font-size: 1em;
+	color: var(--on-background-color);
+	-webkit-appearance: none;
+}
+
+/* Abilities */
+
+.abilities {
+	grid-area: abilities;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-evenly;
+	gap: 1em;
+}
+.ability {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25em;
+	border: var(--border);
+	border-radius: var(--border-radius);
+	width: 5em;
+	height: 5em;
+	padding: 0.25em;
+	text-align: center;
+}
+.ability__heading {
+	font-size: 0.75em;
+}
+.ability__score {
+	flex-grow: 1;
+	width: 100%;
+	font-size: 1.5em;
+}
+.ability__modifier {
+	width: 5ch;
+	font-size: 0.75em;
+}
