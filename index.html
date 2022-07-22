@@ -215,6 +215,71 @@
                 <div class="boxHeading">Skills</div>
             </div>
         </div>
+        <div class="combat">
+            <div class="armorClassAndInitiativeAndSpeed">
+                <div class="armorClass box">
+                    <input type="text" id="armorClass">
+                    <div class="boxHeading">Armor Class</div>
+                </div>
+                <div class="initiative box">
+                    <input type="text" id="initiative">
+                    <div class="boxHeading">Initiative</div>
+                </div>
+                <div class="speed box">
+                    <input type="text" id="speed">
+                    <div class="boxHeading">Speed</div>
+                </div>
+            </div>
+            <div class="hitPoints">
+                <div class="currentHitPoints box">
+                    <div class="hitPointMaximum">
+                        <span>Hit Point Maximum</span>
+                        <input type="text" id="hitPointMaximum">
+                    </div>
+                    <input type="text" id="currentHitPoints">
+                    <div class="boxHeading">Current Hit Points</div>
+                </div>
+                <div class="temporaryHitPoints box">
+                    <input type="text" id="temporaryHitPoints">
+                    <div class="boxHeading">Temporary Hit Points</div>
+                </div>
+            </div>
+            <div class="hitDice box">
+                <div class="totalHitDice">
+                    <span>Total</span>
+                    <input type="text" id="totalHitDice">
+                </div>
+                <input type="text" id="currentHitDice">
+                <div class="boxHeading">Hit Dice</div>
+            </div>
+            <div class="deathSaves box">
+                <div class="deathSaves__deathSaveTypes">
+                    <div class="deathSaves__deathSaveType">
+                        <span>Successes</span>
+                        <div class="deathSaves__inputsContainer deathSaves__inputsContainer--success">
+                            <input type="checkbox" id="deathSaveSuccess1">
+                            <label for="deathSaveSuccess1"></label>
+                            <input type="checkbox" id="deathSaveSuccess2">
+                            <label for="deathSaveSuccess2"></label>
+                            <input type="checkbox" id="deathSaveSuccess3">
+                            <label for="deathSaveSuccess3"></label>
+                        </div>
+                    </div>
+                    <div class="deathSaves__deathSaveType">
+                        <span>Failures</span>
+                        <div class="deathSaves__inputsContainer deathSaves__inputsContainer--failure">
+                            <input type="checkbox" id="deathSaveFailure1">
+                            <label for="deathSaveFailure1"></label>
+                            <input type="checkbox" id="deathSaveFailure2">
+                            <label for="deathSaveFailure2"></label>
+                            <input type="checkbox" id="deathSaveFailure3">
+                            <label for="deathSaveFailure3"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="boxHeading">Death Saves</div>
+            </div>
+        </div>
     </main>
     <footer></footer>
 </body>

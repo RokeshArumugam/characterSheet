@@ -63,10 +63,10 @@ footer {
 main {
 	flex-grow: 1;
 	display: grid;
-	grid-template-columns: minmax(6.5em, 1fr) minmax(16.25em, 2fr) 3fr 3fr;
+	grid-template-columns: minmax(6.5em, 1fr) minmax(16.25em, 2fr) minmax(23.5em, 3fr) 3fr;
 	grid-auto-rows: auto auto 1fr;
 	grid-template-areas:
-		"abilities bonusesAndSavingThrowsAndSkills . ."
+		"abilities bonusesAndSavingThrowsAndSkills combat ."
 		"abilities bonusesAndSavingThrowsAndSkills . ."
 		". . . .";
 	gap: 1em;
@@ -136,7 +136,7 @@ input[type="checkbox"]:checked + label::after {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: space-evenly;
 	gap: 1em;
 }
 .ability {
@@ -213,4 +213,134 @@ input[type="checkbox"]:checked + label::after {
 
 .skill__heading span {
 	color: var(--border-color-input)
+}
+
+/* Combat */
+
+.combat {
+	grid-area: combat;
+	display: grid;
+	grid-auto-columns: 1fr;
+	grid-auto-rows: 1fr;
+	grid-template-areas: 
+		"armorClassAndInitiativeAndSpeed armorClassAndInitiativeAndSpeed"
+		"hitPoints hitPoints"
+		"hitPoints hitPoints"
+		"hitDice deathSaves";
+	gap: 1em;
+}
+
+/* -- Armor Class And Initiative And Speed */
+
+.armorClassAndInitiativeAndSpeed {
+	grid-area: armorClassAndInitiativeAndSpeed;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1em;
+}
+.armorClassAndInitiativeAndSpeed > * {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	width: 7.25em;
+	height: 7em;
+}
+.armorClassAndInitiativeAndSpeed input {
+	flex-grow: 1;
+	flex-shrink: 1;
+	font-size: 1.75em;
+}
+
+/* -- Hit Points */
+
+.hitPoints {
+	grid-area: hitPoints;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.5em;
+}
+.hitPoints > * {
+	flex-basis: 0em;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+.hitPoints input {
+	flex-grow: 1;
+}
+.currentHitPoints {
+	border-bottom-left-radius: 0em;
+	border-bottom-right-radius: 0em;
+}
+.hitPointMaximum {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+.hitPointMaximum span {
+	width: 27ch;
+}
+.temporaryHitPoints {
+	border-top-left-radius: 0em;
+	border-top-right-radius: 0em;
+}
+
+/* -- Hit Dice */
+
+.hitDice {
+	grid-area: hitDice;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+.totalHitDice {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+/* -- Death Saves */
+
+.deathSaves {
+	grid-area: deathSaves;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+.deathSaves__deathSaveTypes {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: center;
+	gap: 0.5em;
+}
+.deathSaves__deathSaveType {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+.deathSaves__deathSaveType > * {
+	flex-basis: 0em;
+	flex-grow: 1;
+}
+.deathSaves__deathSaveType span {
+	text-align: center;
+}
+.deathSaves__inputsContainer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.deathSaves__inputsContainer input[type="checkbox"]:checked + label::after {
+	content: "";
+}
+.deathSaves__inputsContainer--success input[type="checkbox"]:checked + label {
+	background-color: var(--success-color);
+}
+.deathSaves__inputsContainer--failure input[type="checkbox"]:checked + label {
+	background-color: var(--danger-color);
 }
