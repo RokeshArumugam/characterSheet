@@ -67,8 +67,8 @@ main {
 	grid-auto-rows: minmax(31em, auto) auto 1fr;
 	grid-template-areas:
 		"abilities bonusesAndSavingThrowsAndSkills combat personality"
-		"abilities bonusesAndSavingThrowsAndSkills attacks ."
-		". . . .";
+		"abilities bonusesAndSavingThrowsAndSkills attacks featuresAndTraits"
+		". . . featuresAndTraits";
 	gap: 1em;
 	padding: 1em;
     overflow: auto;
@@ -393,5 +393,16 @@ input[type="checkbox"]:checked + label::after {
 	width: 9ch;
 }
 .attacks__notes {
+	flex-grow: 1;
+}
+
+/* Features And Traits */
+
+.featuresAndTraits {
+	grid-area: featuresAndTraits;
+	display: flex;
+	flex-direction: column;
+}
+.featuresAndTraits input {
 	flex-grow: 1;
 }
