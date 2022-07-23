@@ -79,7 +79,7 @@ main {
 	border-radius: var(--border-radius);
 	padding: 0.5em;
 }
-.boxHeading {
+.box__heading {
 	font-weight: bold;
 	text-align: center;
 }
