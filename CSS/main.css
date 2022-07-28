@@ -160,12 +160,12 @@ input[type="checkbox"]:checked + label::after {
 	height: 6.75em;
 	text-align: center;
 }
-.ability__score {
+.ability__modifier {
 	flex-grow: 1;
 	width: 100%;
 	font-size: 1.75em;
 }
-.ability__modifier {
+.ability__score {
 	width: 5ch;
 }
 
