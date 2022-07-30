@@ -1,4 +1,5 @@
 const currentUrlParams = new URLSearchParams(window.location.search);
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
 let data = {
 	"strengthAbilityModifier": "",
@@ -129,12 +130,28 @@ function roll(expression) {
 		return rollDie(parseInt(p1.substring(1)));
 	});
 	console.log(expression);
-	
+
 	return eval(expression);
 };
 
 function convertAbilityScoreToModifier(score) {
 	return Math.floor((score - 10) / 2);
+};
+
+function searchFeat(featName) {
+	fetch(CORS_PROXY + encodeURIComponent("http://dnd5e.wikidot.com/feat:" + featName))
+		.then((response) => {
+			if (response.status == 200)
+				return response.text();
+			else
+				console.error("Status Code: " + response.status);
+		}).then((data) => {
+			let htmlDoc = new DOMParser().parseFromString(data, "text/html");
+			let contentElem = htmlDoc.getElementById("page-content");
+			alert(contentElem.innerText.replaceAll(/\n\n+/g, "\n"));
+		}).catch(err => {
+			console.error(err);
+		});
 };
 
 importDataFromURL();
