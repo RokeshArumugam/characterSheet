@@ -68,7 +68,7 @@ main {
 	grid-template-areas:
 		"abilities bonusesAndSavingThrowsAndSkills combat personality"
 		"abilities bonusesAndSavingThrowsAndSkills attacks featuresAndTraits"
-		"passiveWisdomAndOtherProficienciesAndLanguages passiveWisdomAndOtherProficienciesAndLanguages . featuresAndTraits";
+		"passivePerceptionAndOtherProficienciesAndLanguages passivePerceptionAndOtherProficienciesAndLanguages . featuresAndTraits";
 	gap: 1em;
 	padding: 1em;
     overflow: auto;
@@ -409,8 +409,8 @@ input[type="checkbox"]:checked + label::after {
 
 /* Passive Wisdom and Other Proficiencies And Languages */
 
-.passiveWisdomAndOtherProficienciesAndLanguages {
-	grid-area: passiveWisdomAndOtherProficienciesAndLanguages;
+.passivePerceptionAndOtherProficienciesAndLanguages {
+	grid-area: passivePerceptionAndOtherProficienciesAndLanguages;
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
