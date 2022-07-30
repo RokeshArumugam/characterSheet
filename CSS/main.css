@@ -113,6 +113,12 @@ label[for] {
 	cursor: pointer;
 }
 
+/* -- Number */
+
+input::-webkit-inner-spin-button {
+	margin-right: -0.5em;
+}
+
 /* -- Checkbox */
 
 input[type="checkbox"] {
