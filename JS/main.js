@@ -113,5 +113,29 @@ function populateInputs() {
 	};
 };
 
+function rollDie(sides) {
+	return Math.floor(Math.random() * sides + 1);
+};
+
+function roll(expression) {
+	expression = expression.toLowerCase().replaceAll(/\s/g, "").replaceAll(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
+	if (expression.match(/[^d\d\+\-\* ]/)) {
+		console.log("Invalid Roll: Only digits and 'd+-* ' are allowed.");
+		return;
+	};
+
+	console.log(expression);
+	expression = expression.replaceAll(/d\d+/g, (p1) => {
+		return rollDie(parseInt(p1.substring(1)));
+	});
+	console.log(expression);
+	
+	return eval(expression);
+};
+
+function convertAbilityScoreToModifier(score) {
+	return Math.floor((score - 10) / 2);
+};
+
 importDataFromURL();
 populateInputs();
