@@ -126,8 +126,12 @@ function roll(expression) {
 	};
 
 	console.log(expression);
-	expression = expression.replaceAll(/d\d+/g, (p1) => {
-		return rollDie(parseInt(p1.substring(1)));
+	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
+		let rolls = [];
+		for (let i = 0; i < p1; i++) {
+			rolls.push(rollDie(p2));
+		};
+		return rolls.join("+");
 	});
 	console.log(expression);
 
