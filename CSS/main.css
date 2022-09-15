@@ -98,7 +98,7 @@ main {
 
 /* Inputs */
 
-input, input[type="checkbox"] + label {
+input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label {
 	border: var(--border-thickness) solid var(--border-color-input);
 	border-radius: var(--border-radius);
 	outline: none;
@@ -107,6 +107,7 @@ input, input[type="checkbox"] + label {
 	background-color: var(--background-color);
 	font-size: 1em;
 	color: var(--on-background-color);
+	text-align: center;
 	-webkit-appearance: none;
 }
 label[for] {
@@ -115,16 +116,20 @@ label[for] {
 
 /* -- Number */
 
-input::-webkit-inner-spin-button {
-	margin-right: -0.5em;
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* -- Checkbox */
 
-input[type="checkbox"] {
+input[type="checkbox"], input[name="doubleCheckbox"] {
 	display: none;
 }
-input[type="checkbox"] + label {
+input[type="checkbox"] + label, input[name="doubleCheckbox"] + label {
 	--diameter: 1.75em;
 	position: relative;
 	display: grid;
@@ -135,16 +140,21 @@ input[type="checkbox"] + label {
 	padding: 0em;
 	font-size: 0.75em;
 }
-input[type="checkbox"]:checked + label::after {
-	content: "\f00c";
+input[type="checkbox"] + label::after, input[name="doubleCheckbox"] + label::after {
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	font-size: 0.9em;
+	font-size: 1.25em;
 	font-family: var(--fa-font-family);
 	font-weight: bold;
 	color: var(--primary-color);
+}
+input[type="checkbox"]:checked + label::after, input[name="doubleCheckbox"][value="1"] + label::after {
+	content: "\f00c";
+}
+input[name="doubleCheckbox"][value="2"] + label::after {
+	content: "\f560";
 }
 
 /* Abilities */

@@ -19,33 +19,33 @@
         <div class="abilities">
             <div class="ability box">
                 <span class="box__heading">Strength</span>
-                <input type="text" id="strengthAbilityModifier" class="ability__modifier">
-                <input type="text" id="strengthAbilityScore" class="ability__score">
+                <input type="text" pattern="[\+\-]?\d+" id="strengthAbilityModifier" class="ability__modifier">
+                <input type="number" required id="strengthAbilityScore" class="ability__score">
             </div>
             <div class="ability box">
                 <span class="box__heading">Dexterity</span>
-                <input type="text" id="dexterityAbilityModifier" class="ability__modifier">
-                <input type="text" id="dexterityAbilityScore" class="ability__score">
+                <input type="text" pattern="[\+\-]?\d+" id="dexterityAbilityModifier" class="ability__modifier">
+                <input type="number" required id="dexterityAbilityScore" class="ability__score">
             </div>
             <div class="ability box">
                 <span class="box__heading">Constitution</span>
-                <input type="text" id="constitutionAbilityModifier" class="ability__modifier">
-                <input type="text" id="constitutionAbilityScore" class="ability__score">
+                <input type="text" pattern="[\+\-]?\d+" id="constitutionAbilityModifier" class="ability__modifier">
+                <input type="number" required id="constitutionAbilityScore" class="ability__score">
             </div>
             <div class="ability box">
                 <span class="box__heading">Intelligence</span>
-                <input type="text" id="intelligenceAbilityModifier" class="ability__modifier">
-                <input type="text" id="intelligenceAbilityScore" class="ability__score">
+                <input type="text" pattern="[\+\-]?\d+" id="intelligenceAbilityModifier" class="ability__modifier">
+                <input type="number" required id="intelligenceAbilityScore" class="ability__score">
             </div>
             <div class="ability box">
                 <span class="box__heading">Wisdom</span>
-                <input type="text" id="wisdomAbilityModifier" class="ability__modifier">
-                <input type="text" id="wisdomAbilityScore" class="ability__score">
+                <input type="text" pattern="[\+\-]?\d+" id="wisdomAbilityModifier" class="ability__modifier">
+                <input type="number" required id="wisdomAbilityScore" class="ability__score">
             </div>
             <div class="ability box">
                 <span class="box__heading">Charisma</span>
-                <input type="text" id="charismaAbilityModifier" class="ability__modifier">
-                <input type="text" id="charismaAbilityScore" class="ability__score">
+                <input type="text" pattern="[\+\-]?\d+" id="charismaAbilityModifier" class="ability__modifier">
+                <input type="number" required id="charismaAbilityScore" class="ability__score">
             </div>
         </div>
         <div class="bonusesAndSavingThrowsAndSkills">
@@ -57,159 +57,159 @@
                     </div>
                     <span class="box__heading">Inspiration</span>
                 </div>
-                <div class="proficiency box bar">
+                <div class="proficiencyBonus box bar">
                     <div class="bar__inputWrapper">
-                        <input type="text" id="proficiency">
+                        <input type="text" pattern="[\+\-]?\d+" id="proficiencyBonus">
                     </div>
-                    <span class="box__heading">Proficiency</span>
+                    <span class="box__heading">Proficiency Bonus</span>
                 </div>
             </div>
             <div class="savingThrows box">
                 <div class="savingThrow">
-                    <input type="checkbox" id="strengthSavingThrowProficiency" class="savingThrow__proficiency">
-                    <label for="strengthSavingThrowProficiency"></label>
-                    <input type="text" id="strengthSavingThrowModifier" class="savingThrow__modifier">
+                    <input type="number" name="doubleCheckbox" id="strengthSavingThrowProficiencyLevel" class="savingThrow__proficiencyLevel">
+                    <label for="strengthSavingThrowProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="strengthSavingThrowModifier" class="savingThrow__modifier">
                     <span class="savingThrow__heading">Strength</span>
                 </div>
                 <div class="savingThrow">
-                    <input type="checkbox" id="dexteritySavingThrowProficiency" class="savingThrow__proficiency">
-                    <label for="dexteritySavingThrowProficiency"></label>
-                    <input type="text" id="dexteritySavingThrowModifier" class="savingThrow__modifier">
+                    <input type="number" name="doubleCheckbox" id="dexteritySavingThrowProficiencyLevel" class="savingThrow__proficiencyLevel">
+                    <label for="dexteritySavingThrowProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="dexteritySavingThrowModifier" class="savingThrow__modifier">
                     <span class="savingThrow__heading">Dexterity</span>
                 </div>
                 <div class="savingThrow">
-                    <input type="checkbox" id="constiutionSavingThrowProficiency" class="savingThrow__proficiency">
-                    <label for="constiutionSavingThrowProficiency"></label>
-                    <input type="text" id="constitutionSavingThrowModifier" class="savingThrow__modifier">
+                    <input type="number" name="doubleCheckbox" id="constitutionSavingThrowProficiencyLevel" class="savingThrow__proficiencyLevel">
+                    <label for="constitutionSavingThrowProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="constitutionSavingThrowModifier" class="savingThrow__modifier">
                     <span class="savingThrow__heading">Constitution</span>
                 </div>
                 <div class="savingThrow">
-                    <input type="checkbox" id="intelligenceSavingThrowProficiency" class="savingThrow__proficiency">
-                    <label for="intelligenceSavingThrowProficiency"></label>
-                    <input type="text" id="intelligenceSavingThrowModifier" class="savingThrow__modifier">
+                    <input type="number" name="doubleCheckbox" id="intelligenceSavingThrowProficiencyLevel" class="savingThrow__proficiencyLevel">
+                    <label for="intelligenceSavingThrowProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="intelligenceSavingThrowModifier" class="savingThrow__modifier">
                     <span class="savingThrow__heading">Intelligence</span>
                 </div>
                 <div class="savingThrow">
-                    <input type="checkbox" id="wisdomSavingThrowProficiency" class="savingThrow__proficiency">
-                    <label for="wisdomSavingThrowProficiency"></label>
-                    <input type="text" id="wisdomSavingThrowModifier" class="savingThrow__modifier">
+                    <input type="number" name="doubleCheckbox" id="wisdomSavingThrowProficiencyLevel" class="savingThrow__proficiencyLevel">
+                    <label for="wisdomSavingThrowProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="wisdomSavingThrowModifier" class="savingThrow__modifier">
                     <span class="savingThrow__heading">Wisdom</span>
                 </div>
                 <div class="savingThrow">
-                    <input type="checkbox" id="charismaSavingThrowProficiency" class="savingThrow__proficiency">
-                    <label for="charismaSavingThrowProficiency"></label>
-                    <input type="text" id="charismaSavingThrowModifier" class="savingThrow__modifier">
+                    <input type="number" name="doubleCheckbox" id="charismaSavingThrowProficiencyLevel" class="savingThrow__proficiencyLevel">
+                    <label for="charismaSavingThrowProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="charismaSavingThrowModifier" class="savingThrow__modifier">
                     <span class="savingThrow__heading">Charisma</span>
                 </div>
                 <span class="box__heading">Saving Throws</span>
             </div>
             <div class="skills box">
                 <div class="skill">
-                    <input type="checkbox" id="acrobaticsSkillProficiency" class="skill__proficiency">
-                    <label for="acrobaticsSkillProficiency"></label>
-                    <input type="text" id="acrobaticsSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="acrobaticsSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="acrobaticsSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="acrobaticsSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Acrobatics <span>(Dex)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="animalHandlingSkillProficiency" class="skill__proficiency">
-                    <label for="animalHandlingSkillProficiency"></label>
-                    <input type="text" id="animalHandlingSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="animalHandlingSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="animalHandlingSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="animalHandlingSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Animal Handling <span>(Wis)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="arcanaSkillProficiency" class="skill__proficiency">
-                    <label for="arcanaSkillProficiency"></label>
-                    <input type="text" id="arcanaSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="arcanaSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="arcanaSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="arcanaSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Arcana <span>(Int)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="athleticsSkillProficiency" class="skill__proficiency">
-                    <label for="athleticsSkillProficiency"></label>
-                    <input type="text" id="athleticsSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="athleticsSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="athleticsSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="athleticsSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Athletics <span>(Str)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="deceptionSkillProficiency" class="skill__proficiency">
-                    <label for="deceptionSkillProficiency"></label>
-                    <input type="text" id="deceptionSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="deceptionSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="deceptionSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="deceptionSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Deception <span>(Cha)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="historySkillProficiency" class="skill__proficiency">
-                    <label for="historySkillProficiency"></label>
-                    <input type="text" id="historySkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="historySkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="historySkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="historySkillModifier" class="skill__modifier">
                     <span class="skill__heading">History <span>(Int)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="insightSkillProficiency" class="skill__proficiency">
-                    <label for="insightSkillProficiency"></label>
-                    <input type="text" id="insightSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="insightSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="insightSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="insightSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Insight <span>(Wis)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="intimidationSkillProficiency" class="skill__proficiency">
-                    <label for="intimidationSkillProficiency"></label>
-                    <input type="text" id="intimidationSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="intimidationSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="intimidationSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="intimidationSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Intimidation <span>(Cha)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="investigationSkillProficiency" class="skill__proficiency">
-                    <label for="investigationSkillProficiency"></label>
-                    <input type="text" id="investigationSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="investigationSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="investigationSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="investigationSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Investigation <span>(Int)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="medicineSkillProficiency" class="skill__proficiency">
-                    <label for="medicineSkillProficiency"></label>
-                    <input type="text" id="medicineSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="medicineSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="medicineSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="medicineSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Medicine <span>(Wis)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="natureSkillProficiency" class="skill__proficiency">
-                    <label for="natureSkillProficiency"></label>
-                    <input type="text" id="natureSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="natureSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="natureSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="natureSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Nature <span>(Int)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="perceptionSkillProficiency" class="skill__proficiency">
-                    <label for="perceptionSkillProficiency"></label>
-                    <input type="text" id="perceptionSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="perceptionSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="perceptionSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="perceptionSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Perception <span>(Wis)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="performanceSkillProficiency" class="skill__proficiency">
-                    <label for="performanceSkillProficiency"></label>
-                    <input type="text" id="performanceSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="performanceSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="performanceSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="performanceSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Performance <span>(Cha)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="persuasionSkillProficiency" class="skill__proficiency">
-                    <label for="persuasionSkillProficiency"></label>
-                    <input type="text" id="persuasionSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="persuasionSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="persuasionSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="persuasionSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Persuasion <span>(Cha)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="religionSkillProficiency" class="skill__proficiency">
-                    <label for="religionSkillProficiency"></label>
-                    <input type="text" id="religionSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="religionSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="religionSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="religionSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Religion <span>(Int)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="sleightOfHandSkillProficiency" class="skill__proficiency">
-                    <label for="sleightOfHandSkillProficiency"></label>
-                    <input type="text" id="sleightOfHandSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="sleightOfHandSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="sleightOfHandSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="sleightOfHandSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Sleight of Hand <span>(Dex)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="stealthSkillProficiency" class="skill__proficiency">
-                    <label for="stealthSkillProficiency"></label>
-                    <input type="text" id="stealthSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="stealthSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="stealthSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="stealthSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Stealth <span>(Dex)</span></span>
                 </div>
                 <div class="skill">
-                    <input type="checkbox" id="survivalSkillProficiency" class="skill__proficiency">
-                    <label for="survivalSkillProficiency"></label>
-                    <input type="text" id="survivalSkillModifier" class="skill__modifier">
+                    <input type="number" name="doubleCheckbox" id="survivalSkillProficiencyLevel" class="skill__proficiencyLevel">
+                    <label for="survivalSkillProficiencyLevel"></label>
+                    <input type="text" pattern="[\+\-]?\d+" id="survivalSkillModifier" class="skill__modifier">
                     <span class="skill__heading">Survival <span>(Wis)</span></span>
                 </div>
                 <span class="box__heading">Skills</span>
@@ -218,15 +218,15 @@
         <div class="combat">
             <div class="armorClassAndInitiativeAndSpeed">
                 <div class="armorClass box">
-                    <input type="text" id="armorClass">
+                    <input type="number" id="armorClass">
                     <span class="box__heading">Armor Class</span>
                 </div>
                 <div class="initiative box">
-                    <input type="text" id="initiative">
+                    <input type="text" pattern="[\+\-]?\d+" id="initiative">
                     <span class="box__heading">Initiative</span>
                 </div>
                 <div class="speed box">
-                    <input type="text" id="speed">
+                    <input type="number" id="speed">
                     <span class="box__heading">Speed</span>
                 </div>
             </div>
@@ -313,7 +313,7 @@
                             <input type="text" class="weapon__name">
                         </td>
                         <td>
-                            <input type="text" class="weapon__atkBonus">
+                            <input type="text" pattern="[\+\-]?\d+" class="weapon__atkBonus">
                         </td>
                         <td>
                             <input type="text" class="weapon__damageOrType">
@@ -324,7 +324,7 @@
                             <input type="text" class="weapon__name">
                         </td>
                         <td>
-                            <input type="text" class="weapon__atkBonus">
+                            <input type="text" pattern="[\+\-]?\d+" class="weapon__atkBonus">
                         </td>
                         <td>
                             <input type="text" class="weapon__damageOrType">
@@ -335,7 +335,7 @@
                             <input type="text" class="weapon__name">
                         </td>
                         <td>
-                            <input type="text" class="weapon__atkBonus">
+                            <input type="text" pattern="[\+\-]?\d+" class="weapon__atkBonus">
                         </td>
                         <td>
                             <input type="text" class="weapon__damageOrType">
@@ -353,7 +353,7 @@
         <div class="passivePerceptionAndOtherProficienciesAndLanguages">
             <div class="passivePerception box bar">
                 <div class="bar__inputWrapper">
-                    <input type="text" id="passivePerception">
+                    <input type="number" id="passivePerception">
                 </div>
                 <span class="box__heading">Passive Wisdom (Perception)</span>
             </div>
