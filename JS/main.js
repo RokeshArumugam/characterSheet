@@ -80,12 +80,8 @@ let data = {
 	"temporaryHitPoints": 0,
 	"totalHitDice": "",
 	"currentHitDice": "",
-	"deathSaveSuccess1": false,
-	"deathSaveSuccess2": false,
-	"deathSaveSuccess3": false,
-	"deathSaveFailure1": false,
-	"deathSaveFailure2": false,
-	"deathSaveFailure3": false,
+	"deathSaveSuccesses": 0,
+	"deathSaveFailures": 0,
 	"personalityTraits": "",
 	"ideals": "",
 	"bonds": "",
@@ -109,7 +105,7 @@ function getAbilityModifierForScore(score) {
 function updateDataValueAndInput(id, value) {
 	data[id] = value;
 	const elem = document.getElementById(id);
-	if (elem.name == "doubleCheckbox")
+	if (["doubleCheckbox", "tripleCheckbox"].includes(elem.name))
 		elem.setAttribute("value", value)
 	if ((elem.type == "text") && (typeof value == "number") && (value > 0))
 		value = "+" + value;
@@ -238,14 +234,14 @@ document.getElementById("proficiencyBonus").addEventListener("input", evt => {
 		return
 	updateProficiencyDependentModifiers();
 });
-for (const elem of document.querySelectorAll("[name='doubleCheckbox'] + label")) {
+document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 	elem.addEventListener("click", _ => {
 		const inputElem = elem.previousElementSibling;
 		const newValue = (inputElem.value + 1) % 3;
 		inputElem.setAttribute("value", newValue);
 		inputElem.value = newValue;
 		data[inputElem.id] = newValue;
-		
+
 		if (inputElem.id.includes("SavingThrow")) {
 			console.log(inputElem.value)
 			updateSavingThrowModifier(
@@ -257,6 +253,22 @@ for (const elem of document.querySelectorAll("[name='doubleCheckbox'] + label"))
 			);
 		};
 	});
-};
+});
+document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, index) => {
+	elem.addEventListener("click", _ => {
+		let inputElem = elem.previousElementSibling;
+		for (let i = 0; i < (index % 3); i++) {
+			inputElem = inputElem.previousElementSibling;
+		};
+		console.log(inputElem)
+
+		let newValue = (index % 3) + 1;
+		newValue = (inputElem.value == newValue) ? 0 : newValue;
+		
+		inputElem.setAttribute("value", newValue);
+		inputElem.value = newValue;
+		data[inputElem.id] = newValue;
+	});
+});
 
 importDataFromURL();

@@ -98,7 +98,7 @@ main {
 
 /* Inputs */
 
-input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label {
+input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
 	border: var(--border-thickness) solid var(--border-color-input);
 	border-radius: var(--border-radius);
 	outline: none;
@@ -126,10 +126,10 @@ input[type=number] {
 
 /* -- Checkbox */
 
-input[type="checkbox"], input[name="doubleCheckbox"] {
+input[type="checkbox"], input[name="doubleCheckbox"], input[name="tripleCheckbox"] {
 	display: none;
 }
-input[type="checkbox"] + label, input[name="doubleCheckbox"] + label {
+input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
 	--diameter: 1.75em;
 	position: relative;
 	display: grid;
@@ -351,13 +351,22 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	align-items: center;
 	justify-content: space-between;
 }
-.deathSaves__inputsContainer input[type="checkbox"]:checked + label::after {
-	content: "";
-}
-.deathSaves__inputsContainer--success input[type="checkbox"]:checked + label {
+.deathSaves__inputsContainer--success input[name="tripleCheckbox"][value="1"] ~ label:nth-last-of-type(n+3) {
 	background-color: var(--success-color);
 }
-.deathSaves__inputsContainer--failure input[type="checkbox"]:checked + label {
+.deathSaves__inputsContainer--success input[name="tripleCheckbox"][value="2"] ~ label:nth-last-of-type(n+2) {
+	background-color: var(--success-color);
+}
+.deathSaves__inputsContainer--success input[name="tripleCheckbox"][value="3"] ~ label:nth-last-of-type(n+1) {
+	background-color: var(--success-color);
+}
+.deathSaves__inputsContainer--failure input[name="tripleCheckbox"][value="1"] ~ label:nth-last-of-type(n+3) {
+	background-color: var(--danger-color);
+}
+.deathSaves__inputsContainer--failure input[name="tripleCheckbox"][value="2"] ~ label:nth-last-of-type(n+2) {
+	background-color: var(--danger-color);
+}
+.deathSaves__inputsContainer--failure input[name="tripleCheckbox"][value="3"] ~ label:nth-last-of-type(n+1) {
 	background-color: var(--danger-color);
 }
 
