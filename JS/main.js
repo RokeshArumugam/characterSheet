@@ -105,11 +105,15 @@ function getAbilityModifierForScore(score) {
 function updateDataValueAndInput(id, value) {
 	data[id] = value;
 	const elem = document.getElementById(id);
-	if (["doubleCheckbox", "tripleCheckbox"].includes(elem.name))
-		elem.setAttribute("value", value)
-	if ((elem.type == "text") && (typeof value == "number") && (value > 0))
-		value = "+" + value;
-	elem.value = value;
+	if (elem.type == "checkbox")
+		elem.checked = value
+	else {
+		if (["doubleCheckbox", "tripleCheckbox"].includes(elem.name))
+			elem.setAttribute("value", value)
+		if ((elem.type == "text") && (typeof value == "number") && (value > 0))
+			value = "+" + value;
+		elem.value = value;
+	};
 };
 
 function importDataFromURL() {
@@ -264,7 +268,7 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 
 		let newValue = (index % 3) + 1;
 		newValue = (inputElem.value == newValue) ? 0 : newValue;
-		
+
 		inputElem.setAttribute("value", newValue);
 		inputElem.value = newValue;
 		data[inputElem.id] = newValue;

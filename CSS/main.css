@@ -145,10 +145,13 @@ input[type="checkbox"] + label::after, input[name="doubleCheckbox"] + label::aft
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	font-size: 1.25em;
+	font-size: 0.9em;
 	font-family: var(--fa-font-family);
 	font-weight: bold;
 	color: var(--primary-color);
+}
+input[name="doubleCheckbox"] + label::after {
+	font-size: 1.25em;
 }
 input[type="checkbox"]:checked + label::after, input[name="doubleCheckbox"][value="1"] + label::after {
 	content: "\f00c";
