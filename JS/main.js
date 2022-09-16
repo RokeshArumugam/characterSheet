@@ -1,5 +1,5 @@
 const currentUrlParams = new URLSearchParams(window.location.search);
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+const CORS_PROXY = "https://circumvent-cors.herokuapp.com/";
 
 const skillsForAbilities = {
 	"strength": ["athletics"],
@@ -97,9 +97,25 @@ let data = {
 	"platinumPieces": 0,
 	"equipmentNotes": ""
 };
+let searchedFeats = {};
 
 function getAbilityModifierForScore(score) {
 	return Math.floor((score - 10) / 2);
+};
+
+function getTitleCase(text) {
+	return text.replace(
+		/\w\S*/g,
+		(word, offset) => {
+			if (offset && ["a", "an", "the", "of"].includes(word.toLowerCase()))
+				return word.toLowerCase()
+			return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
+		}
+	);
+}
+
+function getUrlFeatNameForFeatName(featName) {
+	return featName.toLowerCase().replaceAll(" ", "-")
 };
 
 function updateDataValueAndInput(id, value) {
@@ -114,6 +130,8 @@ function updateDataValueAndInput(id, value) {
 			value = "+" + value;
 		elem.value = value;
 	};
+	if (id == "featuresAndTraits")
+		checkForFeats(value);
 };
 
 function importDataFromURL() {
@@ -169,7 +187,7 @@ function updateAbilityModifier(abilityName) {
 };
 
 function rollDie(sides) {
-	return Math.floor(Math.random() * sides + 1);
+	return Math.floor(Math.random() * sides) + 1;
 };
 
 function roll(expression) {
@@ -192,20 +210,75 @@ function roll(expression) {
 	return eval(expression);
 };
 
-function searchFeat(featName) {
-	fetch(CORS_PROXY + encodeURIComponent("http://dnd5e.wikidot.com/feat:" + featName))
-		.then((response) => {
-			if (response.status == 200)
-				return response.text();
-			else
-				console.error("Status Code: " + response.status);
-		}).then((data) => {
-			let htmlDoc = new DOMParser().parseFromString(data, "text/html");
-			let contentElem = htmlDoc.getElementById("page-content");
-			alert(contentElem.innerText.replaceAll(/\n\n+/g, "\n"));
-		}).catch(err => {
-			console.error(err);
-		});
+function showFeatInfo(urlFeatName) {
+	alert(searchedFeats[urlFeatName]["description"] + "\n\n" + searchedFeats[urlFeatName]["url"])
+};
+
+function addFeatButton(featName, urlFeatName) {
+	let featButtonElem = document.createElement("div");
+	featButtonElem.id = "featButton-" + urlFeatName;
+	featButtonElem.classList.add("featuresAndTraits__featButton")
+	featButtonElem.addEventListener("click", evt => {
+		if (evt.target.tagName != "I")
+			showFeatInfo(urlFeatName);
+	});
+
+	let featButtonTextElem = document.createElement("span");
+	featButtonTextElem.innerText = featName;
+	featButtonElem.appendChild(featButtonTextElem);
+
+	let featButtonCloseElem = document.createElement("i");
+	featButtonCloseElem.classList.add("fas")
+	featButtonCloseElem.classList.add("fa-close")
+	featButtonCloseElem.addEventListener("click", _ => featButtonElem.remove());
+	featButtonElem.appendChild(featButtonCloseElem);
+
+	document.getElementsByClassName("featuresAndTraits__featButtonsContainer")[0].appendChild(featButtonElem);
+}
+
+function searchAndAddFeat(featName) {
+	featName = getTitleCase(featName);
+	const urlFeatName = getUrlFeatNameForFeatName(featName);
+	const url = "http://dnd5e.wikidot.com/feat:" + urlFeatName;
+	fetch(
+		CORS_PROXY + (url)
+	).then((response) => {
+		if (response.status == 200)
+			return response.text();
+		else if (response.status == 404)
+			return null
+		else
+			console.error("Status Code: " + response.status);
+	}).then((data) => {
+		if (!data)
+			return
+
+		let wholeText = new DOMParser().parseFromString(data, "text/html").getElementById("page-content").innerText;
+		wholeText = wholeText.replaceAll(/\n\n+/g, "\n").trim().replaceAll(/^\s+/g, "").replaceAll(/\s+\n/g, "\n");
+		searchedFeats[urlFeatName] = {
+			"description": wholeText.substring(wholeText.indexOf("\n") + 1),
+			"source": wholeText.match(/^Source: (.*)\n/)[1],
+			"url": url
+		};
+
+		addFeatButton(featName, urlFeatName);
+	}).catch(err => {
+		console.error(err);
+	});
+};
+
+function checkForFeats(text) {
+	for (const feat of text.matchAll(/^([\w ]+) - .*$/g)) {
+		const featName = feat[1];
+		const urlFeatName = getUrlFeatNameForFeatName(featName);
+		if (urlFeatName in searchedFeats) {
+			if (!(document.getElementById("featButton-" + urlFeatName)) && Object.keys(searchedFeats[urlFeatName]).length)
+				addFeatButton(featName, urlFeatName);
+		} else {
+			searchedFeats[urlFeatName] = {};
+			searchAndAddFeat(featName);
+		};
+	};
 };
 
 for (const elem of document.getElementsByTagName("input")) {
@@ -271,6 +344,9 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 		inputElem.value = newValue;
 		data[inputElem.id] = newValue;
 	});
+});
+document.getElementById("featuresAndTraits").addEventListener("input", evt => {
+	checkForFeats(evt.target.value);
 });
 
 importDataFromURL();

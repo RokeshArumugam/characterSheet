@@ -63,7 +63,7 @@ footer {
 main {
 	flex-grow: 1;
 	display: grid;
-	grid-template-columns: minmax(6.5em, 1fr) minmax(16.25em, 2fr) minmax(23.5em, 3fr) 3fr;
+	grid-template-columns: minmax(6.5em, 1fr) minmax(16.25em, 2fr) minmax(23.5em, 3fr) minmax(14em, 3fr);
 	grid-auto-rows: minmax(31em, auto) auto 1fr;
 	grid-template-areas:
 		"abilities bonusesAndSavingThrowsAndSkills combat personality"
@@ -433,6 +433,28 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	grid-area: featuresAndTraits;
 	display: flex;
 	flex-direction: column;
+}
+.featuresAndTraits__featButtonsContainer {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0.5em;
+}
+.featuresAndTraits__featButtonsContainer:empty {
+	display: none;
+}
+.featuresAndTraits__featButton {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	border-radius: var(--border-radius);
+	padding: 0.5em 0.75em;
+	background-color: var(--primary-color);
+	cursor: pointer;
+	color: var(--on-primary-color);
+}
+.featuresAndTraits__featButton span {
+	flex-grow: 1;
 }
 .featuresAndTraits textarea {
 	flex-grow: 1;
