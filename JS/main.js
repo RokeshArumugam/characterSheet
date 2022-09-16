@@ -247,7 +247,6 @@ document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 		data[inputElem.id] = newValue;
 
 		if (inputElem.id.includes("SavingThrow")) {
-			console.log(inputElem.value)
 			updateSavingThrowModifier(
 				inputElem.id.substring(0, inputElem.id.length - "SavingThrowProficiencyLevel".length)
 			);
@@ -264,7 +263,6 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 		for (let i = 0; i < (index % 3); i++) {
 			inputElem = inputElem.previousElementSibling;
 		};
-		console.log(inputElem)
 
 		let newValue = (index % 3) + 1;
 		newValue = (inputElem.value == newValue) ? 0 : newValue;

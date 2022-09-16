@@ -98,7 +98,7 @@ main {
 
 /* Inputs */
 
-input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
+input, textarea, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
 	border: var(--border-thickness) solid var(--border-color-input);
 	border-radius: var(--border-radius);
 	outline: none;
@@ -107,8 +107,11 @@ input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, inp
 	background-color: var(--background-color);
 	font-size: 1em;
 	color: var(--on-background-color);
-	text-align: center;
 	-webkit-appearance: none;
+	resize: none;
+}
+input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
+	text-align: center;
 }
 label[for] {
 	cursor: pointer;
@@ -388,7 +391,7 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	display: flex;
 	flex-direction: column;
 }
-.personality input {
+.personality textarea {
 	flex-grow: 1;
 }
 .personality > *:nth-child(1) {
@@ -431,7 +434,7 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	display: flex;
 	flex-direction: column;
 }
-.featuresAndTraits input {
+.featuresAndTraits textarea {
 	flex-grow: 1;
 }
 
@@ -448,7 +451,7 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	display: flex;
 	flex-direction: column;
 }
-.otherProficienciesAndLanguages input {
+.otherProficienciesAndLanguages textarea {
 	flex-grow: 1;
 }
 
