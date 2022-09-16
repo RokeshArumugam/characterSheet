@@ -1,6 +1,26 @@
 const currentUrlParams = new URLSearchParams(window.location.search);
 const CORS_PROXY = "https://circumvent-cors.herokuapp.com/";
 
+const modalTypes = {
+	Information: "fa-info-circle",
+	Success: "fa-check-circle",
+	Warning: "fa-exclamation-triangle",
+	Error: "fa-times-circle"
+};
+const showInfoTemplateString = `
+	<div id="modal" class="modal" role="alertdialog">
+		<div id="modal__overlay" class="modal__overlay"></div>
+		<div id="modal__box" class="modal__box">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<div id="modal__message"></div>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Close</button>
+			</div>
+		</div>
+	</div>
+`;
+
 const skillsForAbilities = {
 	"strength": ["athletics"],
 	"dexterity": ["acrobatics", "sleightOfHand", "stealth"],
@@ -118,6 +138,42 @@ function getUrlFeatNameForFeatName(featName) {
 	return featName.toLowerCase().replaceAll(" ", "-")
 };
 
+function createModal(templateString, message, type, heading) {
+	let modalElem = new DOMParser().parseFromString(templateString, "text/html");
+	let messageElem = modalElem.getElementById("modal__message");
+
+	modalElem.getElementById("modal__icon").classList.add(type);
+
+	modalElem.getElementById("modal__heading").innerText = heading;
+
+	if (typeof message !== "string")
+		message = String(message);
+
+	for (let paragraph of message.split("\n")) {
+		let paragraphElem = document.createElement("p");
+		paragraphElem.innerText = paragraph;
+		messageElem.appendChild(paragraphElem);
+	};
+
+	modalElem = modalElem.body.firstChild;
+	modalElem.addEventListener("click", evt => {
+		if (evt.target.classList.contains("modal__button")) {
+			modalElem.remove();
+		};
+	});
+	return modalElem;
+};
+
+window.showInfo = (message, heading = "Information") => {
+	return new Promise((resolve, reject) => {
+		let modalElem = createModal(showInfoTemplateString, message, modalTypes.Information, heading);
+		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
+			resolve(undefined);
+		});
+		document.body.appendChild(modalElem);
+	})
+};
+
 function updateDataValueAndInput(id, value) {
 	data[id] = value;
 	const elem = document.getElementById(id);
@@ -210,17 +266,18 @@ function roll(expression) {
 	return eval(expression);
 };
 
-function showFeatInfo(urlFeatName) {
-	alert(searchedFeats[urlFeatName]["description"] + "\n\n" + searchedFeats[urlFeatName]["url"])
+function showFeatInfo(featName, urlFeatName) {
+	showInfo(searchedFeats[urlFeatName]["description"] + "\n\n" + searchedFeats[urlFeatName]["url"], featName)
 };
 
 function addFeatButton(featName, urlFeatName) {
 	let featButtonElem = document.createElement("div");
 	featButtonElem.id = "featButton-" + urlFeatName;
 	featButtonElem.classList.add("featuresAndTraits__featButton")
+	featButtonElem.classList.add("primaryButton")
 	featButtonElem.addEventListener("click", evt => {
 		if (evt.target.tagName != "I")
-			showFeatInfo(urlFeatName);
+			showFeatInfo(featName, urlFeatName);
 	});
 
 	let featButtonTextElem = document.createElement("span");
