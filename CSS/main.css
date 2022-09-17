@@ -645,6 +645,7 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 .equipment {
 	display: grid;
 	grid-template-columns: auto 1fr;
+	grid-auto-rows: 1fr auto;
 	grid-template-areas: 
 		"currencies equipment__notes"
 		"box__heading box__heading";
