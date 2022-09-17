@@ -420,7 +420,7 @@ function searchAndAddFeat(featName) {
 };
 
 function checkForFeats(text) {
-	for (const feat of text.matchAll(/^([\w ]+) - .*$/g)) {
+	for (const feat of text.matchAll(/^([\w ]+)(:| - ).*$/g)) {
 		const featName = feat[1];
 		const urlFeatName = getUrlFeatNameForFeatName(featName);
 		if (urlFeatName in searchedFeats) {
