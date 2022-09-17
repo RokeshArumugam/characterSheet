@@ -7,6 +7,19 @@ const modalTypes = {
 	Warning: "fa-exclamation-triangle",
 	Error: "fa-times-circle"
 };
+const alertTemplateString = `
+	<div id="modal" class="modal" role="alertdialog">
+		<div id="modal__overlay" class="modal__overlay"></div>
+		<div id="modal__box" class="modal__box">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<div id="modal__message"></div>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Close</button>
+			</div>
+		</div>
+	</div>
+`;
 const showInfoTemplateString = `
 	<div id="modal" class="modal" role="alertdialog">
 		<div id="modal__overlay" class="modal__overlay"></div>
@@ -209,6 +222,19 @@ function createModal(templateString, message, type, heading) {
 	return modalElem;
 };
 
+window.alert = (message, type = modalTypes.Information, heading) => {
+	if (!heading) {
+		heading = Object.keys(modalTypes).find(key => modalTypes[key] === type);
+	};
+	return new Promise((resolve, reject) => {
+		let modalElem = createModal(alertTemplateString, message, type, heading);
+		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
+			resolve(undefined);
+		});
+		document.body.appendChild(modalElem);
+	})
+};
+
 window.showInfo = (message, heading = "Information", sourceLink, sourceText, prerequisites = []) => {
 	return new Promise((resolve, reject) => {
 		let modalElem = createModal(showInfoTemplateString, message, modalTypes.Information, heading);
@@ -253,7 +279,7 @@ function updateDataValueAndInput(id, value) {
 		checkForFeats(value);
 };
 
-function importDataFromURL() {
+function importDataFromUrl() {
 	const keys = Object.keys(data);
 	let values = Object.values(data);
 	if (currentUrlParams.has("values"))
@@ -263,8 +289,8 @@ function importDataFromURL() {
 	};
 };
 
-function exportDataToURL() {
-	console.log(window.location.href + "?values=" + btoa(JSON.stringify(Object.values(data))));
+function exportDataToUrl() {
+	return window.location.origin + window.location.pathname + "?values=" + btoa(JSON.stringify(Object.values(data)));
 };
 
 function updateSavingThrowModifier(abilityName) {
@@ -501,4 +527,4 @@ document.getElementById("featuresAndTraits").addEventListener("input", evt => {
 	checkForFeats(evt.target.value);
 });
 
-importDataFromURL();
+importDataFromUrl();

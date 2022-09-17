@@ -386,7 +386,9 @@
             <span class="box__heading">Equipment</span>
         </div>
     </main>
-    <footer></footer>
+    <footer>
+        <span class="primaryButton" onclick="navigator.clipboard.writeText(exportDataToUrl()); alert('You can use this link to access a character sheet with these values:\n' + exportDataToUrl(), modalTypes.Success, 'Link Copied!')">Copy Link to This Character Sheet</span>
+    </footer>
 </body>
 
 </html>

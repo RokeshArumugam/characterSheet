@@ -55,7 +55,13 @@ header {
 	padding-top: max(1em, env(safe-area-inset-top));
 }
 footer {
+	display: grid;
+	place-items: center;
+	border-top: var(--border);
 	padding-bottom: max(1em, env(safe-area-inset-bottom));
+}
+footer span {
+	font-size: 1.2em;
 }
 
 /* Modal */
@@ -192,7 +198,7 @@ footer {
 		font-weight: var(--thin-font-weight);
 	}
     .modal__box {
-        background-color: #222222;
+        background-color: #333333;
     }
 }
 
@@ -218,6 +224,7 @@ p {
 	margin-left: auto;
 	margin-right: auto;
 	max-width: var(--paragraph-max-width);
+	word-break: break-word;
 }
 a {
 	color: dodgerblue;
