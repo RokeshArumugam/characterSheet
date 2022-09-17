@@ -45,6 +45,13 @@ const skillsForAbilities = {
 }
 
 let data = {
+	"characterName": "",
+	"classAndLevel": "",
+	"background": "",
+	"playerName": "",
+	"race": "",
+	"alignment": "",
+	"experiencePoints": "",
 	"strengthAbilityModifier": 0,
 	"strengthAbilityScore": 10,
 	"dexterityAbilityModifier": 0,

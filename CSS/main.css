@@ -51,9 +51,39 @@ header, footer {
 	padding-left: max(1em, env(safe-area-inset-left));
 	padding-right: max(1em, env(safe-area-inset-right));
 }
+
+/* -- Header */
+
 header {
+	display: flex;
+	align-items: stretch;
+	gap: 0.5em;
+	border-bottom: var(--border);
 	padding-top: max(1em, env(safe-area-inset-top));
 }
+header > * {
+	flex-basis: 0em;
+	flex-grow: 1;
+}
+#characterName {
+	font-size: 2em;
+}
+.header__cellsContainer {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.5em;
+	min-width: 28em;
+}
+.header__cell {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.25em;
+	text-align: center;
+}
+
+/* -- Footer */
+
 footer {
 	display: grid;
 	place-items: center;
