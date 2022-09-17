@@ -1,3 +1,6 @@
+
+// Variables
+
 const currentUrlParams = new URLSearchParams(window.location.search);
 const CORS_PROXY = "https://circumvent-cors.herokuapp.com/";
 
@@ -146,6 +149,8 @@ let data = {
 };
 let searchedDetails = {};
 
+// Utility Functions
+
 function getAbilityModifierForScore(score) {
 	return Math.floor((score - 10) / 2);
 };
@@ -278,6 +283,8 @@ window.showInfo = (message, heading = "Information", sourceLink, sourceText, pre
 		document.body.appendChild(modalElem);
 	})
 };
+
+// Main Functions
 
 function updateDataValueAndInput(id, value) {
 	data[id] = value;
@@ -499,6 +506,8 @@ function checkForDetail(text) {
 	};
 };
 
+// Event Listeners
+
 for (const elem of document.getElementsByTagName("input")) {
 	if (elem.id)
 		elem.addEventListener("input", _ => {
@@ -566,5 +575,7 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 document.getElementById("featuresAndTraits").addEventListener("input", evt => {
 	checkForDetail(evt.target.value);
 });
+
+// Main
 
 importDataFromUrl();
