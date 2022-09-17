@@ -126,7 +126,7 @@ function getAbilityModifierForScore(score) {
 };
 
 function getTitleCase(text) {
-	return text.replace(
+	return text.replaceAll(
 		/\w\S*/g,
 		(word, offset) => {
 			if (offset && ["a", "an", "the", "of"].includes(word.toLowerCase()))
@@ -399,7 +399,7 @@ function searchAndAddFeat(featName) {
 		for (const elem of contentElem.getElementsByTagName("table")) {
 			elem.innerText = [...elem.rows].slice(1).map(row => {
 				return "| " + [...row.cells].map(cell => {
-					return cell.innerText.trim().replace("\n", " ").replace("|", "!")
+					return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
 				}).join(" | ") + " |"
 			}).join("\n");
 		};
@@ -421,7 +421,7 @@ function searchAndAddFeat(featName) {
 
 function checkForFeats(text) {
 	for (const feat of text.matchAll(/^([\w ]+)(:| - ).*$/g)) {
-		const featName = feat[1];
+		const featName = feat[1].replaceAll("(", "").replaceAll(")", "");
 		const urlFeatName = getUrlFeatNameForFeatName(featName);
 		if (urlFeatName in searchedFeats) {
 			if (!(document.getElementById("featButton-" + urlFeatName)) && Object.keys(searchedFeats[urlFeatName]).length)
