@@ -420,8 +420,8 @@ function searchAndAddFeat(featName) {
 };
 
 function checkForFeats(text) {
-	for (const feat of text.matchAll(/^([\w ]+)(:| - ).*$/g)) {
-		const featName = feat[1].replaceAll("(", "").replaceAll(")", "");
+	for (const feat of text.matchAll(/(^|\n)([\w ]+)(:| - ).*$/g)) {
+		const featName = feat[2].replaceAll("(", "").replaceAll(")", "");
 		const urlFeatName = getUrlFeatNameForFeatName(featName);
 		if (urlFeatName in searchedFeats) {
 			if (!(document.getElementById("featButton-" + urlFeatName)) && Object.keys(searchedFeats[urlFeatName]).length)
