@@ -44,6 +44,37 @@ body {
 	-webkit-text-size-adjust: 100%;
 }
 
+/* Screen Size Warning */
+
+.screenSizeWarning {
+	position: absolute;
+	z-index: 20;
+	inset: 0;
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: 3em;
+	background-color: rgba(0, 0, 0, 0.8);
+	pointer-events: all;
+	text-align: center;
+}
+.screenSizeWarning h1 {
+	margin-bottom: 1em;
+	font-size: 3em;
+	color: var(--primary-color);
+}
+.screenSizeWarning span {
+	font-size: 1.75em;
+	color: white;
+}
+
+@media (max-width: 35.5em) {
+	.screenSizeWarning {
+		display: flex;
+	}
+}
+
 /* Header and Footer */
 
 header, footer {
