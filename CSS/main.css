@@ -663,22 +663,32 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	display: flex;
 	flex-direction: column;
 }
-.featuresAndTraits__featButtonsContainer {
+.featuresAndTraits__detailButtonsContainer {
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
 	gap: 0.5em;
 }
-.featuresAndTraits__featButtonsContainer:empty {
+.featuresAndTraits__detailButtonsContainer:empty {
 	display: none;
 }
-.featuresAndTraits__featButton {
+.featuresAndTraits__detailButton {
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
 }
-.featuresAndTraits__featButton span {
+.featuresAndTraits__detailButton span {
 	flex-grow: 1;
+}
+.featuresAndTraits__detailButton i {
+	--diameter: 1.25em;
+	display: grid;
+	place-items: center;
+	border-radius: 50%;
+	width: var(--diameter);
+	height: var(--diameter);
+	background-color: var(--on-primary-color);
+	color: var(--primary-color);
 }
 .featuresAndTraits textarea {
 	flex-grow: 1;

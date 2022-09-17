@@ -36,6 +36,11 @@ const showInfoTemplateString = `
 	</div>
 `;
 
+const detailTypes = {
+	Feat: "feat:(detailUrlName)",
+	Subclass: "(className):(detailUrlName)"
+};
+
 const skillsForAbilities = {
 	"strength": ["athletics"],
 	"dexterity": ["acrobatics", "sleightOfHand", "stealth"],
@@ -139,7 +144,7 @@ let data = {
 	"platinumPieces": 0,
 	"equipmentNotes": ""
 };
-let searchedFeats = {};
+let searchedDetails = {};
 
 function getAbilityModifierForScore(score) {
 	return Math.floor((score - 10) / 2);
@@ -156,8 +161,8 @@ function getTitleCase(text) {
 	);
 }
 
-function getUrlFeatNameForFeatName(featName) {
-	return featName.toLowerCase().replaceAll(" ", "-")
+function getDetailUrlNameForDetailName(detailName) {
+	return detailName.toLowerCase().replaceAll(" ", "-")
 };
 
 function getSanitizedHtmlWithLinksFromMarkdown(html) {
@@ -203,6 +208,10 @@ function createModal(templateString, message, type, heading) {
 				cellElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(cellText);
 				childElem.appendChild(cellElem);
 			};
+		} else if (line.startsWith("#")) {
+			let numHashes = line.match("^#+")[0].length;
+			childElem = document.createElement("h" + numHashes);
+			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(numHashes + 1));
 		} else if (line.startsWith("* ")) {
 			if (parentElements.at(-1).tagName != "UL") {
 				parentElements = [parentElements[0]];
@@ -283,7 +292,7 @@ function updateDataValueAndInput(id, value) {
 		elem.value = value;
 	};
 	if (id == "featuresAndTraits")
-		checkForFeats(value);
+		checkForDetail(value);
 };
 
 function importDataFromUrl() {
@@ -362,106 +371,130 @@ function roll(expression) {
 	return eval(expression);
 };
 
-function showFeatInfo(featName, urlFeatName) {
+function showDetailInfo(detailName, detailUrlName) {
 	showInfo(
-		searchedFeats[urlFeatName]["description"],
-		featName,
-		searchedFeats[urlFeatName]["url"],
-		searchedFeats[urlFeatName]["source"],
-		searchedFeats[urlFeatName]["prerequisites"]
+		searchedDetails[detailUrlName]["description"],
+		detailName,
+		searchedDetails[detailUrlName]["url"],
+		searchedDetails[detailUrlName]["source"],
+		searchedDetails[detailUrlName]["prerequisites"]
 	);
 };
 
-function addFeatButton(featName, urlFeatName) {
-	let featButtonElem = document.createElement("div");
-	featButtonElem.id = "featButton-" + urlFeatName;
-	featButtonElem.classList.add("featuresAndTraits__featButton")
-	featButtonElem.classList.add("primaryButton")
-	featButtonElem.addEventListener("click", evt => {
+function addDetailButton(detailName, detailUrlName) {
+	let detailButtonElem = document.createElement("div");
+	detailButtonElem.id = "detailButton-" + detailUrlName;
+	detailButtonElem.classList.add("featuresAndTraits__detailButton")
+	detailButtonElem.classList.add("primaryButton")
+	detailButtonElem.addEventListener("click", evt => {
 		if (evt.target.tagName != "I")
-			showFeatInfo(featName, urlFeatName);
+			showDetailInfo(detailName, detailUrlName);
 	});
 
-	let featButtonTextElem = document.createElement("span");
-	featButtonTextElem.innerText = featName;
-	featButtonElem.appendChild(featButtonTextElem);
+	let detailButtonTextElem = document.createElement("span");
+	detailButtonTextElem.innerText = detailName;
+	detailButtonElem.appendChild(detailButtonTextElem);
 
-	let featButtonCloseElem = document.createElement("i");
-	featButtonCloseElem.classList.add("fas")
-	featButtonCloseElem.classList.add("fa-close")
-	featButtonCloseElem.addEventListener("click", _ => featButtonElem.remove());
-	featButtonElem.appendChild(featButtonCloseElem);
+	let detailButtonCloseElem = document.createElement("i");
+	detailButtonCloseElem.classList.add("fas")
+	detailButtonCloseElem.classList.add("fa-close")
+	detailButtonCloseElem.addEventListener("click", _ => detailButtonElem.remove());
+	detailButtonElem.appendChild(detailButtonCloseElem);
 
-	document.getElementsByClassName("featuresAndTraits__featButtonsContainer")[0].appendChild(featButtonElem);
+	document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0].appendChild(detailButtonElem);
 }
 
-function searchAndAddFeat(featName) {
-	featName = getTitleCase(featName);
-	const urlFeatName = getUrlFeatNameForFeatName(featName);
-	const url = "http://dnd5e.wikidot.com/feat:" + urlFeatName;
-	fetch(
-		CORS_PROXY + (url)
-	).then((response) => {
-		if (response.status == 200)
-			return response.text();
-		else if (response.status == 404)
-			return null
-		else
-			console.error("Status Code: " + response.status);
-	}).then((data) => {
-		if (!data)
-			return
+async function searchAndAddDetail(detailName) {
+	detailName = getTitleCase(detailName);
+	const detailUrlName = getDetailUrlNameForDetailName(detailName);
+	const classAndLevel = document.getElementById("classAndLevel").value;
+	const className = getDetailUrlNameForDetailName(classAndLevel.match(/^\S*/)[0]);
 
-		let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
-
-		let source = contentElem.firstElementChild.innerText.substring("Source: ".length);
-		contentElem.firstElementChild.remove();
-
-		let prerequisites = [];
-		if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
-			prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
-			contentElem.firstElementChild.remove();
+	for (const detailType in detailTypes) {
+		let urlPathname = detailTypes[detailType];
+		for (const variable of urlPathname.matchAll(/\((.*?)\)/g)) {
+			let variableValue = eval(variable[1]);
+			urlPathname = urlPathname.replace(variable[0], variableValue);
 		};
 
-		for (const elem of contentElem.getElementsByTagName("a")) {
-			elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
-		};
-		for (const elem of contentElem.getElementsByTagName("li")) {
-			elem.innerText = "* " + elem.innerText.trim();
-		};
-		for (const elem of contentElem.getElementsByTagName("table")) {
-			elem.innerText = [...elem.rows].slice(1).map(row => {
-				return "| " + [...row.cells].map(cell => {
-					return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
-				}).join(" | ") + " |"
-			}).join("\n");
-		};
+		const url = "http://dnd5e.wikidot.com/" + urlPathname;
+		await fetch(
+			CORS_PROXY + (url)
+		).then((response) => {
+			if (response.status == 200)
+				return response.text();
+			else if (response.status == 404)
+				return null
+			else
+				console.error("Status Code: " + response.status);
+		}).then((data) => {
+			if (!data)
+				return
 
-		let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+			let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
-		searchedFeats[urlFeatName] = {
-			"description": description,
-			"prerequisites": prerequisites,
-			"source": source,
-			"url": url
-		};
+			let source = "";
+			for (const elem of contentElem.getElementsByTagName("p")) {
+				if (!(elem.innerText.startsWith("Source: ")))
+					continue;
+				source = elem.innerText.substring("Source: ".length);
+				elem.remove()
+			};
 
-		addFeatButton(featName, urlFeatName);
-	}).catch(err => {
-		console.error(err);
-	});
+			let prerequisites = [];
+			if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
+				prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
+				contentElem.firstElementChild.remove();
+			};
+
+			for (let i = 1; i <= 3; i++) {
+				for (const elem of contentElem.getElementsByTagName("h" + i)) {
+					elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
+				};
+			};
+			for (const elem of contentElem.getElementsByTagName("a")) {
+				elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
+			};
+			for (const elem of contentElem.getElementsByTagName("li")) {
+				elem.innerText = "* " + elem.innerText.trim();
+			};
+			for (const elem of contentElem.getElementsByTagName("table")) {
+				elem.innerText = [...elem.rows].slice(1).map(row => {
+					return "| " + [...row.cells].map(cell => {
+						return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
+					}).join(" | ") + " |"
+				}).join("\n");
+			};
+
+			let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+
+			searchedDetails[detailUrlName] = {
+				"detailType": detailType,
+				"description": description,
+				"prerequisites": prerequisites,
+				"source": source,
+				"url": url
+			};
+
+			addDetailButton(detailName, detailUrlName);
+		}).catch(err => {
+			console.error(err);
+		});
+		if ((Object.keys(searchedDetails[detailUrlName]).length) || !className)
+			break;
+	};
 };
 
-function checkForFeats(text) {
-	for (const feat of text.matchAll(/(^|\n)([\w ]+)(:| - ).*$/g)) {
-		const featName = feat[2].replaceAll("(", "").replaceAll(")", "");
-		const urlFeatName = getUrlFeatNameForFeatName(featName);
-		if (urlFeatName in searchedFeats) {
-			if (!(document.getElementById("featButton-" + urlFeatName)) && Object.keys(searchedFeats[urlFeatName]).length)
-				addFeatButton(featName, urlFeatName);
+function checkForDetail(text) {
+	for (const detail of text.matchAll(/(^|\n)([\w ]+)(:| - ).*$/g)) {
+		const detailName = detail[2].replaceAll("(", "").replaceAll(")", "");
+		const detailUrlName = getDetailUrlNameForDetailName(detailName);
+		if (detailUrlName in searchedDetails) {
+			if (!(document.getElementById("detailButton-" + detailUrlName)) && Object.keys(searchedDetails[detailUrlName]).length)
+				addDetailButton(detailName, detailUrlName);
 		} else {
-			searchedFeats[urlFeatName] = {};
-			searchAndAddFeat(featName);
+			searchedDetails[detailUrlName] = {};
+			searchAndAddDetail(detailName);
 		};
 	};
 };
@@ -531,7 +564,7 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 	});
 });
 document.getElementById("featuresAndTraits").addEventListener("input", evt => {
-	checkForFeats(evt.target.value);
+	checkForDetail(evt.target.value);
 });
 
 importDataFromUrl();
