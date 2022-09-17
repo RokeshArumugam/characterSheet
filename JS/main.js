@@ -13,7 +13,7 @@ const showInfoTemplateString = `
 		<div id="modal__box" class="modal__box">
 			<i id="modal__icon" class="fas"></i>
 			<span id="modal__heading">Alert</span>
-			<a id="modal__source"></a>
+			<a target="_blank" id="modal__source"></a>
 			<div id="modal__prerequisites"></div>
 			<div id="modal__message" data-heading="Description"></div>
 			<div id="modal__buttonContainer">
@@ -140,6 +140,23 @@ function getUrlFeatNameForFeatName(featName) {
 	return featName.toLowerCase().replaceAll(" ", "-")
 };
 
+function getSanitizedHtmlWithLinksFromMarkdown(html) {
+	let elem = document.createElement("div");
+	elem.innerText = html;
+	for (const link of elem.innerHTML.matchAll(/\[(.+?)\]\((.+?)\)/g)) {
+		let tmpElem = document.createElement("div");
+
+		tmpElem.innerHTML = link[2];
+		let linkHref = tmpElem.innerText;
+
+		tmpElem.innerHTML = link[1];
+		let linkText = tmpElem.innerText;
+
+		elem.innerHTML = elem.innerHTML.replace(link[0], "<a target='_blank' href='" + linkHref + "'>" + linkText + "</a>");
+	};
+	return elem.innerHTML
+};
+
 function createModal(templateString, message, type, heading) {
 	let modalElem = new DOMParser().parseFromString(templateString, "text/html");
 	let messageElem = modalElem.getElementById("modal__message");
@@ -163,7 +180,7 @@ function createModal(templateString, message, type, heading) {
 			childElem = document.createElement("tr");
 			for (const cellText of line.substring(2, line.length - 2).split(" | ")) {
 				let cellElem = document.createElement(parentElements.at(-1).rows.length ? "td" : "th");
-				cellElem.innerText = cellText;
+				cellElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(cellText);
 				childElem.appendChild(cellElem);
 			};
 		} else if (line.startsWith("* ")) {
@@ -173,12 +190,12 @@ function createModal(templateString, message, type, heading) {
 				parentElements.at(-2).appendChild(parentElements.at(-1));
 			};
 			childElem = document.createElement("li");
-			childElem.innerText = line.substring(2);
+			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(2));
 		} else {
 			if (parentElements.length > 1)
 				parentElements = [parentElements[0]];
 			childElem = document.createElement("p");
-			childElem.innerText = line;
+			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line);
 		};
 		parentElements.at(-1).appendChild(childElem);
 	};
@@ -373,6 +390,9 @@ function searchAndAddFeat(featName) {
 			contentElem.firstElementChild.remove();
 		};
 
+		for (const elem of contentElem.getElementsByTagName("a")) {
+			elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
+		};
 		for (const elem of contentElem.getElementsByTagName("li")) {
 			elem.innerText = "* " + elem.innerText.trim();
 		};
