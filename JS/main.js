@@ -445,6 +445,10 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 
 			let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
+			let tableOfContentElem = contentElem.querySelector("#toc");
+			if (tableOfContentElem)
+				tableOfContentElem.remove();
+
 			let source = "";
 			for (const elem of contentElem.getElementsByTagName("p")) {
 				if (!(elem.innerText.startsWith("Source: ")))
