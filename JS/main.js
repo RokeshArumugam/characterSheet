@@ -13,7 +13,9 @@ const showInfoTemplateString = `
 		<div id="modal__box" class="modal__box">
 			<i id="modal__icon" class="fas"></i>
 			<span id="modal__heading">Alert</span>
-			<div id="modal__message"></div>
+			<a id="modal__source"></a>
+			<div id="modal__prerequisites"></div>
+			<div id="modal__message" data-heading="Description"></div>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Close</button>
 			</div>
@@ -149,10 +151,36 @@ function createModal(templateString, message, type, heading) {
 	if (typeof message !== "string")
 		message = String(message);
 
-	for (let paragraph of message.split("\n")) {
-		let paragraphElem = document.createElement("p");
-		paragraphElem.innerText = paragraph;
-		messageElem.appendChild(paragraphElem);
+	let parentElements = [messageElem];
+	for (let line of message.split("\n")) {
+		let childElem;
+		if (line.startsWith("| ")) {
+			if (parentElements.at(-1).tagName != "TABLE") {
+				parentElements = [parentElements[0]];
+				parentElements.push(document.createElement("table"));
+				parentElements.at(-2).appendChild(parentElements.at(-1));
+			};
+			childElem = document.createElement("tr");
+			for (const cellText of line.substring(2, line.length - 2).split(" | ")) {
+				let cellElem = document.createElement(parentElements.at(-1).rows.length ? "td" : "th");
+				cellElem.innerText = cellText;
+				childElem.appendChild(cellElem);
+			};
+		} else if (line.startsWith("* ")) {
+			if (parentElements.at(-1).tagName != "UL") {
+				parentElements = [parentElements[0]];
+				parentElements.push(document.createElement("ul"));
+				parentElements.at(-2).appendChild(parentElements.at(-1));
+			};
+			childElem = document.createElement("li");
+			childElem.innerText = line.substring(2);
+		} else {
+			if (parentElements.length > 1)
+				parentElements = [parentElements[0]];
+			childElem = document.createElement("p");
+			childElem.innerText = line;
+		};
+		parentElements.at(-1).appendChild(childElem);
 	};
 
 	modalElem = modalElem.body.firstChild;
@@ -164,9 +192,27 @@ function createModal(templateString, message, type, heading) {
 	return modalElem;
 };
 
-window.showInfo = (message, heading = "Information") => {
+window.showInfo = (message, heading = "Information", sourceLink, sourceText, prerequisites = []) => {
 	return new Promise((resolve, reject) => {
 		let modalElem = createModal(showInfoTemplateString, message, modalTypes.Information, heading);
+
+		if (sourceLink) {
+			let sourceElem = modalElem.querySelector("#modal__source");
+			sourceElem.href = sourceLink;
+			sourceElem.innerText = "Source: " + (sourceText || sourceLink);
+		};
+
+		if (prerequisites.length) {
+			let prerequisitesElem = modalElem.querySelector("#modal__prerequisites");
+			let listElem = document.createElement("ul");
+			for (const prerequisite of prerequisites) {
+				let listItemElem = document.createElement("li");
+				listItemElem.innerText = prerequisite;
+				listElem.appendChild(listItemElem);
+			};
+			prerequisitesElem.appendChild(listElem);
+		};
+
 		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
 			resolve(undefined);
 		});
@@ -267,7 +313,13 @@ function roll(expression) {
 };
 
 function showFeatInfo(featName, urlFeatName) {
-	showInfo(searchedFeats[urlFeatName]["description"] + "\n\n" + searchedFeats[urlFeatName]["url"], featName)
+	showInfo(
+		searchedFeats[urlFeatName]["description"],
+		featName,
+		searchedFeats[urlFeatName]["url"],
+		searchedFeats[urlFeatName]["source"],
+		searchedFeats[urlFeatName]["prerequisites"]
+	);
 };
 
 function addFeatButton(featName, urlFeatName) {
@@ -310,11 +362,34 @@ function searchAndAddFeat(featName) {
 		if (!data)
 			return
 
-		let wholeText = new DOMParser().parseFromString(data, "text/html").getElementById("page-content").innerText;
-		wholeText = wholeText.replaceAll(/\n\n+/g, "\n").trim().replaceAll(/^\s+/g, "").replaceAll(/\s+\n/g, "\n");
+		let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
+
+		let source = contentElem.firstElementChild.innerText.substring("Source: ".length);
+		contentElem.firstElementChild.remove();
+
+		let prerequisites = [];
+		if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
+			prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
+			contentElem.firstElementChild.remove();
+		};
+
+		for (const elem of contentElem.getElementsByTagName("li")) {
+			elem.innerText = "* " + elem.innerText.trim();
+		};
+		for (const elem of contentElem.getElementsByTagName("table")) {
+			elem.innerText = [...elem.rows].slice(1).map(row => {
+				return "| " + [...row.cells].map(cell => {
+					return cell.innerText.trim().replace("\n", " ").replace("|", "!")
+				}).join(" | ") + " |"
+			}).join("\n");
+		};
+
+		let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+
 		searchedFeats[urlFeatName] = {
-			"description": wholeText.substring(wholeText.indexOf("\n") + 1),
-			"source": wholeText.match(/^Source: (.*)\n/)[1],
+			"description": description,
+			"prerequisites": prerequisites,
+			"source": source,
 			"url": url
 		};
 

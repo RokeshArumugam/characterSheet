@@ -81,7 +81,7 @@ footer {
 .modal__box {
 	max-width: 500px;
 	min-width: 300px;
-	max-height: min(90vh, 600px);
+	max-height: 90vh;
     background-color: var(--background-color);
 	font-size: 14px;
 }
@@ -120,12 +120,61 @@ footer {
 	font-weight: var(--default-font-weight);
 	text-align: center;
 }
+#modal__source {
+	align-self: center;
+}
+#modal__source:empty {
+	display: none;
+}
+#modal__prerequisites {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+}
+#modal__prerequisites::before {
+	content: "Prerequisites";
+	font-size: 1.1em;
+	font-weight: bold;
+}
+#modal__prerequisites:empty {
+	display: none;
+}
 #modal__message {
 	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
 	font-weight: var(--default-font-weight);
 }
-#modal__message p {
+#modal__message::before {
+	content: attr(data-heading);
+	font-size: 1.1em;
+	font-weight: bold;
+}
+#modal__box p {
 	margin-left: 0em;
+}
+#modal__box ul {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+	padding-left: 1.85em;
+	padding-right: 1.85em;
+}
+#modal__box table {
+	overflow: hidden;
+	margin: auto;
+	border: var(--border);
+	border-radius: var(--border-radius);
+	border-spacing: 0px;
+	padding: 0.5em;
+}
+#modal__box td, #modal__box th {
+	padding: 0.5em;
+	vertical-align: middle;
+}
+#modal__box table th {
+	border-bottom: var(--border);
 }
 #modal__box .inputWrapper {
 	margin: 0em;
@@ -143,7 +192,7 @@ footer {
 		font-weight: var(--thin-font-weight);
 	}
     .modal__box {
-        background-color: #333333;
+        background-color: #222222;
     }
 }
 
@@ -161,6 +210,23 @@ main {
 	gap: 1em;
 	padding: 1em;
     overflow: auto;
+}
+p, li {
+	line-height: 1.3em;
+}
+p {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: var(--paragraph-max-width);
+}
+.primaryButton {
+	outline: none;
+	border: none;
+	border-radius: var(--border-radius);
+	padding: 0.5em 0.75em;
+	background-color: var(--primary-color);
+	cursor: pointer;
+	color: var(--on-primary-color);
 }
 .box {
 	gap: 0.5em;
@@ -183,15 +249,6 @@ main {
 }
 .bar span {
 	flex-grow: 1;
-}
-.primaryButton {
-	outline: none;
-	border: none;
-	border-radius: var(--border-radius);
-	padding: 0.5em 0.75em;
-	background-color: var(--primary-color);
-	cursor: pointer;
-	color: var(--on-primary-color);
 }
 
 /* Inputs */
