@@ -40,8 +40,9 @@ const showInfoTemplateString = `
 `;
 
 const detailTypes = {
-	Feat: "feat:(detailUrlName)",
-	Subclass: "(className):(detailUrlName)"
+	Class: "(detailUrlName)",
+	Subclass: "(className):(detailUrlName)",
+	Feat: "feat:(detailUrlName)"
 };
 
 const skillsForAbilities = {
@@ -214,8 +215,10 @@ function createModal(templateString, message, type, heading) {
 				childElem.appendChild(cellElem);
 			};
 		} else if (line.startsWith("#")) {
+			if (parentElements.length > 1)
+				parentElements = [parentElements[0]];
 			let numHashes = line.match("^#+")[0].length;
-			childElem = document.createElement("h" + numHashes);
+			childElem = document.createElement("h" + Math.max(2, numHashes));
 			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(numHashes + 1));
 		} else if (line.startsWith("* ")) {
 			if (parentElements.at(-1).tagName != "UL") {
@@ -300,6 +303,8 @@ function updateDataValueAndInput(id, value) {
 	};
 	if (id == "featuresAndTraits")
 		checkForDetail(value);
+	else if (id == "classAndLevel")
+		checkForDetail(value, ["Class"]);
 };
 
 function importDataFromUrl() {
@@ -411,20 +416,20 @@ function addDetailButton(detailName, detailUrlName) {
 	document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0].appendChild(detailButtonElem);
 }
 
-async function searchAndAddDetail(detailName) {
+async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	detailName = getTitleCase(detailName);
 	const detailUrlName = getDetailUrlNameForDetailName(detailName);
 	const classAndLevel = document.getElementById("classAndLevel").value;
 	const className = getDetailUrlNameForDetailName(classAndLevel.match(/^\S*/)[0]);
 
-	for (const detailType in detailTypes) {
+	for (const detailType of detailTypesToSearch) {
 		let urlPathname = detailTypes[detailType];
 		for (const variable of urlPathname.matchAll(/\((.*?)\)/g)) {
 			let variableValue = eval(variable[1]);
 			urlPathname = urlPathname.replace(variable[0], variableValue);
 		};
-
 		const url = "http://dnd5e.wikidot.com/" + urlPathname;
+
 		await fetch(
 			CORS_PROXY + (url)
 		).then((response) => {
@@ -492,23 +497,31 @@ async function searchAndAddDetail(detailName) {
 	};
 };
 
-function checkForDetail(text) {
-	for (const detail of text.matchAll(/(^|\n)([\w ]+)(:| - ).*$/g)) {
-		const detailName = detail[2].replaceAll("(", "").replaceAll(")", "");
-		const detailUrlName = getDetailUrlNameForDetailName(detailName);
-		if (detailUrlName in searchedDetails) {
-			if (!(document.getElementById("detailButton-" + detailUrlName)) && Object.keys(searchedDetails[detailUrlName]).length)
-				addDetailButton(detailName, detailUrlName);
-		} else {
-			searchedDetails[detailUrlName] = {};
-			searchAndAddDetail(detailName);
+function checkForDetail(text, types = ["Subclass", "Feat"]) {
+	let regexes = [];
+	if (types.includes("Class"))
+		regexes.push(/(^)(\S+)/g);
+	if (types.includes("Subclass") || types.includes("Feat"))
+		regexes.push(/(^|\n)([\w ]+)(:| - ).*$/g);
+
+	for (const regex of regexes) {
+		for (const detail of text.matchAll(regex)) {
+			const detailName = detail[2].replaceAll("(", "").replaceAll(")", "");
+			const detailUrlName = getDetailUrlNameForDetailName(detailName);
+			if (detailUrlName in searchedDetails) {
+				if (!(document.getElementById("detailButton-" + detailUrlName)) && Object.keys(searchedDetails[detailUrlName]).length)
+					addDetailButton(detailName, detailUrlName);
+			} else {
+				searchedDetails[detailUrlName] = {};
+				searchAndAddDetail(detailName, types);
+			};
 		};
 	};
 };
 
 // Event Listeners
 
-for (const elem of document.getElementsByTagName("input")) {
+for (const elem of document.querySelectorAll("input,textarea")) {
 	if (elem.id)
 		elem.addEventListener("input", _ => {
 			if (!elem.validity.valid)
@@ -517,27 +530,27 @@ for (const elem of document.getElementsByTagName("input")) {
 				data[elem.id] = elem.checked;
 			else
 				data[elem.id] = (typeof data[elem.id] == "number") ? Number(elem.value) : elem.value;
+
+			switch (elem.id) {
+				case "classAndLevel":
+					checkForDetail(elem.value, ["Class"]);
+					break;
+				case "proficiencyBonus":
+					updateProficiencyDependentModifiers();
+					break;
+				case "featuresAndTraits":
+					checkForDetail(elem.value);
+					break;
+				default:
+					break;
+			};
+
+			if (elem.classList.contains("ability__score"))
+				updateAbilityModifier(elem.id.substring(0, elem.id.length - "AbilityScore".length));
+			else if (elem.classList.contains("ability__score"))
+				updateAbilityDependentModifiers(elem.id.substring(0, elem.id.length - "AbilityModifier".length));
 		});
 };
-for (const elem of document.getElementsByClassName("ability__score")) {
-	elem.addEventListener("input", _ => {
-		if (!elem.validity.valid)
-			return
-		updateAbilityModifier(elem.id.substring(0, elem.id.length - "AbilityScore".length));
-	});
-};
-for (const elem of document.getElementsByClassName("ability__modifier")) {
-	elem.addEventListener("input", _ => {
-		if (!elem.validity.valid)
-			return
-		updateAbilityDependentModifiers(elem.id.substring(0, elem.id.length - "AbilityModifier".length));
-	});
-};
-document.getElementById("proficiencyBonus").addEventListener("input", evt => {
-	if (!evt.target.validity.valid)
-		return
-	updateProficiencyDependentModifiers();
-});
 document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 	elem.addEventListener("click", _ => {
 		const inputElem = elem.previousElementSibling;
@@ -571,9 +584,6 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 		inputElem.value = newValue;
 		data[inputElem.id] = newValue;
 	});
-});
-document.getElementById("featuresAndTraits").addEventListener("input", evt => {
-	checkForDetail(evt.target.value);
 });
 
 // Main

@@ -218,6 +218,9 @@ footer span {
 	font-size: 1.1em;
 	font-weight: bold;
 }
+#modal__box h2, #modal__box h3 {
+	margin-top: 1em;
+}
 #modal__box p {
 	margin-left: 0em;
 }
@@ -234,6 +237,7 @@ footer span {
 	border: var(--border);
 	border-radius: var(--border-radius);
 	border-spacing: 0px;
+	max-width: calc(100% - 2 * var(--border-thickness));
 	padding: 0.5em;
 }
 #modal__box td, #modal__box th {
