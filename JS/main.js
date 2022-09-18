@@ -41,7 +41,8 @@ const showInfoTemplateString = `
 
 const detailTypes = {
 	Class: "(detailUrlName)",
-	Subclass: "(className):(detailUrlName)",
+	Race: "(mainRaceUrlName)",
+	Subclass: "(classUrlName):(detailUrlName)",
 	Feat: "feat:(detailUrlName)"
 };
 
@@ -53,7 +54,7 @@ const skillsForAbilities = {
 	"charisma": ["deception", "intimidation", "performance", "persuasion"]
 }
 
-let data = {
+let characterSheetData = {
 	"characterName": "",
 	"classAndLevel": "",
 	"background": "",
@@ -290,7 +291,7 @@ window.showInfo = (message, heading = "Information", sourceLink, sourceText, pre
 // Main Functions
 
 function updateDataValueAndInput(id, value) {
-	data[id] = value;
+	characterSheetData[id] = value;
 	const elem = document.getElementById(id);
 	if (elem.type == "checkbox")
 		elem.checked = value
@@ -301,15 +302,17 @@ function updateDataValueAndInput(id, value) {
 			value = "+" + value;
 		elem.value = value;
 	};
-	if (id == "featuresAndTraits")
-		checkForDetail(value);
-	else if (id == "classAndLevel")
+	if (id == "classAndLevel")
 		checkForDetail(value, ["Class"]);
+	else if (id == "race")
+		checkForDetail(value, ["Race"]);
+	else if (id == "featuresAndTraits")
+		checkForDetail(value);
 };
 
 function importDataFromUrl() {
-	const keys = Object.keys(data);
-	let values = Object.values(data);
+	const keys = Object.keys(characterSheetData);
+	let values = Object.values(characterSheetData);
 	if (currentUrlParams.has("values"))
 		values = JSON.parse(atob(currentUrlParams.get("values")));
 	for (let i = 0; i < values.length; i++) {
@@ -318,20 +321,20 @@ function importDataFromUrl() {
 };
 
 function exportDataToUrl() {
-	return window.location.origin + window.location.pathname + "?values=" + btoa(JSON.stringify(Object.values(data)));
+	return window.location.origin + window.location.pathname + "?values=" + btoa(JSON.stringify(Object.values(characterSheetData)));
 };
 
 function updateSavingThrowModifier(abilityName) {
 	updateDataValueAndInput(
 		abilityName + "SavingThrowModifier",
-		data[abilityName + "AbilityModifier"] + (data[abilityName + "SavingThrowProficiencyLevel"] * data["proficiencyBonus"])
+		characterSheetData[abilityName + "AbilityModifier"] + (characterSheetData[abilityName + "SavingThrowProficiencyLevel"] * characterSheetData["proficiencyBonus"])
 	);
 };
 
 function updateSkillModifier(skillName) {
 	updateDataValueAndInput(
 		skillName + "SkillModifier",
-		data[Object.keys(skillsForAbilities).filter(key => skillsForAbilities[key].includes(skillName)) + "AbilityModifier"] + (data[skillName + "SkillProficiencyLevel"] * data["proficiencyBonus"])
+		characterSheetData[Object.keys(skillsForAbilities).filter(key => skillsForAbilities[key].includes(skillName)) + "AbilityModifier"] + (characterSheetData[skillName + "SkillProficiencyLevel"] * characterSheetData["proficiencyBonus"])
 	);
 };
 
@@ -354,7 +357,7 @@ function updateProficiencyDependentModifiers() {
 function updateAbilityModifier(abilityName) {
 	updateDataValueAndInput(
 		abilityName + "AbilityModifier",
-		getAbilityModifierForScore(data[abilityName + "AbilityScore"])
+		getAbilityModifierForScore(characterSheetData[abilityName + "AbilityScore"])
 	);
 	updateAbilityDependentModifiers(abilityName);
 };
@@ -393,7 +396,10 @@ function showDetailInfo(detailName, detailUrlName) {
 	);
 };
 
-function addDetailButton(detailName, detailUrlName) {
+function addDetailButtonIfNotExist(detailName, detailUrlName) {
+	if (document.getElementById("detailButton-" + detailUrlName))
+		return
+
 	let detailButtonElem = document.createElement("div");
 	detailButtonElem.id = "detailButton-" + detailUrlName;
 	detailButtonElem.classList.add("featuresAndTraits__detailButton")
@@ -418,9 +424,26 @@ function addDetailButton(detailName, detailUrlName) {
 
 async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	detailName = getTitleCase(detailName);
-	const detailUrlName = getDetailUrlNameForDetailName(detailName);
-	const classAndLevel = document.getElementById("classAndLevel").value;
-	const className = getDetailUrlNameForDetailName(classAndLevel.match(/^\S*/)[0]);
+	let detailUrlName = getDetailUrlNameForDetailName(detailName);
+
+	let classUrlName = "";
+	let mainRaceName = "";
+	let mainRaceUrlName = "";
+	if (detailTypesToSearch.includes("Subclass")) {
+		classUrlName = getDetailUrlNameForDetailName(
+			document.getElementById("classAndLevel").value.match(/^\S*/)[0]
+		);
+	} else if (detailTypesToSearch.includes("Race")) {
+		mainRaceName = getTitleCase(detailName.match(/\S*$/g)[0]);
+		mainRaceUrlName = getDetailUrlNameForDetailName(mainRaceName);
+	};
+
+	if (detailUrlName in searchedDetails) {
+		if (Object.keys(searchedDetails[detailUrlName]).length)
+			addDetailButtonIfNotExist(detailName, detailUrlName);
+		return
+	};
+	searchedDetails[detailUrlName] = {};
 
 	for (const detailType of detailTypesToSearch) {
 		let urlPathname = detailTypes[detailType];
@@ -431,7 +454,7 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 		const url = "http://dnd5e.wikidot.com/" + urlPathname;
 
 		await fetch(
-			CORS_PROXY + (url)
+			CORS_PROXY + url
 		).then((response) => {
 			if (response.status == 200)
 				return response.text();
@@ -463,6 +486,21 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 				contentElem.firstElementChild.remove();
 			};
 
+			if (detailType == "Race") {
+				let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
+				let wholeRaceName = detailName.trim().toLowerCase();
+				let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
+				if (subraceRowElem) {
+					for (const rowElem of rowElems) {
+						if (rowElem != subraceRowElem)
+							rowElem.remove();
+					};
+				} else {
+					detailName = mainRaceName;
+					detailUrlName = mainRaceUrlName;
+				}
+			};
+
 			for (let i = 1; i <= 3; i++) {
 				for (const elem of contentElem.getElementsByTagName("h" + i)) {
 					elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
@@ -492,33 +530,30 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 				"url": url
 			};
 
-			addDetailButton(detailName, detailUrlName);
+			addDetailButtonIfNotExist(detailName, detailUrlName);
 		}).catch(err => {
 			console.error(err);
 		});
-		if ((Object.keys(searchedDetails[detailUrlName]).length) || !className)
+		if (Object.keys(searchedDetails[detailUrlName]).length)
 			break;
 	};
 };
 
 function checkForDetail(text, types = ["Subclass", "Feat"]) {
-	let regexes = [];
+	let detailTypesForRegex = {};
 	if (types.includes("Class"))
-		regexes.push(/(^)(\S+)/g);
+		detailTypesForRegex["/^(\\S+)/g"] = ["Class"];
+	if (types.includes("Race"))
+		detailTypesForRegex["/(.+)/g"] = ["Race"];
 	if (types.includes("Subclass") || types.includes("Feat"))
-		regexes.push(/(^|\n)([\w ]+)(:| - ).*$/g);
+		detailTypesForRegex["/^([\\w ]+)(:| - )$/gm"] = ["Subclass", "Feat"];
 
-	for (const regex of regexes) {
-		for (const detail of text.matchAll(regex)) {
-			const detailName = detail[2].replaceAll("(", "").replaceAll(")", "");
-			const detailUrlName = getDetailUrlNameForDetailName(detailName);
-			if (detailUrlName in searchedDetails) {
-				if (!(document.getElementById("detailButton-" + detailUrlName)) && Object.keys(searchedDetails[detailUrlName]).length)
-					addDetailButton(detailName, detailUrlName);
-			} else {
-				searchedDetails[detailUrlName] = {};
-				searchAndAddDetail(detailName, types);
-			};
+	for (const [regexString, types] of Object.entries(detailTypesForRegex)) {
+		for (const detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
+			searchAndAddDetail(
+				detail[1].replaceAll("(", "").replaceAll(")", ""),
+				types
+			);
 		};
 	};
 };
@@ -531,13 +566,16 @@ for (const elem of document.querySelectorAll("input,textarea")) {
 			if (!elem.validity.valid)
 				return
 			if (elem.type == "checkbox")
-				data[elem.id] = elem.checked;
+				characterSheetData[elem.id] = elem.checked;
 			else
-				data[elem.id] = (typeof data[elem.id] == "number") ? Number(elem.value) : elem.value;
+				characterSheetData[elem.id] = (typeof characterSheetData[elem.id] == "number") ? Number(elem.value) : elem.value;
 
 			switch (elem.id) {
 				case "classAndLevel":
 					checkForDetail(elem.value, ["Class"]);
+					break;
+				case "race":
+					checkForDetail(elem.value, ["Race"]);
 					break;
 				case "proficiencyBonus":
 					updateProficiencyDependentModifiers();
@@ -561,7 +599,7 @@ document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 		const newValue = (inputElem.value + 1) % 3;
 		inputElem.setAttribute("value", newValue);
 		inputElem.value = newValue;
-		data[inputElem.id] = newValue;
+		characterSheetData[inputElem.id] = newValue;
 
 		if (inputElem.id.includes("SavingThrow")) {
 			updateSavingThrowModifier(
@@ -586,7 +624,7 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 
 		inputElem.setAttribute("value", newValue);
 		inputElem.value = newValue;
-		data[inputElem.id] = newValue;
+		characterSheetData[inputElem.id] = newValue;
 	});
 });
 
