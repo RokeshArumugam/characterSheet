@@ -236,7 +236,7 @@ function createModal(templateString, message, type, heading) {
 			if (parentElements.length > 1)
 				parentElements = [parentElements[0]];
 			let numHashes = line.match("^#+")[0].length;
-			childElem = document.createElement("h" + Math.max(2, numHashes));
+			childElem = document.createElement("h" + (numHashes + 1));
 			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(numHashes + 1));
 		} else if (line.startsWith("* ")) {
 			if (parentElements.at(-1).tagName != "UL") {

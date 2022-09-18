@@ -205,10 +205,12 @@ footer i {
 	flex-direction: column;
 	gap: 0.25em;
 }
+#modal__prerequisites::before, #modal__message::before {
+	font-size: 1.5em;
+	font-weight: bold;
+}
 #modal__prerequisites::before {
 	content: "Prerequisites";
-	font-size: 1.1em;
-	font-weight: bold;
 }
 #modal__prerequisites:empty {
 	display: none;
@@ -222,10 +224,8 @@ footer i {
 }
 #modal__message::before {
 	content: attr(data-heading);
-	font-size: 1.1em;
-	font-weight: bold;
 }
-#modal__box h2, #modal__box h3 {
+#modal__box h2, #modal__box h3, #modal__box h4 {
 	margin-top: 1em;
 }
 #modal__box p {
