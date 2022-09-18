@@ -57,6 +57,7 @@ const showInfoTemplateString = `
 
 const detailTypes = {
 	Class: "(detailUrlName)",
+	Background: "background:(detailUrlName)",
 	Race: "(mainRaceUrlName)",
 	Subclass: "(classUrlName):(detailUrlName)",
 	Feat: "feat:(detailUrlName)"
@@ -332,12 +333,22 @@ function updateDataValueAndInput(id, value) {
 			value = "+" + value;
 		elem.value = value;
 	};
-	if (id == "classAndLevel")
-		checkForDetail(value, ["Class"]);
-	else if (id == "race")
-		checkForDetail(value, ["Race"]);
-	else if (id == "featuresAndTraits")
-		checkForDetail(value);
+	switch (id) {
+		case "classAndLevel":
+			checkForDetail(value, ["Class"]);
+			break;
+		case "background":
+			checkForDetail(value, ["Background"]);
+			break;
+		case "race":
+			checkForDetail(value, ["Race"]);
+			break;
+		case "featuresAndTraits":
+			checkForDetail(value, ["Subclass", "Feat"]);
+			break;
+		default:
+			break;
+	}
 };
 
 function importDataFromUrl() {
@@ -476,6 +487,9 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	searchedDetails[detailUrlName] = {};
 
 	for (const detailType of detailTypesToSearch) {
+		if ((detailType == "Subclass") && !classUrlName)
+			continue;
+
 		let urlPathname = detailTypes[detailType];
 		for (const variable of urlPathname.matchAll(/\((.*?)\)/g)) {
 			let variableValue = eval(variable[1]);
@@ -569,12 +583,12 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	};
 };
 
-function checkForDetail(text, types = ["Subclass", "Feat"]) {
+function checkForDetail(text, types) {
 	let detailTypesForRegex = {};
 	if (types.includes("Class"))
 		detailTypesForRegex["/^(\\S+)/g"] = ["Class"];
-	if (types.includes("Race"))
-		detailTypesForRegex["/(.+)/g"] = ["Race"];
+	if (types.includes("Background") || types.includes("Race"))
+		detailTypesForRegex["/(.+)/g"] = ["Background", "Race"];
 	if (types.includes("Subclass") || types.includes("Feat"))
 		detailTypesForRegex["/^([\\w ]+)(:| - )$/gm"] = ["Subclass", "Feat"];
 
@@ -604,6 +618,9 @@ for (const elem of document.querySelectorAll("input,textarea")) {
 				case "classAndLevel":
 					checkForDetail(elem.value, ["Class"]);
 					break;
+				case "background":
+					checkForDetail(elem.value, ["Background"]);
+					break;
 				case "race":
 					checkForDetail(elem.value, ["Race"]);
 					break;
@@ -611,7 +628,7 @@ for (const elem of document.querySelectorAll("input,textarea")) {
 					updateProficiencyDependentModifiers();
 					break;
 				case "featuresAndTraits":
-					checkForDetail(elem.value);
+					checkForDetail(elem.value, ["Subclass", "Feat"]);
 					break;
 				default:
 					break;
