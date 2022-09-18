@@ -557,7 +557,11 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 				elem.innerText = "* " + elem.innerText.trim();
 			};
 			for (const elem of contentElem.getElementsByTagName("table")) {
-				elem.innerText = [...elem.rows].slice(1).map(row => {
+				let rows = elem.rows;
+				if (elem.rows[0].cells.length == 1)
+					elem.rows[0].remove()
+				
+				elem.innerText = [...rows].map(row => {
 					return "| " + [...row.cells].map(cell => {
 						return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
 					}).join(" | ") + " |"
