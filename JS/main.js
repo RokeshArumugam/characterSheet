@@ -8,7 +8,8 @@ const modalTypes = {
 	Information: "fa-info-circle",
 	Success: "fa-check-circle",
 	Warning: "fa-exclamation-triangle",
-	Error: "fa-times-circle"
+	Error: "fa-times-circle",
+	Prompt: "fa-question-circle"
 };
 const alertTemplateString = `
 	<div id="modal" class="modal" role="alertdialog">
@@ -19,6 +20,21 @@ const alertTemplateString = `
 			<div id="modal__message"></div>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Close</button>
+			</div>
+		</div>
+	</div>
+`;
+const promptTemplateString = `
+	<div id="modal" class="modal" role="alertdialog">
+		<div id="modal__overlay" class="modal__overlay"></div>
+		<div id="modal__box" class="modal__box">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Prompt</span>
+			<div id="modal__message"></div>
+			<input type="text" id="modal__field">
+			<div id="modal__buttonContainer">
+				<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
+				<button id="modal__button--ok" class="modal__button primaryButton">OK</button>
 			</div>
 		</div>
 	</div>
@@ -259,7 +275,21 @@ window.alert = (message, type = modalTypes.Information, heading) => {
 		document.body.appendChild(modalElem);
 	})
 };
-
+window.prompt = (message, heading = "Prompt", defaultText = "") => {
+	return new Promise((resolve, reject) => {
+		let modalElem = createModal(promptTemplateString, message, modalTypes.Prompt, heading);
+		let modalFieldElem = modalElem.querySelector("#modal__field");
+		modalFieldElem.value = defaultText;
+		modalElem.querySelector("#modal__button--ok").addEventListener("click", () => {
+			resolve(modalFieldElem.value);
+		});
+		modalElem.querySelector("#modal__button--cancel").addEventListener("click", () => {
+			resolve(null);
+		});
+		document.body.appendChild(modalElem);
+		modalFieldElem.focus();
+	});
+};
 window.showInfo = (message, heading = "Information", sourceLink, sourceText, prerequisites = []) => {
 	return new Promise((resolve, reject) => {
 		let modalElem = createModal(showInfoTemplateString, message, modalTypes.Information, heading);
@@ -369,11 +399,11 @@ function rollDie(sides) {
 function roll(expression) {
 	expression = expression.toLowerCase().replaceAll(/\s/g, "").replaceAll(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
 	if (expression.match(/[^d\d\+\-\* ]/)) {
-		console.log("Invalid Roll: Only digits and 'd+-* ' are allowed.");
+		alert("Only digits and 'd+-* ' are allowed.", modalTypes.Error, "Invalid Roll");
 		return;
 	};
 
-	console.log(expression);
+	let output = [expression];
 	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
 		let rolls = [];
 		for (let i = 0; i < p1; i++) {
@@ -381,9 +411,9 @@ function roll(expression) {
 		};
 		return rolls.join("+");
 	});
-	console.log(expression);
-
-	return eval(expression);
+	output.push(expression);
+	output.push(eval(expression));
+	alert(output.join("\n"), modalTypes.Information, "Roll")
 };
 
 function showDetailInfo(detailName, detailUrlName) {
