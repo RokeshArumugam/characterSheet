@@ -638,16 +638,20 @@ function roll(expression) {
 		return;
 	};
 
-	let output = [expression];
+	let output = ["Roll: " + expression];
 	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
+		if (p1 == "")
+			p1 = 1
+
 		let rolls = [];
 		for (let i = 0; i < p1; i++) {
 			rolls.push(rollDie(p2));
 		};
 		return rolls.join("+");
 	});
-	output.push(expression);
-	output.push(eval(expression));
+	if (expression.includes(" "))
+		output.push("Roll: " + expression);
+	output.push("Total: " + eval(expression));
 	alert(output.join("\n"), modalTypes.Information, "Roll")
 };
 
