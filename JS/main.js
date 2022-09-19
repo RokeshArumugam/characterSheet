@@ -513,6 +513,7 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	};
 	searchedDetails[detailUrlName] = {};
 
+	let urls = [];
 	for (const detailType of detailTypesToSearch) {
 		if ((detailType == "Subclass") && !classUrlName)
 			continue;
@@ -523,6 +524,9 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 			urlPathname = urlPathname.replace(variable[0], variableValue);
 		};
 		const url = "http://dnd5e.wikidot.com/" + urlPathname;
+		if (urls.includes(url))
+			continue;
+		urls.push(url);
 
 		await fetch(
 			CORS_PROXY + url
@@ -535,7 +539,7 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 				console.error("Status Code: " + response.status);
 		}).then((data) => {
 			if (!data)
-				return
+				return;
 
 			let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
@@ -615,15 +619,26 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 };
 
 function checkForDetail(text, detailTypesToCheckFor) {
-	let detailTypesForRegex = {};
+	let detailTypesForRegexString = {};
 	if (detailTypesToCheckFor.includes("Class"))
-		detailTypesForRegex["/^(\\S+)/g"] = ["Class"];
-	if (detailTypesToCheckFor.includes("Background") || detailTypesToCheckFor.includes("Race"))
-		detailTypesForRegex["/(.+)/g"] = ["Background", "Race"];
-	if (detailTypesToCheckFor.includes("Subclass") || detailTypesToCheckFor.includes("Feat"))
-		detailTypesForRegex["/^([\\w ]+)(:| - )$/gm"] = ["Subclass", "Feat"];
+		detailTypesForRegexString["/^(\\S+)/g"] = ["Class"];
+	if (detailTypesToCheckFor.includes("Background") || detailTypesToCheckFor.includes("Race")) {
+		const regexString = "/(.+)/g";
+		detailTypesForRegexString[regexString] = [];
+		for (const type of ["Background", "Race"]) {
+			if (detailTypesToCheckFor.includes(type))
+				detailTypesForRegexString[regexString].push(type);
+		};
+	} if (detailTypesToCheckFor.includes("Subclass") || detailTypesToCheckFor.includes("Feat")) {
+		const regexString = "/^([\\w ]+)(:| - )$/gm";
+		detailTypesForRegexString[regexString] = [];
+		for (const type of ["Subclass", "Feat"]) {
+			if (detailTypesToCheckFor.includes(type))
+				detailTypesForRegexString[regexString].push(type);
+		};
+	};
 
-	for (const [regexString, types] of Object.entries(detailTypesForRegex)) {
+	for (const [regexString, types] of Object.entries(detailTypesForRegexString)) {
 		for (const detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
 			searchAndAddDetail(
 				detail[1].replaceAll("(", "").replaceAll(")", ""),
