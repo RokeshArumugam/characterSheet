@@ -71,6 +71,7 @@ const skillsForAbilities = {
 	"charisma": ["deception", "intimidation", "performance", "persuasion"]
 }
 
+const minimumWeaponRows = 3;
 let characterSheetData = {
 	"characterName": "",
 	"classAndLevel": "",
@@ -155,6 +156,7 @@ let characterSheetData = {
 	"ideals": "",
 	"bonds": "",
 	"flaws": "",
+	"weapons": Array.from({ length: minimumWeaponRows }, _ => ["", "", ""]),
 	"attacksNotes": "",
 	"featuresAndTraits": "",
 	"passivePerception": "",
@@ -321,12 +323,55 @@ window.showInfo = (message, heading = "Information", sourceLink, sourceText, pre
 
 // Main Functions
 
+function addWeaponRow(weapon) {
+	const weaponsElem = document.getElementById("weapons");
+
+	let rowElem = document.createElement("tr");
+	rowElem.classList.add("weapon__row")
+
+	let nameElem = document.createElement("td");
+	let nameInputElem = document.createElement("input");
+	nameInputElem.type = "text";
+	nameInputElem.classList.add("weapon__name");
+	nameInputElem.value = weapon[0];
+	nameInputElem.addEventListener("input", inputEventListener);
+	nameElem.appendChild(nameInputElem);
+	rowElem.appendChild(nameElem);
+
+	let atkBonusElem = document.createElement("td");
+	let atkBonusInputElem = document.createElement("input");
+	atkBonusInputElem.type = "text";
+	atkBonusInputElem.pattern = "[\\+\\-]?\\d*";
+	atkBonusInputElem.classList.add("weapon__atkBonus");
+	atkBonusInputElem.value = weapon[1];
+	atkBonusInputElem.addEventListener("input", inputEventListener);
+	atkBonusElem.appendChild(atkBonusInputElem);
+	rowElem.appendChild(atkBonusElem);
+
+	let damageOrTypeElem = document.createElement("td");
+	let damageOrTypeInputElem = document.createElement("input");
+	damageOrTypeInputElem.type = "text";
+	damageOrTypeInputElem.classList.add("weapon__damageOrType");
+	damageOrTypeInputElem.value = weapon[2];
+	damageOrTypeInputElem.addEventListener("input", inputEventListener);
+	damageOrTypeElem.appendChild(damageOrTypeInputElem);
+	rowElem.appendChild(damageOrTypeElem);
+
+	weaponsElem.appendChild(rowElem)
+};
+
 function updateDataValueAndInput(id, value) {
 	characterSheetData[id] = value;
+
 	const elem = document.getElementById(id);
+
 	if (elem.type == "checkbox")
 		elem.checked = value
-	else {
+	else if (elem.id == "weapons") {
+		document.getElementById("weapons").innerHTML = "";
+		for (const weapon of value)
+			addWeaponRow(weapon)
+	} else {
 		if (["doubleCheckbox", "tripleCheckbox"].includes(elem.name))
 			elem.setAttribute("value", value)
 		if ((elem.type == "text") && (typeof value == "number") && (value > 0))
@@ -401,30 +446,6 @@ function updateAbilityModifier(abilityName) {
 		getAbilityModifierForScore(characterSheetData[abilityName + "AbilityScore"])
 	);
 	updateAbilityDependentModifiers(abilityName);
-};
-
-function rollDie(sides) {
-	return Math.floor(Math.random() * sides) + 1;
-};
-
-function roll(expression) {
-	expression = expression.toLowerCase().replaceAll(/\s/g, "").replaceAll(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
-	if (expression.match(/[^d\d\+\-\* ]/)) {
-		alert("Only digits and 'd+-* ' are allowed.", modalTypes.Error, "Invalid Roll");
-		return;
-	};
-
-	let output = [expression];
-	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
-		let rolls = [];
-		for (let i = 0; i < p1; i++) {
-			rolls.push(rollDie(p2));
-		};
-		return rolls.join("+");
-	});
-	output.push(expression);
-	output.push(eval(expression));
-	alert(output.join("\n"), modalTypes.Information, "Roll")
 };
 
 function showDetailInfo(detailName, detailUrlName) {
@@ -560,7 +581,7 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 				let rows = elem.rows;
 				if (elem.rows[0].cells.length == 1)
 					elem.rows[0].remove()
-				
+
 				elem.innerText = [...rows].map(row => {
 					return "| " + [...row.cells].map(cell => {
 						return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
@@ -587,13 +608,13 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	};
 };
 
-function checkForDetail(text, types) {
+function checkForDetail(text, detailTypesToCheckFor) {
 	let detailTypesForRegex = {};
-	if (types.includes("Class"))
+	if (detailTypesToCheckFor.includes("Class"))
 		detailTypesForRegex["/^(\\S+)/g"] = ["Class"];
-	if (types.includes("Background") || types.includes("Race"))
+	if (detailTypesToCheckFor.includes("Background") || detailTypesToCheckFor.includes("Race"))
 		detailTypesForRegex["/(.+)/g"] = ["Background", "Race"];
-	if (types.includes("Subclass") || types.includes("Feat"))
+	if (detailTypesToCheckFor.includes("Subclass") || detailTypesToCheckFor.includes("Feat"))
 		detailTypesForRegex["/^([\\w ]+)(:| - )$/gm"] = ["Subclass", "Feat"];
 
 	for (const [regexString, types] of Object.entries(detailTypesForRegex)) {
@@ -606,43 +627,88 @@ function checkForDetail(text, types) {
 	};
 };
 
+function rollDie(sides) {
+	return Math.floor(Math.random() * sides) + 1;
+};
+
+function roll(expression) {
+	expression = expression.toLowerCase().replaceAll(/\s/g, "").replaceAll(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
+	if (expression.match(/[^d\d\+\-\* ]/)) {
+		alert("Only digits and 'd+-* ' are allowed.", modalTypes.Error, "Invalid Roll");
+		return;
+	};
+
+	let output = [expression];
+	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
+		let rolls = [];
+		for (let i = 0; i < p1; i++) {
+			rolls.push(rollDie(p2));
+		};
+		return rolls.join("+");
+	});
+	output.push(expression);
+	output.push(eval(expression));
+	alert(output.join("\n"), modalTypes.Information, "Roll")
+};
+
 // Event Listeners
+
+function inputEventListener(evt) {
+	const elem = evt.target;
+	if (!elem.validity.valid)
+		return
+
+	if (elem.className.startsWith("weapon__")) {
+		const cellElem = elem.parentElement;
+		const rowElem = cellElem.parentElement;
+		const cellIndex = [...rowElem.children].indexOf(cellElem);
+		const tbodyElem = rowElem.parentElement;
+
+		characterSheetData["weapons"][[...tbodyElem.children].indexOf(rowElem)][cellIndex] = elem.value;
+		if (characterSheetData["weapons"].at(-1).join("")) {
+			characterSheetData["weapons"].push(["", "", ""]);
+			addWeaponRow(["", "", ""]);
+		};
+
+		while ((characterSheetData["weapons"].length > minimumWeaponRows) && !(characterSheetData["weapons"].at(-2).join(""))) {
+			characterSheetData["weapons"].splice(characterSheetData["weapons"].length - 2, 1);
+			tbodyElem.children[tbodyElem.children.length - 2].remove();
+			tbodyElem.lastChild.firstChild.children[cellIndex].focus();
+		};
+	} else if (elem.type == "checkbox")
+		characterSheetData[elem.id] = elem.checked;
+	else
+		characterSheetData[elem.id] = (typeof characterSheetData[elem.id] == "number") ? Number(elem.value) : elem.value;
+
+	switch (elem.id) {
+		case "classAndLevel":
+			checkForDetail(elem.value, ["Class"]);
+			break;
+		case "background":
+			checkForDetail(elem.value, ["Background"]);
+			break;
+		case "race":
+			checkForDetail(elem.value, ["Race"]);
+			break;
+		case "proficiencyBonus":
+			updateProficiencyDependentModifiers();
+			break;
+		case "featuresAndTraits":
+			checkForDetail(elem.value, ["Subclass", "Feat"]);
+			break;
+		default:
+			break;
+	};
+
+	if (elem.classList.contains("ability__score"))
+		updateAbilityModifier(elem.id.substring(0, elem.id.length - "AbilityScore".length));
+	else if (elem.classList.contains("ability__score"))
+		updateAbilityDependentModifiers(elem.id.substring(0, elem.id.length - "AbilityModifier".length));
+};
 
 for (const elem of document.querySelectorAll("input,textarea")) {
 	if (elem.id)
-		elem.addEventListener("input", _ => {
-			if (!elem.validity.valid)
-				return
-			if (elem.type == "checkbox")
-				characterSheetData[elem.id] = elem.checked;
-			else
-				characterSheetData[elem.id] = (typeof characterSheetData[elem.id] == "number") ? Number(elem.value) : elem.value;
-
-			switch (elem.id) {
-				case "classAndLevel":
-					checkForDetail(elem.value, ["Class"]);
-					break;
-				case "background":
-					checkForDetail(elem.value, ["Background"]);
-					break;
-				case "race":
-					checkForDetail(elem.value, ["Race"]);
-					break;
-				case "proficiencyBonus":
-					updateProficiencyDependentModifiers();
-					break;
-				case "featuresAndTraits":
-					checkForDetail(elem.value, ["Subclass", "Feat"]);
-					break;
-				default:
-					break;
-			};
-
-			if (elem.classList.contains("ability__score"))
-				updateAbilityModifier(elem.id.substring(0, elem.id.length - "AbilityScore".length));
-			else if (elem.classList.contains("ability__score"))
-				updateAbilityDependentModifiers(elem.id.substring(0, elem.id.length - "AbilityModifier".length));
-		});
+		elem.addEventListener("input", inputEventListener);
 };
 document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 	elem.addEventListener("click", _ => {
