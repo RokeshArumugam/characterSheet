@@ -323,6 +323,8 @@ window.showInfo = (message, heading = "Information", sourceLink, sourceText, pre
 
 // Main Functions
 
+// -- Data Manipulation and Population
+
 function addWeaponRow(weapon) {
 	const weaponsElem = document.getElementById("weapons");
 
@@ -410,6 +412,8 @@ function exportDataToUrl() {
 	return window.location.origin + window.location.pathname + "?values=" + btoa(JSON.stringify(Object.values(characterSheetData)));
 };
 
+// -- Updating Modifiers
+
 function updateSavingThrowModifier(abilityName) {
 	updateDataValueAndInput(
 		abilityName + "SavingThrowModifier",
@@ -447,6 +451,8 @@ function updateAbilityModifier(abilityName) {
 	);
 	updateAbilityDependentModifiers(abilityName);
 };
+
+// -- Details
 
 function showDetailInfo(detailName, detailUrlName) {
 	showInfo(
@@ -626,6 +632,8 @@ function checkForDetail(text, detailTypesToCheckFor) {
 		};
 	};
 };
+
+// -- Rolls
 
 function rollDie(sides) {
 	return Math.floor(Math.random() * sides) + 1;
