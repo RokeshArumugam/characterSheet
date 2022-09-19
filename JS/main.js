@@ -618,9 +618,9 @@ async function searchAndAddDetail(detailName, detailTypes) {
 			}).catch(err => {
 				console.error(err);
 			});
+			if (Object.keys(searchedDetails[detailUrlName]).length)
+				return;
 		};
-		if (Object.keys(searchedDetails[detailUrlName]).length)
-			break;
 	};
 };
 
