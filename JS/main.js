@@ -636,7 +636,7 @@ function checkForDetail(text, detailTypes) {
 				detailTypesForRegexString[regexString].push(type);
 		};
 	} if (detailTypes.includes("Subclass") || detailTypes.includes("Feat")) {
-		const regexString = "/^([\\w \(\)]+)(:| - )$/gm";
+		const regexString = "/^([\\w\(\)][\\w \(\)]*)(:| - )$/gm";
 		detailTypesForRegexString[regexString] = [];
 		for (const type of ["Subclass", "Feat"]) {
 			if (detailTypes.includes(type))
@@ -646,8 +646,11 @@ function checkForDetail(text, detailTypes) {
 
 	for (const [regexString, types] of Object.entries(detailTypesForRegexString)) {
 		for (const detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
+			const detailName = detail[1].trim();
+			if (!detailName)
+				continue;
 			searchAndAddDetail(
-				detail[1],
+				detailName,
 				types
 			);
 		};
