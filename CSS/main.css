@@ -155,9 +155,9 @@ footer i {
 	pointer-events: none;
 }
 .modal__box {
-	max-width: 500px;
+	max-width: 600px;
 	min-width: 300px;
-	max-height: 90vh;
+	max-height: 80vh;
     background-color: var(--background-color);
 	font-size: 14px;
 }
