@@ -635,10 +635,10 @@ function checkForDetail(text, detailTypes) {
 			if (detailTypes.includes(type))
 				detailTypesForRegexString[regexString].push(type);
 		};
-	} if (detailTypes.includes("Subclass") || detailTypes.includes("Feat")) {
+	} if (detailTypes.includes("Feat") || detailTypes.includes("Subclass")) {
 		const regexString = "/^([\\w\(\)][\\w \(\)]*)(:| - )$/gm";
 		detailTypesForRegexString[regexString] = [];
-		for (const type of ["Subclass", "Feat"]) {
+		for (const type of ["Feat", "Subclass"]) {
 			if (detailTypes.includes(type))
 				detailTypesForRegexString[regexString].push(type);
 		};
