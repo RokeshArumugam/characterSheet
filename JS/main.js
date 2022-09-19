@@ -55,12 +55,12 @@ const showInfoTemplateString = `
 	</div>
 `;
 
-const detailTypes = {
-	Class: "(detailUrlName)",
-	Background: "background:(detailUrlName)",
-	Race: "(mainRaceUrlName)",
-	Subclass: "(classUrlName):(detailUrlName)",
-	Feat: "feat:(detailUrlName)"
+const pathnamesForDetailType = {
+	"Class": ["(detailUrlName)"],
+	"Background": ["background:(detailUrlName)"],
+	"Race": ["(mainRaceUrlName)"],
+	"Subclass": ["(classUrlName):(detailUrlName)"],
+	"Feat": ["feat:(detailUrlName)", "feat:(detailUrlName)-ua"]
 };
 
 const skillsForAbilities = {
@@ -188,7 +188,7 @@ function getTitleCase(text) {
 }
 
 function getDetailUrlNameForDetailName(detailName) {
-	return detailName.toLowerCase().replaceAll(" ", "-")
+	return detailName.toLowerCase().replaceAll("(", "").replaceAll(")", "").replaceAll(" ", "-")
 };
 
 function getSanitizedHtmlWithLinksFromMarkdown(html) {
@@ -490,18 +490,18 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 	document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0].appendChild(detailButtonElem);
 }
 
-async function searchAndAddDetail(detailName, detailTypesToSearch) {
+async function searchAndAddDetail(detailName, detailTypes) {
 	detailName = getTitleCase(detailName);
 	let detailUrlName = getDetailUrlNameForDetailName(detailName);
 
 	let classUrlName = "";
 	let mainRaceName = "";
 	let mainRaceUrlName = "";
-	if (detailTypesToSearch.includes("Subclass")) {
+	if (detailTypes.includes("Subclass")) {
 		classUrlName = getDetailUrlNameForDetailName(
 			document.getElementById("classAndLevel").value.match(/^\S*/)[0]
 		);
-	} else if (detailTypesToSearch.includes("Race")) {
+	} else if (detailTypes.includes("Race")) {
 		mainRaceName = getTitleCase(detailName.match(/\S*$/g)[0]);
 		mainRaceUrlName = getDetailUrlNameForDetailName(mainRaceName);
 	};
@@ -513,127 +513,132 @@ async function searchAndAddDetail(detailName, detailTypesToSearch) {
 	};
 	searchedDetails[detailUrlName] = {};
 
-	let urls = [];
-	for (const detailType of detailTypesToSearch) {
+	let checkedUrls = [];
+	for (const detailType of detailTypes) {
 		if ((detailType == "Subclass") && !classUrlName)
 			continue;
 
-		let urlPathname = detailTypes[detailType];
-		for (const variable of urlPathname.matchAll(/\((.*?)\)/g)) {
-			let variableValue = eval(variable[1]);
-			urlPathname = urlPathname.replace(variable[0], variableValue);
+		let urls = [];
+		for (let urlPathname of pathnamesForDetailType[detailType]) {
+			for (const variable of urlPathname.matchAll(/\((.*?)\)/g)) {
+				let variableValue = eval(variable[1]);
+				urlPathname = urlPathname.replace(variable[0], variableValue);
+			};
+			let url = "http://dnd5e.wikidot.com/" + urlPathname;
+			if (checkedUrls.includes(url))
+				continue;
+			urls.push(url);
+			checkedUrls.push(url);
 		};
-		const url = "http://dnd5e.wikidot.com/" + urlPathname;
-		if (urls.includes(url))
-			continue;
-		urls.push(url);
 
-		await fetch(
-			CORS_PROXY + url
-		).then((response) => {
-			if (response.status == 200)
-				return response.text();
-			else if (response.status == 404)
-				return null
-			else
-				console.error("Status Code: " + response.status);
-		}).then((data) => {
-			if (!data)
-				return;
+		for (const url of urls) {
+			await fetch(
+				CORS_PROXY + url
+			).then((response) => {
+				if (response.status == 200)
+					return response.text();
+				else if (response.status == 404)
+					return null
+				else
+					console.error("Status Code: " + response.status);
+			}).then((data) => {
+				if (!data)
+					return;
 
-			let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
+				let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
-			let tableOfContentElem = contentElem.querySelector("#toc");
-			if (tableOfContentElem)
-				tableOfContentElem.remove();
+				let tableOfContentElem = contentElem.querySelector("#toc");
+				if (tableOfContentElem)
+					tableOfContentElem.remove();
 
-			let source = "";
-			for (const elem of contentElem.getElementsByTagName("p")) {
-				if (!(elem.innerText.startsWith("Source: ")))
-					continue;
-				source = elem.innerText.substring("Source: ".length);
-				elem.remove()
-			};
-
-			let prerequisites = [];
-			if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
-				prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
-				contentElem.firstElementChild.remove();
-			};
-
-			if (detailType == "Race") {
-				let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
-				let wholeRaceName = detailName.trim().toLowerCase();
-				let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
-				if (subraceRowElem) {
-					for (const rowElem of rowElems) {
-						if (rowElem != subraceRowElem)
-							rowElem.remove();
-					};
-				} else {
-					detailName = mainRaceName;
-					detailUrlName = mainRaceUrlName;
-				}
-			};
-
-			for (let i = 1; i <= 3; i++) {
-				for (const elem of contentElem.getElementsByTagName("h" + i)) {
-					elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
+				let source = "";
+				for (const elem of contentElem.getElementsByTagName("p")) {
+					if (!(elem.innerText.startsWith("Source: ")))
+						continue;
+					source = elem.innerText.substring("Source: ".length);
+					elem.remove()
 				};
-			};
-			for (const elem of contentElem.getElementsByTagName("a")) {
-				elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
-			};
-			for (const elem of contentElem.getElementsByTagName("li")) {
-				elem.innerText = "* " + elem.innerText.trim();
-			};
-			for (const elem of contentElem.getElementsByTagName("table")) {
-				let rows = elem.rows;
-				if (elem.rows[0].cells.length == 1)
-					elem.rows[0].remove()
 
-				elem.innerText = [...rows].map(row => {
-					return "| " + [...row.cells].map(cell => {
-						return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
-					}).join(" | ") + " |"
-				}).join("\n");
-			};
+				let prerequisites = [];
+				if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
+					prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
+					contentElem.firstElementChild.remove();
+				};
 
-			let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+				if (detailType == "Race") {
+					let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
+					let wholeRaceName = detailName.trim().toLowerCase();
+					let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
+					if (subraceRowElem) {
+						for (const rowElem of rowElems) {
+							if (rowElem != subraceRowElem)
+								rowElem.remove();
+						};
+					} else {
+						detailName = mainRaceName;
+						detailUrlName = mainRaceUrlName;
+					}
+				};
 
-			searchedDetails[detailUrlName] = {
-				"detailType": detailType,
-				"description": description,
-				"prerequisites": prerequisites,
-				"source": source,
-				"url": url
-			};
+				for (let i = 1; i <= 3; i++) {
+					for (const elem of contentElem.getElementsByTagName("h" + i)) {
+						elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
+					};
+				};
+				for (const elem of contentElem.getElementsByTagName("a")) {
+					elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
+				};
+				for (const elem of contentElem.getElementsByTagName("li")) {
+					elem.innerText = "* " + elem.innerText.trim();
+				};
+				for (const elem of contentElem.getElementsByTagName("table")) {
+					let rows = elem.rows;
+					if (elem.rows[0].cells.length == 1)
+						elem.rows[0].remove()
 
-			addDetailButtonIfNotExist(detailName, detailUrlName);
-		}).catch(err => {
-			console.error(err);
-		});
+					elem.innerText = [...rows].map(row => {
+						return "| " + [...row.cells].map(cell => {
+							return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
+						}).join(" | ") + " |"
+					}).join("\n");
+				};
+
+				let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+
+				searchedDetails[detailUrlName] = {
+					"detailType": detailType,
+					"description": description,
+					"prerequisites": prerequisites,
+					"source": source,
+					"url": url
+				};
+
+				addDetailButtonIfNotExist(detailName, detailUrlName);
+			}).catch(err => {
+				console.error(err);
+			});
+		};
 		if (Object.keys(searchedDetails[detailUrlName]).length)
 			break;
 	};
 };
 
-function checkForDetail(text, detailTypesToCheckFor) {
+function checkForDetail(text, detailTypes) {
 	let detailTypesForRegexString = {};
-	if (detailTypesToCheckFor.includes("Class"))
+	if (detailTypes.includes("Class"))
 		detailTypesForRegexString["/^(\\S+)/g"] = ["Class"];
-	if (detailTypesToCheckFor.includes("Background") || detailTypesToCheckFor.includes("Race")) {
+	if (detailTypes.includes("Background") || detailTypes.includes("Race")) {
 		const regexString = "/(.+)/g";
 		detailTypesForRegexString[regexString] = [];
 		for (const type of ["Background", "Race"]) {
-			if (detailTypesToCheckFor.includes(type))
+			if (detailTypes.includes(type))
 				detailTypesForRegexString[regexString].push(type);
 		};
-	} if (detailTypesToCheckFor.includes("Subclass") || detailTypesToCheckFor.includes("Feat")) {
-		const regexString = "/^([\\w ]+)(:| - )$/gm";
+	} if (detailTypes.includes("Subclass") || detailTypes.includes("Feat")) {
+		const regexString = "/^([\\w \(\)]+)(:| - )$/gm";
 		detailTypesForRegexString[regexString] = [];
 		for (const type of ["Subclass", "Feat"]) {
-			if (detailTypesToCheckFor.includes(type))
+			if (detailTypes.includes(type))
 				detailTypesForRegexString[regexString].push(type);
 		};
 	};
@@ -641,7 +646,7 @@ function checkForDetail(text, detailTypesToCheckFor) {
 	for (const [regexString, types] of Object.entries(detailTypesForRegexString)) {
 		for (const detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
 			searchAndAddDetail(
-				detail[1].replaceAll("(", "").replaceAll(")", ""),
+				detail[1],
 				types
 			);
 		};
