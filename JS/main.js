@@ -627,16 +627,16 @@ async function searchAndAddDetail(detailName, detailTypes) {
 function checkForDetail(text, detailTypes) {
 	let detailTypesForRegexString = {};
 	if (detailTypes.includes("Class"))
-		detailTypesForRegexString["/^(\\S+)/g"] = ["Class"];
+		detailTypesForRegexString["/^(\\w+)/g"] = ["Class"];
 	if (detailTypes.includes("Background") || detailTypes.includes("Race")) {
-		const regexString = "/(.+)/g";
+		const regexString = "/\\s*(.+)\\s*/g";
 		detailTypesForRegexString[regexString] = [];
 		for (const type of ["Background", "Race"]) {
 			if (detailTypes.includes(type))
 				detailTypesForRegexString[regexString].push(type);
 		};
 	} if (detailTypes.includes("Feat") || detailTypes.includes("Subclass")) {
-		const regexString = "/^([\\w\(\)][\\w \(\)]*)(:| - )$/gm";
+		const regexString = "/^\\s*([\\w\(\)][\\w \(\)]*)(:| - )\\s*$/gm";
 		detailTypesForRegexString[regexString] = [];
 		for (const type of ["Feat", "Subclass"]) {
 			if (detailTypes.includes(type))
