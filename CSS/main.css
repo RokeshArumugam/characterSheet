@@ -750,7 +750,7 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	width: 2.5ch;
 }
 .currency input {
-	width: 5ch
+	width: 7.5ch
 }
 .equipment__notes {
 	grid-area: equipment__notes;
