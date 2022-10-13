@@ -125,7 +125,6 @@ footer {
 	padding-bottom: max(1em, env(safe-area-inset-bottom));
 }
 footer span {
-	grid-column: 2;
 	font-size: 1.2em;
 }
 footer i {
@@ -190,6 +189,9 @@ footer i {
 }
 #modal__icon.fa-times-circle {
 	color: var(--danger-color);
+}
+#modal__icon.fa-heart {
+	color: red;
 }
 #modal__heading {
 	font-size: 1.75em;

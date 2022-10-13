@@ -9,7 +9,8 @@ const modalTypes = {
 	Success: "fa-check-circle",
 	Warning: "fa-exclamation-triangle",
 	Error: "fa-times-circle",
-	Prompt: "fa-question-circle"
+	Prompt: "fa-question-circle",
+	Donation: "fa-heart"
 };
 const alertTemplateString = `
 	<div id="modal" class="modal" role="alertdialog">
@@ -781,11 +782,18 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 	});
 });
 
+document.getElementsByClassName("donationButton")[0].addEventListener("click", _ => {
+	alert(
+		"If you like using this digital character sheet for free and would like to give back in some way, [donations](" + "https://donate.stripe.com/fZe5kv5SJ3jZfjG000" + ") are most welcome!",
+		modalTypes.Donation,
+		'Donations'
+	);
+});
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
 	const url = exportDataToUrl();
 	navigator.clipboard.writeText(url);
 	alert(
-		"After you click 'Close', the data in this tab will be saved so as long as you don't close the tab you can come back to this character sheet later.\n\nYou can also use this link (which has been copied) to access a character sheet with these values:\n" + url,
+		"After you click 'Close', the data in this tab will be saved so as long as you don't close the tab you can come back to this character sheet later.\n\nYou can also use this link (which has been copied) to access a character sheet with these values:\n[" + url + "](" + url + ")",
 		modalTypes.Success,
 		'Link Copied!'
 	).then(_ => {
