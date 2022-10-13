@@ -781,6 +781,18 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 	});
 });
 
+document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
+	const url = exportDataToUrl();
+	navigator.clipboard.writeText(url);
+	alert(
+		"After you click 'Close', the data in this tab will be saved so as long as you don't close the tab you can come back to this character sheet later.\n\nYou can also use this link (which has been copied) to access a character sheet with these values:\n" + url,
+		modalTypes.Success,
+		'Link Copied!'
+	).then(_ => {
+		window.location.replace(url);
+	});
+});
+
 // Main
 
 importDataFromUrl();
