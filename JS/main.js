@@ -2,7 +2,7 @@
 // Variables
 
 const currentUrlParams = new URLSearchParams(window.location.search);
-const CORS_PROXY = "https://circumvent-cors.herokuapp.com/";
+const CORS_PROXY = "https://proxy.cors.sh/";
 
 const modalTypes = {
 	Information: "fa-info-circle",
