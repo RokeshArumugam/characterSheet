@@ -2,7 +2,7 @@
 // Variables
 
 const currentUrlParams = new URLSearchParams(window.location.search);
-const CORS_PROXY = "https://proxy.cors.sh/";
+const CORS_PROXY = "https://corsproxy.io/?";
 
 const modalTypes = {
 	Information: "fa-info-circle",
