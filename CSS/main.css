@@ -30,18 +30,16 @@
     margin: 0em;
     box-sizing: border-box;
     padding: 0em;
-	font-family: var(--default-font-family);
 }
 body {
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
-	min-height: 100vh;
-	min-height: -webkit-fill-available;
-	max-height: 100vh;
-	max-height: -webkit-fill-available;
+	min-height: 100svh;
+	max-height: 100svh;
 	background-color: var(--background-color);
+	font-family: var(--default-font-family);
 	color: var(--on-background-color);
 	-webkit-text-size-adjust: 100%;
 }
@@ -351,7 +349,7 @@ input, textarea, input[type="checkbox"] + label, input[name="doubleCheckbox"] + 
 	background-color: var(--background-color);
 	font-size: 1em;
 	color: var(--on-background-color);
-	-webkit-appearance: none;
+	appearance: none;
 	resize: none;
 }
 input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
@@ -364,11 +362,11 @@ label[for] {
 /* -- Number */
 
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 input[type=number] {
-  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* -- Checkbox */
