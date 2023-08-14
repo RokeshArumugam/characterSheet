@@ -13,47 +13,38 @@ const modalTypes = {
 	Donation: "fa-heart"
 };
 const alertTemplateString = `
-	<div id="modal" class="modal" role="alertdialog">
-		<div id="modal__overlay" class="modal__overlay"></div>
-		<div id="modal__box" class="modal__box">
-			<i id="modal__icon" class="fas"></i>
-			<span id="modal__heading">Alert</span>
-			<div id="modal__message"></div>
-			<div id="modal__buttonContainer">
-				<button class="modal__button primaryButton">Close</button>
-			</div>
+	<dialog id="modal" role="alertdialog">
+		<i id="modal__icon" class="fas"></i>
+		<span id="modal__heading">Alert</span>
+		<div id="modal__message"></div>
+		<div id="modal__buttonContainer">
+			<button class="modal__button primaryButton">Close</button>
 		</div>
-	</div>
+	</dialog>
 `;
 const promptTemplateString = `
-	<div id="modal" class="modal" role="alertdialog">
-		<div id="modal__overlay" class="modal__overlay"></div>
-		<div id="modal__box" class="modal__box">
-			<i id="modal__icon" class="fas"></i>
-			<span id="modal__heading">Prompt</span>
-			<div id="modal__message"></div>
-			<input type="text" id="modal__field">
-			<div id="modal__buttonContainer">
-				<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
-				<button id="modal__button--ok" class="modal__button primaryButton">OK</button>
-			</div>
+	<dialog id="modal" role="alertdialog">
+		<i id="modal__icon" class="fas"></i>
+		<span id="modal__heading">Prompt</span>
+		<div id="modal__message"></div>
+		<input type="text" id="modal__field">
+		<div id="modal__buttonContainer">
+			<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
+			<button id="modal__button--ok" class="modal__button primaryButton">OK</button>
 		</div>
-	</div>
+	</dialog>
 `;
 const showInfoTemplateString = `
-	<div id="modal" class="modal" role="alertdialog">
-		<div id="modal__overlay" class="modal__overlay"></div>
-		<div id="modal__box" class="modal__box">
-			<i id="modal__icon" class="fas"></i>
-			<span id="modal__heading">Alert</span>
-			<a target="_blank" id="modal__source"></a>
-			<div id="modal__prerequisites"></div>
-			<div id="modal__message" data-heading="Description"></div>
-			<div id="modal__buttonContainer">
-				<button class="modal__button primaryButton">Close</button>
-			</div>
+	<dialog id="modal" role="alertdialog">
+		<i id="modal__icon" class="fas"></i>
+		<span id="modal__heading">Alert</span>
+		<a target="_blank" id="modal__source"></a>
+		<div id="modal__prerequisites"></div>
+		<div id="modal__message" data-heading="Description"></div>
+		<div id="modal__buttonContainer">
+			<button class="modal__button primaryButton">Close</button>
 		</div>
-	</div>
+	</dialog>
 `;
 
 const pathnamesForDetailType = {
@@ -228,8 +219,7 @@ function createModal(templateString, message, type, heading) {
 
 	modalElem.getElementById("modal__heading").innerText = heading;
 
-	if (typeof message !== "string")
-		message = String(message);
+	if (typeof message !== "string") message = String(message);
 
 	let parentElements = [messageElem];
 	for (let line of message.split("\n")) {
@@ -270,24 +260,21 @@ function createModal(templateString, message, type, heading) {
 	};
 
 	modalElem = modalElem.body.firstChild;
-	modalElem.addEventListener("click", evt => {
-		if (evt.target.classList.contains("modal__button")) {
-			modalElem.remove();
-		};
-	});
+	modalElem.addEventListener("close", () => modalElem.remove());
 	return modalElem;
 };
 
 window.alert = (message, type = modalTypes.Information, heading) => {
-	if (!heading) {
-		heading = Object.keys(modalTypes).find(key => modalTypes[key] === type);
-	};
+	heading ??= Object.keys(modalTypes).find(key => modalTypes[key] === type);
 	return new Promise((resolve, reject) => {
 		let modalElem = createModal(alertTemplateString, message, type, heading);
 		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
-			resolve(undefined);
+			modalElem.close();
+			resolve(null);
 		});
+		modalElem.addEventListener("cancel", () => resolve(null));
 		document.body.appendChild(modalElem);
+		modalElem.showModal();
 	})
 };
 window.prompt = (message, heading = "Prompt", defaultText = "") => {
@@ -296,13 +283,16 @@ window.prompt = (message, heading = "Prompt", defaultText = "") => {
 		let modalFieldElem = modalElem.querySelector("#modal__field");
 		modalFieldElem.value = defaultText;
 		modalElem.querySelector("#modal__button--ok").addEventListener("click", () => {
+			modalElem.close();
 			resolve(modalFieldElem.value);
 		});
 		modalElem.querySelector("#modal__button--cancel").addEventListener("click", () => {
+			modalElem.close();
 			resolve(null);
 		});
+		modalElem.addEventListener("cancel", () => resolve(null));
 		document.body.appendChild(modalElem);
-		modalFieldElem.focus();
+		modalElem.showModal();
 	});
 };
 window.showInfo = (message, heading = "Information", sourceLink, sourceText, prerequisites = []) => {
@@ -327,10 +317,13 @@ window.showInfo = (message, heading = "Information", sourceLink, sourceText, pre
 		};
 
 		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
-			resolve(undefined);
+			modalElem.close();
+			resolve(null);
 		});
+		modalElem.addEventListener("cancel", () => resolve(null));
 		document.body.appendChild(modalElem);
-	})
+		modalElem.showModal();
+	});
 };
 
 // Main Functions
