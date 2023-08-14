@@ -544,93 +544,86 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 		};
 
 		for (const url of urls) {
-			await fetch(
-				CORS_PROXY + url
-			).then((response) => {
-				if (response.status == 200)
-					return response.text();
-				else if (response.status == 404)
-					return null
-				else
-					console.error("Status Code: " + response.status);
-			}).then((data) => {
-				if (!data)
-					return;
+			await fetch(CORS_PROXY + url)
+				.then((response) => {
+					if (response.status == 200) return response.text();
+					else if (response.status == 404) return null;
+					else console.error("Status Code: " + response.status);
+				}).then((data) => {
+					if (!data) return;
 
-				let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
+					let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
-				let tableOfContentElem = contentElem.querySelector("#toc");
-				if (tableOfContentElem)
-					tableOfContentElem.remove();
+					let tableOfContentElem = contentElem.querySelector("#toc");
+					if (tableOfContentElem) tableOfContentElem.remove();
 
-				let source = "";
-				for (const elem of contentElem.getElementsByTagName("p")) {
-					if (!(elem.innerText.startsWith("Source: ")))
-						continue;
-					source = elem.innerText.substring("Source: ".length);
-					elem.remove()
-				};
-
-				let prerequisites = [];
-				if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
-					prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
-					contentElem.firstElementChild.remove();
-				};
-
-				if (detailType == "Race") {
-					let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
-					let wholeRaceName = detailName.trim().toLowerCase();
-					let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
-					if (subraceRowElem) {
-						for (const rowElem of rowElems) {
-							if (rowElem != subraceRowElem)
-								rowElem.remove();
-						};
-					} else {
-						detailName = mainRaceName;
-						detailUrlName = mainRaceUrlName;
-					}
-				};
-
-				for (let i = 1; i <= 3; i++) {
-					for (const elem of contentElem.getElementsByTagName("h" + i)) {
-						elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
+					let source = "";
+					for (const elem of contentElem.getElementsByTagName("p")) {
+						if (!(elem.innerText.startsWith("Source: "))) continue;
+						source = elem.innerText.substring("Source: ".length);
+						elem.remove()
 					};
-				};
-				for (const elem of contentElem.getElementsByTagName("a")) {
-					elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
-				};
-				for (const elem of contentElem.getElementsByTagName("li")) {
-					elem.innerText = "* " + elem.innerText.trim();
-				};
-				for (const elem of contentElem.getElementsByTagName("table")) {
-					let rows = elem.rows;
-					if (elem.rows[0].cells.length == 1)
-						elem.rows[0].remove()
 
-					elem.innerText = [...rows].map(row => {
-						return "| " + [...row.cells].map(cell => {
-							return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
-						}).join(" | ") + " |"
-					}).join("\n");
-				};
+					let prerequisites = [];
+					if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
+						prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
+						contentElem.firstElementChild.remove();
+					};
 
-				let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+					if (detailType == "Race") {
+						let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
+						let wholeRaceName = detailName.trim().toLowerCase();
+						let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
+						if (subraceRowElem) {
+							for (const rowElem of rowElems) {
+								if (rowElem != subraceRowElem)
+									rowElem.remove();
+							};
+						} else {
+							detailName = mainRaceName;
+							detailUrlName = mainRaceUrlName;
+						}
+					};
 
-				searchedDetails[detailUrlName] = {
-					"detailType": detailType,
-					"description": description,
-					"prerequisites": prerequisites,
-					"source": source,
-					"url": url
-				};
+					for (let i = 1; i <= 3; i++) {
+						for (const elem of contentElem.getElementsByTagName("h" + i)) {
+							elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
+						};
+					};
+					for (const elem of contentElem.getElementsByTagName("a")) {
+						elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
+					};
+					for (const elem of contentElem.getElementsByTagName("li")) {
+						elem.innerText = "* " + elem.innerText.trim();
+					};
+					for (const elem of contentElem.getElementsByClassName("hover")) {
+						elem.firstElementChild.innerText = " (" + elem.firstElementChild.innerText.toLowerCase() + ")";
+					};
+					for (const elem of contentElem.getElementsByTagName("table")) {
+						let rows = elem.rows;
+						if (elem.rows[0].cells.length == 1)
+							elem.rows[0].remove()
 
-				addDetailButtonIfNotExist(detailName, detailUrlName);
-			}).catch(err => {
-				console.error(err);
-			});
-			if (Object.keys(searchedDetails[detailUrlName]).length)
-				return;
+						elem.innerText = [...rows].map(row => {
+							return "| " + [...row.cells].map(cell => {
+								return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
+							}).join(" | ") + " |"
+						}).join("\n");
+					};
+
+					let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+
+					searchedDetails[detailUrlName] = {
+						"detailType": detailType,
+						"description": description,
+						"prerequisites": prerequisites,
+						"source": source,
+						"url": url
+					};
+
+					addDetailButtonIfNotExist(detailName, detailUrlName);
+				}).catch(err => console.error(err));
+			if (Object.keys(searchedDetails[detailUrlName]).length) return;
 		};
 	};
 });
