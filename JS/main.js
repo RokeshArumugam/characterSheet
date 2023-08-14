@@ -210,6 +210,16 @@ function getSanitizedHtmlWithLinksFromMarkdown(html) {
 	return elem.innerHTML
 };
 
+function debounce(callback, delay = 1000) {
+	let timeout;
+	return (...args) => {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => {
+			callback(...args);
+		}, delay);
+	};
+};
+
 function createModal(templateString, message, type, heading) {
 	let modalElem = new DOMParser().parseFromString(templateString, "text/html");
 	let messageElem = modalElem.getElementById("modal__message");
@@ -492,7 +502,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 	document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0].appendChild(detailButtonElem);
 }
 
-async function searchAndAddDetail(detailName, detailTypes) {
+const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 	detailName = getTitleCase(detailName);
 	let detailUrlName = getDetailUrlNameForDetailName(detailName);
 
@@ -623,7 +633,7 @@ async function searchAndAddDetail(detailName, detailTypes) {
 				return;
 		};
 	};
-};
+});
 
 function checkForDetail(text, detailTypes) {
 	let detailTypesForRegexString = {};
@@ -648,12 +658,8 @@ function checkForDetail(text, detailTypes) {
 	for (const [regexString, types] of Object.entries(detailTypesForRegexString)) {
 		for (const detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
 			const detailName = detail[1].trim();
-			if (!detailName)
-				continue;
-			searchAndAddDetail(
-				detailName,
-				types
-			);
+			if (!detailName) continue;
+			searchAndAddDetail(detailName, types);
 		};
 	};
 };
@@ -692,8 +698,7 @@ function roll(expression) {
 
 function inputEventListener(evt) {
 	const elem = evt.target;
-	if (!elem.validity.valid)
-		return
+	if (!elem.validity.valid) return
 
 	if (elem.className.startsWith("weapon__")) {
 		const cellElem = elem.parentElement;
