@@ -1,7 +1,7 @@
 
 // Variables
 
-const modalTemplateStrings = {
+const modalTemplates = {
 	"alert": `
 		<dialog id="modal" role="alertdialog">
 			<i id="modal__icon" class="fas"></i>
@@ -187,8 +187,8 @@ let searchedDetails = {};
 
 function showModal(options) {
 	return new Promise((resolve, reject) => {
-		options["templateString"] ??= modalTemplateStrings["alert"];
-		let modalElem = new DOMParser().parseFromString(options["templateString"], "text/html");
+		options["template"] ??= modalTemplates["alert"];
+		let modalElem = new DOMParser().parseFromString(options["template"], "text/html");
 		let messageElem = modalElem.getElementById("modal__message");
 
 		modalElem.getElementById("modal__icon").classList.add(options["icon"] ?? "fa-info-circle");
@@ -233,8 +233,8 @@ function showModal(options) {
 			parentElements.at(-1).appendChild(childElem);
 		};
 
-		switch (options["templateString"]) {
-			case modalTemplateStrings["prompt"]:
+		switch (options["template"]) {
+			case modalTemplates["prompt"]:
 				let modalFieldElem = modalElem.getElementById("modal__field");
 				let modalOkElem = modalElem.getElementById("modal__button--ok");
 				if (options["defaultPromptText"])
@@ -249,7 +249,7 @@ function showModal(options) {
 					resolve(modalFieldElem.value);
 				});
 				break;
-			case modalTemplateStrings["detailInfo"]:
+			case modalTemplates["detailInfo"]:
 				if (options["sourceLink"]) {
 					let sourceElem = modalElem.getElementById("modal__source");
 					sourceElem.href = options["sourceLink"];
@@ -266,13 +266,13 @@ function showModal(options) {
 					prerequisitesElem.appendChild(listElem);
 				};
 				break;
-			case modalTemplateStrings["save"]:
+			case modalTemplates["save"]:
 				modalElem.getElementById("modal__button--download").addEventListener("click", evt => {
 					evt.target.parentElement.parentElement.close();
 					resolve(true);
 				});
 				break;
-			case modalTemplateStrings["welcome"]:
+			case modalTemplates["welcome"]:
 				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", evt => {
 					let reader = new FileReader();
 					reader.addEventListener("load", evt => {
@@ -372,7 +372,7 @@ window.alert = (message, heading, icon) => {
 };
 window.prompt = (message, heading = "Prompt", defaultText = "") => {
 	return showModal({
-		"templateString": modalTemplateStrings["prompt"],
+		"template": modalTemplates["prompt"],
 		message,
 		heading,
 		"icon": "fa-question-circle",
@@ -381,7 +381,7 @@ window.prompt = (message, heading = "Prompt", defaultText = "") => {
 };
 
 String.prototype.toSmartTitleCase = function () {
-	return this.replaceAll(
+	return this.replace(
 		/\w\S*/g,
 		(word, offset) => {
 			if (offset && ["a", "an", "the", "of"].includes(word.toLowerCase()))
@@ -402,7 +402,7 @@ function debounce(callback, delay = 1000) {
 };
 
 function getDetailUrlNameForDetailName(detailName) {
-	return detailName.toLowerCase().replaceAll(/[\(\)]/g, "").replaceAll(" ", "-")
+	return detailName.toLowerCase().replace(/[\(\)]/g, "").replaceAll(" ", "-")
 };
 
 function sanitizeHtmlAndConvertMarkdownLinks(html) {
@@ -559,7 +559,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 	detailButtonElem.addEventListener("click", evt => {
 		if (evt.target.tagName == "I") return;
 		showModal({
-			"templateString": modalTemplateStrings["detailInfo"],
+			"template": modalTemplates["detailInfo"],
 			"message": searchedDetails[detailUrlName]["description"],
 			"heading": detailName,
 			"sourceLink": searchedDetails[detailUrlName]["url"],
@@ -678,7 +678,7 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 						}).join("\n");
 					};
 
-					let description = contentElem.innerText.trim().replaceAll(/\n\n+/g, "\n");
+					let description = contentElem.innerText.trim().replace(/\n\n+/g, "\n");
 
 					searchedDetails[detailUrlName] = {
 						"detailType": detailType,
@@ -723,14 +723,14 @@ function rollDie(sides) {
 };
 
 function roll(expression) {
-	expression = expression.toLowerCase().replaceAll(/\s/g, "").replaceAll(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
+	expression = expression.toLowerCase().replace(/\s/g, "").replace(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
 	if (expression.match(/[^d\d\+\-\* ]/)) {
 		alert("Only digits and 'd+-* ' are allowed.", "Invalid Roll", "fa-times-circle");
 		return;
 	};
 
 	let output = ["Roll: " + expression];
-	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
+	expression = expression.replace(/(\d*)d(\d+)/g, (_, p1, p2) => {
 		let rolls = [];
 		for (let i = 0; i < (p1 || 1); i++) rolls.push(rollDie(p2));
 		return rolls.length ? rolls.join("+") : [0];
@@ -841,7 +841,7 @@ document.getElementsByClassName("donationButton")[0].addEventListener("click", _
 });
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
 	showModal({
-		"templateString": modalTemplateStrings["save"],
+		"template": modalTemplates["save"],
 		"message": "You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet is also automatically saved in your browser so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
 		"heading": "Saving This Character Sheet",
 		"icon": "fa-floppy-disk"
@@ -860,7 +860,7 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 // Main
 
 showModal({
-	"templateString": modalTemplateStrings["welcome"],
+	"template": modalTemplates["welcome"],
 	"message": "This is an online digital character sheet that can be used for games such as DnD.\n\nYou can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether.",
 	"heading": "Welcome",
 	"icon": "fa-dice-d20"
