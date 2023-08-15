@@ -4,74 +4,65 @@
 const currentUrlParams = new URLSearchParams(window.location.search);
 const CORS_PROXY = "https://corsproxy.io/?";
 
-const modalTypes = {
-	Information: "fa-info-circle",
-	Success: "fa-check-circle",
-	Warning: "fa-exclamation-triangle",
-	Error: "fa-times-circle",
-	Prompt: "fa-question-circle",
-	Save: "fa-floppy-disk",
-	Welcome: "fa-dice-d20",
-	Donation: "fa-heart"
+const modalTemplateStrings = {
+	"alert": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<div id="modal__message"></div>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Close</button>
+			</div>
+		</dialog>
+	`,
+	"prompt": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Prompt</span>
+			<div id="modal__message"></div>
+			<input type="text" id="modal__field">
+			<div id="modal__buttonContainer">
+				<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
+				<button id="modal__button--ok" class="modal__button primaryButton">OK</button>
+			</div>
+		</dialog>
+	`,
+	"detailInfo": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<a target="_blank" id="modal__source"></a>
+			<div id="modal__prerequisites"></div>
+			<div id="modal__message" data-heading="Description"></div>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Close</button>
+			</div>
+		</dialog>
+	`,
+	"save": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<div id="modal__message"></div>
+			<div id="modal__buttonContainer">
+				<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
+				<button id="modal__button--download" class="modal__button primaryButton">Download</button>
+			</div>
+		</dialog>
+	`,
+	"welcome": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<div id="modal__message" data-heading="Welcome to Character Sheet!"></div>
+			<input id="modal__characterSheetFileInput" type="file">
+			<ul id="modal__characterSheetList"></ul>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Start a New Character</button>
+			</div>
+		</dialog>
+	`
 };
-const alertTemplateString = `
-	<dialog id="modal" role="alertdialog">
-		<i id="modal__icon" class="fas"></i>
-		<span id="modal__heading">Alert</span>
-		<div id="modal__message"></div>
-		<div id="modal__buttonContainer">
-			<button class="modal__button primaryButton">Close</button>
-		</div>
-	</dialog>
-`;
-const promptTemplateString = `
-	<dialog id="modal" role="alertdialog">
-		<i id="modal__icon" class="fas"></i>
-		<span id="modal__heading">Prompt</span>
-		<div id="modal__message"></div>
-		<input type="text" id="modal__field">
-		<div id="modal__buttonContainer">
-			<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
-			<button id="modal__button--ok" class="modal__button primaryButton">OK</button>
-		</div>
-	</dialog>
-`;
-const showInfoTemplateString = `
-	<dialog id="modal" role="alertdialog">
-		<i id="modal__icon" class="fas"></i>
-		<span id="modal__heading">Alert</span>
-		<a target="_blank" id="modal__source"></a>
-		<div id="modal__prerequisites"></div>
-		<div id="modal__message" data-heading="Description"></div>
-		<div id="modal__buttonContainer">
-			<button class="modal__button primaryButton">Close</button>
-		</div>
-	</dialog>
-`;
-const showSaveTemplateString = `
-	<dialog id="modal" role="alertdialog">
-		<i id="modal__icon" class="fas"></i>
-		<span id="modal__heading">Alert</span>
-		<div id="modal__message"></div>
-		<div id="modal__buttonContainer">
-			<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
-			<button id="modal__button--download" class="modal__button primaryButton">Download</button>
-		</div>
-	</dialog>
-`;
-const showWelcomeTemplateString = `
-	<dialog id="modal" role="alertdialog">
-		<i id="modal__icon" class="fas"></i>
-		<span id="modal__heading">Alert</span>
-		<div id="modal__message" data-heading="Welcome to Character Sheet!"></div>
-		<input id="modal__characterSheetFileInput" type="file">
-		<ul id="modal__characterSheetList"></ul>
-		<div id="modal__buttonContainer">
-			<button class="modal__button primaryButton">Start a New Character</button>
-		</div>
-	</dialog>
-`;
-
 const pathnamesForDetailType = {
 	"Class": ["(detailUrlName)"],
 	"Background": ["background:(detailUrlName)"],
@@ -79,7 +70,6 @@ const pathnamesForDetailType = {
 	"Subclass": ["(classUrlName):(detailUrlName)"],
 	"Feat": ["feat:(detailUrlName)", "feat:(detailUrlName)-ua"]
 };
-
 const skillsForAbilities = {
 	"strength": ["athletics"],
 	"dexterity": ["acrobatics", "sleightOfHand", "stealth"],
@@ -194,6 +184,201 @@ let searchedDetails = {};
 
 // Utility Functions
 
+function showModal(options) {
+	return new Promise((resolve, reject) => {
+		options["templateString"] ??= modalTemplateStrings["alert"];
+		let modalElem = new DOMParser().parseFromString(options["templateString"], "text/html");
+		let messageElem = modalElem.getElementById("modal__message");
+
+		modalElem.getElementById("modal__icon").classList.add(options["icon"] ?? "fa-info-circle");
+
+		modalElem.getElementById("modal__heading").innerText = options["heading"] ?? "Information";
+
+		if (typeof options["message"] !== "string") options["message"] = String(options["message"]);
+
+		let parentElements = [messageElem];
+		for (let line of options["message"].split("\n")) {
+			let childElem;
+			if (line.startsWith("| ")) {
+				if (parentElements.at(-1).tagName != "TABLE") {
+					parentElements = [parentElements[0]];
+					parentElements.push(document.createElement("table"));
+					parentElements.at(-2).appendChild(parentElements.at(-1));
+				};
+				childElem = document.createElement("tr");
+				for (const cellText of line.substring(2, line.length - 2).split(" | ")) {
+					let cellElem = document.createElement(parentElements.at(-1).rows.length ? "td" : "th");
+					cellElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(cellText);
+					childElem.appendChild(cellElem);
+				};
+			} else if (line.startsWith("#")) {
+				if (parentElements.length > 1)
+					parentElements = [parentElements[0]];
+				let numHashes = line.match("^#+")[0].length;
+				childElem = document.createElement("h" + (numHashes + 1));
+				childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(numHashes + 1));
+			} else if (line.startsWith("* ")) {
+				if (parentElements.at(-1).tagName != "UL") {
+					parentElements = [parentElements[0]];
+					parentElements.push(document.createElement("ul"));
+					parentElements.at(-2).appendChild(parentElements.at(-1));
+				};
+				childElem = document.createElement("li");
+				childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(2));
+			} else {
+				if (parentElements.length > 1)
+					parentElements = [parentElements[0]];
+				childElem = document.createElement("p");
+				childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line);
+			};
+			parentElements.at(-1).appendChild(childElem);
+		};
+
+		switch (options["templateString"]) {
+			case modalTemplateStrings["prompt"]:
+				let modalFieldElem = modalElem.getElementById("modal__field");
+				let modalOkElem = modalElem.getElementById("modal__button--ok");
+				if (options["defaultPromptText"])
+					modalFieldElem.value = options["defaultPromptText"];
+				modalFieldElem.addEventListener("keyup", evt => {
+					if (evt.key != "Enter") return;
+					evt.preventDefault();
+					modalOkElem.click();
+				});
+				modalOkElem.addEventListener("click", evt => {
+					evt.target.parentElement.parentElement.close();
+					resolve(modalFieldElem.value);
+				});
+				break;
+			case modalTemplateStrings["detailInfo"]:
+				if (options["sourceLink"]) {
+					let sourceElem = modalElem.getElementById("modal__source");
+					sourceElem.href = options["sourceLink"];
+					sourceElem.innerText = "Source: " + (options["sourceText"] || options["sourceLink"]);
+				};
+				if (options["prerequisites"]?.length) {
+					let prerequisitesElem = modalElem.getElementById("modal__prerequisites");
+					let listElem = document.createElement("ul");
+					for (const prerequisite of prerequisites) {
+						let listItemElem = document.createElement("li");
+						listItemElem.innerText = prerequisite;
+						listElem.appendChild(listItemElem);
+					};
+					prerequisitesElem.appendChild(listElem);
+				};
+				break;
+			case modalTemplateStrings["save"]:
+				modalElem.getElementById("modal__button--download").addEventListener("click", evt => {
+					evt.target.parentElement.parentElement.close();
+					resolve(true);
+				});
+				break;
+			case modalTemplateStrings["welcome"]:
+				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", evt => {
+					let reader = new FileReader();
+					reader.addEventListener("load", evt => {
+						for (let [key, value] of Object.entries(JSON.parse(evt.target.result)))
+							updateDataValueAndInput(key, value);
+						evt.target.parentElement.close();
+						resolve(null);
+					});
+					reader.readAsText(evt.target.files[0]);
+				});
+
+				let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
+				let characterSheetListElem = modalElem.getElementById("modal__characterSheetList");
+				for (
+					let [existingCharacterSheetId, existingCharacterSheetData] of existingCharacterSheetIds.map(
+						id => [id, JSON.parse(localStorage.getItem(id))]
+					).sort((a, b) => b[1]["lastAutosave"] - a[1]["lastAutosave"])
+				) {
+					let liElem = document.createElement("li");
+					liElem.classList.add("modal__characterSheet");
+
+					let buttonElem = document.createElement("div");
+					buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
+					buttonElem.addEventListener("click", () => {
+						characterSheetId = existingCharacterSheetId;
+						for (let [key, value] of Object.entries(existingCharacterSheetData))
+							updateDataValueAndInput(key, value);
+						modalElem.close()
+						resolve(null);
+					});
+					liElem.appendChild(buttonElem);
+
+					let nameElem = document.createElement("span");
+					nameElem.classList.add("modal__characterName");
+					nameElem.innerText = existingCharacterSheetData["characterName"] || "Unamed character";
+					buttonElem.appendChild(nameElem);
+
+					let descriptionElem = document.createElement("span");
+					descriptionElem.classList.add("modal__characterDescription");
+					descriptionElem.innerText = (existingCharacterSheetData["race"] || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"] || "<unknown class and level>");
+					buttonElem.appendChild(descriptionElem);
+
+					let metadataElem = document.createElement("div");
+					metadataElem.classList.add("modal__characterSheetMetadata");
+
+					let timestampElem = document.createElement("span");
+					timestampElem.classList.add("modal__characterSheetLastSave");
+					timestampElem.innerText = "Last saved "
+
+					let seconds = Math.round((Date.now() - existingCharacterSheetData["lastAutosave"]) / 1000);
+					if (seconds < 60)
+						timestampElem.innerText += timeFormatter.format(-seconds, "seconds");
+					else if (seconds < (60 * 60))
+						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60), "minutes");
+					else if (seconds < (60 * 60 * 24))
+						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60), "hours");
+					else if (seconds < (60 * 60 * 24 * 30.5))
+						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24), "days");
+					else
+						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24 / 30.5), "months");
+					metadataElem.appendChild(timestampElem);
+
+					let deleteElem = document.createElement("i");
+					deleteElem.classList.add("fas", "fa-trash-can", "modal__characterSheetDelete")
+					deleteElem.addEventListener("click", evt => {
+						evt.target.parentElement.parentElement.remove();
+						localStorage.removeItem(existingCharacterSheetId);
+					});
+					metadataElem.appendChild(deleteElem);
+
+					liElem.appendChild(metadataElem);
+					characterSheetListElem.appendChild(liElem);
+				};
+				break;
+			default:
+				break;
+		}
+
+
+		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", evt => {
+			evt.target.parentElement.parentElement.close();
+			resolve(null);
+		});
+
+		modalElem = modalElem.body.firstChild;
+		modalElem.addEventListener("close", () => modalElem.remove());
+		modalElem.addEventListener("cancel", () => resolve(null));
+
+		document.body.appendChild(modalElem);
+		modalElem.showModal();
+	});
+};
+window.alert = (message, heading, icon) => {
+	return showModal({ message, heading, icon })
+};
+window.prompt = (message, heading = "Prompt", defaultText = "") => {
+	return showModal({
+		"templateString": modalTemplateStrings["prompt"],
+		message,
+		heading,
+		"icon": "fa-question-circle",
+		"defaultPromptText": defaultText
+	})
+};
+
 function getAbilityModifierForScore(score) {
 	return Math.floor((score - 10) / 2);
 };
@@ -238,224 +423,6 @@ function debounce(callback, delay = 1000) {
 			callback(...args);
 		}, delay);
 	};
-};
-
-function createModal(templateString, message, type, heading) {
-	let modalElem = new DOMParser().parseFromString(templateString, "text/html");
-	let messageElem = modalElem.getElementById("modal__message");
-
-	modalElem.getElementById("modal__icon").classList.add(type);
-
-	modalElem.getElementById("modal__heading").innerText = heading;
-
-	if (typeof message !== "string") message = String(message);
-
-	let parentElements = [messageElem];
-	for (let line of message.split("\n")) {
-		let childElem;
-		if (line.startsWith("| ")) {
-			if (parentElements.at(-1).tagName != "TABLE") {
-				parentElements = [parentElements[0]];
-				parentElements.push(document.createElement("table"));
-				parentElements.at(-2).appendChild(parentElements.at(-1));
-			};
-			childElem = document.createElement("tr");
-			for (const cellText of line.substring(2, line.length - 2).split(" | ")) {
-				let cellElem = document.createElement(parentElements.at(-1).rows.length ? "td" : "th");
-				cellElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(cellText);
-				childElem.appendChild(cellElem);
-			};
-		} else if (line.startsWith("#")) {
-			if (parentElements.length > 1)
-				parentElements = [parentElements[0]];
-			let numHashes = line.match("^#+")[0].length;
-			childElem = document.createElement("h" + (numHashes + 1));
-			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(numHashes + 1));
-		} else if (line.startsWith("* ")) {
-			if (parentElements.at(-1).tagName != "UL") {
-				parentElements = [parentElements[0]];
-				parentElements.push(document.createElement("ul"));
-				parentElements.at(-2).appendChild(parentElements.at(-1));
-			};
-			childElem = document.createElement("li");
-			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(2));
-		} else {
-			if (parentElements.length > 1)
-				parentElements = [parentElements[0]];
-			childElem = document.createElement("p");
-			childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line);
-		};
-		parentElements.at(-1).appendChild(childElem);
-	};
-
-	modalElem = modalElem.body.firstChild;
-	modalElem.addEventListener("close", () => modalElem.remove());
-	return modalElem;
-};
-
-window.alert = (message, type = modalTypes.Information, heading) => {
-	heading ??= Object.keys(modalTypes).find(key => modalTypes[key] === type);
-	return new Promise((resolve, reject) => {
-		let modalElem = createModal(alertTemplateString, message, type, heading);
-		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
-			modalElem.close();
-			resolve(null);
-		});
-		modalElem.addEventListener("cancel", () => resolve(null));
-		document.body.appendChild(modalElem);
-		modalElem.showModal();
-	})
-};
-window.prompt = (message, heading = "Prompt", defaultText = "") => {
-	return new Promise((resolve, reject) => {
-		let modalElem = createModal(promptTemplateString, message, modalTypes.Prompt, heading);
-		let modalFieldElem = modalElem.querySelector("#modal__field");
-		modalFieldElem.value = defaultText;
-		modalElem.querySelector("#modal__button--ok").addEventListener("click", () => {
-			modalElem.close();
-			resolve(modalFieldElem.value);
-		});
-		modalElem.querySelector("#modal__button--cancel").addEventListener("click", () => {
-			modalElem.close();
-			resolve(null);
-		});
-		modalElem.addEventListener("cancel", () => resolve(null));
-		document.body.appendChild(modalElem);
-		modalElem.showModal();
-	});
-};
-window.showInfo = (message, heading = "Information", sourceLink, sourceText, prerequisites = []) => {
-	return new Promise((resolve, reject) => {
-		let modalElem = createModal(showInfoTemplateString, message, modalTypes.Information, heading);
-
-		if (sourceLink) {
-			let sourceElem = modalElem.querySelector("#modal__source");
-			sourceElem.href = sourceLink;
-			sourceElem.innerText = "Source: " + (sourceText || sourceLink);
-		};
-
-		if (prerequisites.length) {
-			let prerequisitesElem = modalElem.querySelector("#modal__prerequisites");
-			let listElem = document.createElement("ul");
-			for (const prerequisite of prerequisites) {
-				let listItemElem = document.createElement("li");
-				listItemElem.innerText = prerequisite;
-				listElem.appendChild(listItemElem);
-			};
-			prerequisitesElem.appendChild(listElem);
-		};
-
-		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
-			modalElem.close();
-			resolve(null);
-		});
-		modalElem.addEventListener("cancel", () => resolve(null));
-		document.body.appendChild(modalElem);
-		modalElem.showModal();
-	});
-};
-window.showSave = (message, heading = "Save") => {
-	return new Promise((resolve, reject) => {
-		let modalElem = createModal(showSaveTemplateString, message, modalTypes.Save, heading);
-		modalElem.querySelector("#modal__button--download").addEventListener("click", () => {
-			modalElem.close();
-			resolve(true);
-		});
-		modalElem.querySelector("#modal__button--cancel").addEventListener("click", () => {
-			modalElem.close();
-			resolve(null);
-		});
-		modalElem.addEventListener("cancel", () => resolve(null));
-		document.body.appendChild(modalElem);
-		modalElem.showModal();
-	})
-};
-window.showWelcome = (message, heading = "Welcome") => {
-	return new Promise((resolve, reject) => {
-		let modalElem = createModal(showWelcomeTemplateString, message, modalTypes.Welcome, heading);
-
-		modalElem.querySelector("#modal__characterSheetFileInput").addEventListener("input", (evt) => {
-			let reader = new FileReader();
-			reader.addEventListener("load", evt => {
-				for (let [key, value] of Object.entries(JSON.parse(evt.target.result)))
-					updateDataValueAndInput(key, value);
-				modalElem.close();
-				resolve(null);
-			});
-			reader.readAsText(evt.target.files[0]);
-		});
-
-		let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
-		let characterSheetListElem = modalElem.querySelector("#modal__characterSheetList");
-		for (
-			let [existingCharacterSheetId, existingCharacterSheetData] of existingCharacterSheetIds.map(
-				id => [id, JSON.parse(localStorage.getItem(id))]
-			).sort((a, b) => b[1]["lastSaved"] - a[1]["lastSaved"])
-		) {
-			let liElem = document.createElement("li");
-			liElem.classList.add("modal__characterSheet");
-
-			let buttonElem = document.createElement("div");
-			buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
-			buttonElem.addEventListener("click", () => {
-				characterSheetId = existingCharacterSheetId;
-				for (let [key, value] of Object.entries(existingCharacterSheetData))
-					updateDataValueAndInput(key, value);
-				modalElem.close()
-				resolve(null);
-			});
-			liElem.appendChild(buttonElem);
-
-			let nameElem = document.createElement("span");
-			nameElem.classList.add("modal__characterName");
-			nameElem.innerText = existingCharacterSheetData["characterName"] || "Unamed character";
-			buttonElem.appendChild(nameElem);
-
-			let descriptionElem = document.createElement("span");
-			descriptionElem.classList.add("modal__characterDescription");
-			descriptionElem.innerText = (existingCharacterSheetData["race"] || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"] || "<unknown class and level>");
-			buttonElem.appendChild(descriptionElem);
-
-			let metadataElem = document.createElement("div");
-			metadataElem.classList.add("modal__characterSheetMetadata");
-
-			let timestampElem = document.createElement("span");
-			timestampElem.classList.add("modal__characterSheetLastSave");
-			timestampElem.innerText = "Last saved "
-
-			let seconds = Math.round((Date.now() - existingCharacterSheetData["lastAutosave"]) / 1000);
-			if (seconds < 60)
-				timestampElem.innerText += timeFormatter.format(-seconds, "seconds");
-			else if (seconds < (60 * 60))
-				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60), "minutes");
-			else if (seconds < (60 * 60 * 24))
-				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60), "hours");
-			else if (seconds < (60 * 60 * 24 * 30.5))
-				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24), "days");
-			else
-				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24 / 30.5), "months");
-			metadataElem.appendChild(timestampElem);
-
-			let deleteElem = document.createElement("i");
-			deleteElem.classList.add("fas", "fa-trash-can", "modal__characterSheetDelete")
-			deleteElem.addEventListener("click", evt => {
-				evt.target.parentElement.parentElement.remove();
-				localStorage.removeItem(existingCharacterSheetId);
-			});
-			metadataElem.appendChild(deleteElem);
-
-			liElem.appendChild(metadataElem);
-			characterSheetListElem.appendChild(liElem);
-		};
-
-		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
-			modalElem.close();
-			resolve(null);
-		});
-		modalElem.addEventListener("cancel", () => resolve(null));
-		document.body.appendChild(modalElem);
-		modalElem.showModal();
-	})
 };
 
 // Main Functions
@@ -591,13 +558,14 @@ function updateAbilityModifier(abilityName) {
 // -- Details
 
 function showDetailInfo(detailName, detailUrlName) {
-	showInfo(
-		searchedDetails[detailUrlName]["description"],
-		detailName,
-		searchedDetails[detailUrlName]["url"],
-		searchedDetails[detailUrlName]["source"],
-		searchedDetails[detailUrlName]["prerequisites"]
-	);
+	showModal({
+		"templateString": modalTemplateStrings["detailInfo"],
+		"message": searchedDetails[detailUrlName]["description"],
+		"heading": detailName,
+		"sourceLink": searchedDetails[detailUrlName]["url"],
+		"sourceText": searchedDetails[detailUrlName]["source"],
+		"prerequisites": searchedDetails[detailUrlName]["prerequisites"]
+	})
 };
 
 function addDetailButtonIfNotExist(detailName, detailUrlName) {
@@ -790,7 +758,7 @@ function rollDie(sides) {
 function roll(expression) {
 	expression = expression.toLowerCase().replaceAll(/\s/g, "").replaceAll(/([\+\-\*])/g, " $1 ").replace(/^ (.) /, "$1");
 	if (expression.match(/[^d\d\+\-\* ]/)) {
-		alert("Only digits and 'd+-* ' are allowed.", modalTypes.Error, "Invalid Roll");
+		alert("Only digits and 'd+-* ' are allowed.", "Invalid Roll", "fa-times-circle");
 		return;
 	};
 
@@ -808,7 +776,7 @@ function roll(expression) {
 	if (expression.includes(" "))
 		output.push("Roll: " + expression);
 	output.push("Total: " + eval(expression));
-	alert(output.join("\n"), modalTypes.Information, "Roll")
+	alert(output.join("\n"), "Roll")
 };
 
 // Event Listeners
@@ -908,15 +876,17 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 document.getElementsByClassName("donationButton")[0].addEventListener("click", _ => {
 	alert(
 		"If you like using this digital character sheet and would like to give back in some way, [donations](" + "https://donate.stripe.com/fZe5kv5SJ3jZfjG000" + ") are most welcome!",
-		modalTypes.Donation,
-		'Donations'
+		'Donations',
+		"fa-heart"
 	);
 });
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
-	showSave(
-		"You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet is also automatically saved in your browser so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
-		"Saving This Character Sheet"
-	).then(response => {
+	showModal({
+		"templateString": modalTemplateStrings["save"],
+		"message": "You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet is also automatically saved in your browser so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
+		"heading": "Saving This Character Sheet",
+		"icon": "fa-floppy-disk"
+	}).then(response => {
 		if (!response) return;
 		let linkElem = document.createElement("a");
 		linkElem.setAttribute(
@@ -930,6 +900,9 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 
 // Main
 
-showWelcome(
-	"This is an online digital character sheet that can be used for games such as DnD.\n\nYou can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether."
-);
+showModal({
+	"templateString": modalTemplateStrings["welcome"],
+	"message": "This is an online digital character sheet that can be used for games such as DnD.\n\nYou can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether.",
+	"heading": "Welcome",
+	"icon": "fa-dice-d20"
+});

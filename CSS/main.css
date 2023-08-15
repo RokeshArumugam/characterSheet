@@ -261,6 +261,9 @@ footer i {
 #modal p {
 	margin-left: 0em;
 }
+#modal a:focus {
+	outline: none;
+}
 #modal ul {
 	display: flex;
 	flex-direction: column;
