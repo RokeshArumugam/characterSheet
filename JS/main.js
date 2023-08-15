@@ -893,7 +893,7 @@ fetch("README.md")
 	.then(response => {
 		showModal({
 			"template": modalTemplates["welcome"],
-			"message": response.replace(/^.+\n/, ""),
+			"message": response.replace(/^.+\n/, "").replace(/^\n#/gm, "#"),
 			"heading": "Welcome",
 			"icon": "fa-dice-d20"
 		}).then(_ => {

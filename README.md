@@ -3,8 +3,8 @@ This is a digital character sheet that is heavily inspired by the [D&D 5E charac
 
 This character sheet automatically updates ability, saving throw and skill modifiers. It also automatically provides buttons that display information about your class, background, race, feats and subclasses depending on what you type into the sheet.
 
-* Class must be one word (may be hyphenated)
-* Feats and subclasses must be on one line and end with ':' or ' - '
+* Class should be one word (may be hyphenated)
+* Feats and subclasses should be on one line and end with ':' or ' - '
 
 The information is scraped from [http://dnd5e.wikidot.com](http://dnd5e.wikidot.com).
 
