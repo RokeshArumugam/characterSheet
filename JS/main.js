@@ -1,9 +1,6 @@
 
 // Variables
 
-const currentUrlParams = new URLSearchParams(window.location.search);
-const CORS_PROXY = "https://corsproxy.io/?";
-
 const modalTemplateStrings = {
 	"alert": `
 		<dialog id="modal" role="alertdialog">
@@ -63,6 +60,8 @@ const modalTemplateStrings = {
 		</dialog>
 	`
 };
+
+const CORS_PROXY = "https://corsproxy.io/?";
 const pathnamesForDetailType = {
 	"Class": ["(detailUrlName)"],
 	"Background": ["background:(detailUrlName)"],
@@ -70,6 +69,7 @@ const pathnamesForDetailType = {
 	"Subclass": ["(classUrlName):(detailUrlName)"],
 	"Feat": ["feat:(detailUrlName)", "feat:(detailUrlName)-ua"]
 };
+
 const skillsForAbilities = {
 	"strength": ["athletics"],
 	"dexterity": ["acrobatics", "sleightOfHand", "stealth"],
@@ -78,13 +78,13 @@ const skillsForAbilities = {
 	"wisdom": ["animalHandling", "insight", "medicine", "perception", "survival"],
 	"charisma": ["deception", "intimidation", "performance", "persuasion"]
 }
-
 const minimumWeaponRows = 3;
+
 let existingCharacterSheetIds = Object.keys(localStorage);
 let characterSheetId;
 do characterSheetId = String(Math.random());
 while (existingCharacterSheetIds.includes(characterSheetId));
-let characterSheetData = {
+const emptyCharacterSheetData = {
 	"characterName": "",
 	"classAndLevel": "",
 	"background": "",
@@ -168,7 +168,7 @@ let characterSheetData = {
 	"ideals": "",
 	"bonds": "",
 	"flaws": "",
-	"weapons": Array.from({ length: minimumWeaponRows }, _ => ["", "", ""]),
+	"weapons": Array(minimumWeaponRows).fill(["", "", ""]),
 	"attacksNotes": "",
 	"featuresAndTraits": "",
 	"passivePerception": "",
@@ -180,6 +180,7 @@ let characterSheetData = {
 	"platinumPieces": 0,
 	"equipmentNotes": ""
 };
+let characterSheetData = Object.assign({}, emptyCharacterSheetData);
 let searchedDetails = {};
 
 // Utility Functions
@@ -206,17 +207,16 @@ function showModal(options) {
 					parentElements.at(-2).appendChild(parentElements.at(-1));
 				};
 				childElem = document.createElement("tr");
-				for (const cellText of line.substring(2, line.length - 2).split(" | ")) {
+				for (let cellText of line.substring(2, line.length - 2).split(" | ")) {
 					let cellElem = document.createElement(parentElements.at(-1).rows.length ? "td" : "th");
-					cellElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(cellText);
+					cellElem.innerHTML = sanitizeHtmlAndConvertMarkdownLinks(cellText);
 					childElem.appendChild(cellElem);
 				};
 			} else if (line.startsWith("#")) {
-				if (parentElements.length > 1)
-					parentElements = [parentElements[0]];
+				if (parentElements.length > 1) parentElements = [parentElements[0]];
 				let numHashes = line.match("^#+")[0].length;
 				childElem = document.createElement("h" + (numHashes + 1));
-				childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(numHashes + 1));
+				childElem.innerHTML = sanitizeHtmlAndConvertMarkdownLinks(line.substring(numHashes + 1));
 			} else if (line.startsWith("* ")) {
 				if (parentElements.at(-1).tagName != "UL") {
 					parentElements = [parentElements[0]];
@@ -224,12 +224,11 @@ function showModal(options) {
 					parentElements.at(-2).appendChild(parentElements.at(-1));
 				};
 				childElem = document.createElement("li");
-				childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line.substring(2));
+				childElem.innerHTML = sanitizeHtmlAndConvertMarkdownLinks(line.substring(2));
 			} else {
-				if (parentElements.length > 1)
-					parentElements = [parentElements[0]];
+				if (parentElements.length > 1) parentElements = [parentElements[0]];
 				childElem = document.createElement("p");
-				childElem.innerHTML = getSanitizedHtmlWithLinksFromMarkdown(line);
+				childElem.innerHTML = sanitizeHtmlAndConvertMarkdownLinks(line);
 			};
 			parentElements.at(-1).appendChild(childElem);
 		};
@@ -259,7 +258,7 @@ function showModal(options) {
 				if (options["prerequisites"]?.length) {
 					let prerequisitesElem = modalElem.getElementById("modal__prerequisites");
 					let listElem = document.createElement("ul");
-					for (const prerequisite of prerequisites) {
+					for (let prerequisite of prerequisites) {
 						let listItemElem = document.createElement("li");
 						listItemElem.innerText = prerequisite;
 						listElem.appendChild(listItemElem);
@@ -277,8 +276,7 @@ function showModal(options) {
 				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", evt => {
 					let reader = new FileReader();
 					reader.addEventListener("load", evt => {
-						for (let [key, value] of Object.entries(JSON.parse(evt.target.result)))
-							updateDataValueAndInput(key, value);
+						characterSheetData = JSON.parse(evt.target.result);
 						evt.target.parentElement.close();
 						resolve(null);
 					});
@@ -287,21 +285,20 @@ function showModal(options) {
 
 				let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
 				let characterSheetListElem = modalElem.getElementById("modal__characterSheetList");
-				for (
-					let [existingCharacterSheetId, existingCharacterSheetData] of existingCharacterSheetIds.map(
-						id => [id, JSON.parse(localStorage.getItem(id))]
-					).sort((a, b) => b[1]["lastAutosave"] - a[1]["lastAutosave"])
-				) {
+				existingCharacterSheetIds.map(
+					id => [id, JSON.parse(localStorage.getItem(id))]
+				).sort(
+					(a, b) => b[1]["lastAutosave"] - a[1]["lastAutosave"]
+				).forEach(([existingCharacterSheetId, existingCharacterSheetData]) => {
 					let liElem = document.createElement("li");
 					liElem.classList.add("modal__characterSheet");
 
 					let buttonElem = document.createElement("div");
 					buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
-					buttonElem.addEventListener("click", () => {
+					buttonElem.addEventListener("click", evt => {
 						characterSheetId = existingCharacterSheetId;
-						for (let [key, value] of Object.entries(existingCharacterSheetData))
-							updateDataValueAndInput(key, value);
-						modalElem.close()
+						characterSheetData = existingCharacterSheetData;
+						evt.target.parentElement.parentElement.parentElement.close()
 						resolve(null);
 					});
 					liElem.appendChild(buttonElem);
@@ -321,19 +318,24 @@ function showModal(options) {
 
 					let timestampElem = document.createElement("span");
 					timestampElem.classList.add("modal__characterSheetLastSave");
-					timestampElem.innerText = "Last saved "
 
 					let seconds = Math.round((Date.now() - existingCharacterSheetData["lastAutosave"]) / 1000);
-					if (seconds < 60)
-						timestampElem.innerText += timeFormatter.format(-seconds, "seconds");
-					else if (seconds < (60 * 60))
-						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60), "minutes");
-					else if (seconds < (60 * 60 * 24))
-						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60), "hours");
-					else if (seconds < (60 * 60 * 24 * 30.5))
-						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24), "days");
-					else
-						timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24 / 30.5), "months");
+					let timeUnitLimits = [
+						[60, "seconds"],
+						[60 * 60, "minutes"],
+						[60 * 60 * 24, "hours"],
+						[60 * 60 * 24 * 30.5, "days"],
+						[60 * 60 * 24 * 365, "months"],
+						[60 * 60 * 24 * 365 * 999, "years"],
+					];
+					for (let i = 0; i < timeUnitLimits.length; i++) {
+						if (seconds >= timeUnitLimits[i][0]) continue;
+						timestampElem.innerText = "Last saved " + timeFormatter.format(
+							-Math.round(seconds / (timeUnitLimits[i - 1] ?? [1, ""])[0]),
+							timeUnitLimits[i][1]
+						);
+						break;
+					};
 					metadataElem.appendChild(timestampElem);
 
 					let deleteElem = document.createElement("i");
@@ -346,12 +348,11 @@ function showModal(options) {
 
 					liElem.appendChild(metadataElem);
 					characterSheetListElem.appendChild(liElem);
-				};
+				});
 				break;
 			default:
 				break;
-		}
-
+		};
 
 		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", evt => {
 			evt.target.parentElement.parentElement.close();
@@ -379,12 +380,8 @@ window.prompt = (message, heading = "Prompt", defaultText = "") => {
 	})
 };
 
-function getAbilityModifierForScore(score) {
-	return Math.floor((score - 10) / 2);
-};
-
-function getTitleCase(text) {
-	return text.replaceAll(
+String.prototype.toSmartTitleCase = function () {
+	return this.replaceAll(
 		/\w\S*/g,
 		(word, offset) => {
 			if (offset && ["a", "an", "the", "of"].includes(word.toLowerCase()))
@@ -394,14 +391,24 @@ function getTitleCase(text) {
 	);
 }
 
-function getDetailUrlNameForDetailName(detailName) {
-	return detailName.toLowerCase().replaceAll("(", "").replaceAll(")", "").replaceAll(" ", "-")
+function debounce(callback, delay = 1000) {
+	let timeout;
+	return (...args) => {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => {
+			callback(...args);
+		}, delay);
+	};
 };
 
-function getSanitizedHtmlWithLinksFromMarkdown(html) {
+function getDetailUrlNameForDetailName(detailName) {
+	return detailName.toLowerCase().replaceAll(/[\(\)]/g, "").replaceAll(" ", "-")
+};
+
+function sanitizeHtmlAndConvertMarkdownLinks(html) {
 	let elem = document.createElement("div");
 	elem.innerText = html;
-	for (const link of elem.innerHTML.matchAll(/\[(.+?)\]\((.+?)\)/g)) {
+	for (let link of elem.innerHTML.matchAll(/\[(.+?)\]\((.+?)\)/g)) {
 		let tmpElem = document.createElement("div");
 
 		tmpElem.innerHTML = link[2];
@@ -415,22 +422,12 @@ function getSanitizedHtmlWithLinksFromMarkdown(html) {
 	return elem.innerHTML
 };
 
-function debounce(callback, delay = 1000) {
-	let timeout;
-	return (...args) => {
-		clearTimeout(timeout);
-		timeout = setTimeout(() => {
-			callback(...args);
-		}, delay);
-	};
-};
-
 // Main Functions
 
 // -- Data Manipulation and Population
 
-function addWeaponRow(weapon) {
-	const weaponsElem = document.getElementById("weapons");
+function addWeaponRow(weaponData) {
+	let weaponsElem = document.getElementById("weapons");
 
 	let rowElem = document.createElement("tr");
 	rowElem.classList.add("weapon__row")
@@ -439,7 +436,7 @@ function addWeaponRow(weapon) {
 	let nameInputElem = document.createElement("input");
 	nameInputElem.type = "text";
 	nameInputElem.classList.add("weapon__name");
-	nameInputElem.value = weapon[0];
+	nameInputElem.value = weaponData[0];
 	nameInputElem.addEventListener("input", inputEventListener);
 	nameElem.appendChild(nameInputElem);
 	rowElem.appendChild(nameElem);
@@ -449,7 +446,7 @@ function addWeaponRow(weapon) {
 	atkBonusInputElem.type = "text";
 	atkBonusInputElem.pattern = "[\\+\\-]?\\d*";
 	atkBonusInputElem.classList.add("weapon__atkBonus");
-	atkBonusInputElem.value = weapon[1];
+	atkBonusInputElem.value = weaponData[1];
 	atkBonusInputElem.addEventListener("input", inputEventListener);
 	atkBonusElem.appendChild(atkBonusInputElem);
 	rowElem.appendChild(atkBonusElem);
@@ -458,7 +455,7 @@ function addWeaponRow(weapon) {
 	let damageOrTypeInputElem = document.createElement("input");
 	damageOrTypeInputElem.type = "text";
 	damageOrTypeInputElem.classList.add("weapon__damageOrType");
-	damageOrTypeInputElem.value = weapon[2];
+	damageOrTypeInputElem.value = weaponData[2];
 	damageOrTypeInputElem.addEventListener("input", inputEventListener);
 	damageOrTypeElem.appendChild(damageOrTypeInputElem);
 	rowElem.appendChild(damageOrTypeElem);
@@ -467,6 +464,7 @@ function addWeaponRow(weapon) {
 };
 
 function autosaveCharacterSheet() {
+	if (JSON.stringify(characterSheetData) == JSON.stringify(emptyCharacterSheetData)) return;
 	characterSheetData["lastAutosave"] = Date.now();
 	localStorage.setItem(characterSheetId, JSON.stringify(characterSheetData));
 };
@@ -475,7 +473,7 @@ function updateDataValueAndInput(id, value) {
 	characterSheetData[id] = value;
 	autosaveCharacterSheet();
 
-	const elem = document.getElementById(id);
+	let elem = document.getElementById(id);
 
 	if (elem.id == "lastAutosave") {
 		let datetimeString = new Date(value).toLocaleString("en-gb").slice(0, -3);
@@ -488,8 +486,7 @@ function updateDataValueAndInput(id, value) {
 		elem.checked = value
 	else if (elem.id == "weapons") {
 		document.getElementById("weapons").innerHTML = "";
-		for (const weapon of value)
-			addWeaponRow(weapon)
+		value.forEach(weaponData => addWeaponRow(weaponData));
 	} else {
 		if (["doubleCheckbox", "tripleCheckbox"].includes(elem.name))
 			elem.setAttribute("value", value)
@@ -533,52 +530,42 @@ function updateSkillModifier(skillName) {
 
 function updateAbilityDependentModifiers(abilityName) {
 	updateSavingThrowModifier(abilityName);
-	for (const skillName of skillsForAbilities[abilityName]) {
-		updateSkillModifier(skillName)
-	};
+	skillsForAbilities[abilityName].forEach(skillName => updateSkillModifier(skillName));
 };
 
 function updateProficiencyDependentModifiers() {
-	for (const [abilityName, skillNames] of Object.entries(skillsForAbilities)) {
+	Object.entries(skillsForAbilities).forEach(([abilityName, skillNames]) => {
 		updateSavingThrowModifier(abilityName);
-		for (const skillName of skillNames) {
-			updateSkillModifier(skillName);
-		};
-	};
+		skillNames.forEach(skillName => updateSkillModifier(skillName))
+	});
 };
 
 function updateAbilityModifier(abilityName) {
 	updateDataValueAndInput(
 		abilityName + "AbilityModifier",
-		getAbilityModifierForScore(characterSheetData[abilityName + "AbilityScore"])
+		Math.floor((characterSheetData[abilityName + "AbilityScore"] - 10) / 2)
 	);
 	updateAbilityDependentModifiers(abilityName);
 };
 
 // -- Details
 
-function showDetailInfo(detailName, detailUrlName) {
-	showModal({
-		"templateString": modalTemplateStrings["detailInfo"],
-		"message": searchedDetails[detailUrlName]["description"],
-		"heading": detailName,
-		"sourceLink": searchedDetails[detailUrlName]["url"],
-		"sourceText": searchedDetails[detailUrlName]["source"],
-		"prerequisites": searchedDetails[detailUrlName]["prerequisites"]
-	})
-};
-
 function addDetailButtonIfNotExist(detailName, detailUrlName) {
-	if (document.getElementById("detailButton-" + detailUrlName))
-		return
+	if (document.getElementById("detailButton-" + detailUrlName)) return;
 
 	let detailButtonElem = document.createElement("div");
 	detailButtonElem.id = "detailButton-" + detailUrlName;
-	detailButtonElem.classList.add("featuresAndTraits__detailButton")
-	detailButtonElem.classList.add("primaryButton")
+	detailButtonElem.classList.add("featuresAndTraits__detailButton", "primaryButton");
 	detailButtonElem.addEventListener("click", evt => {
-		if (evt.target.tagName != "I")
-			showDetailInfo(detailName, detailUrlName);
+		if (evt.target.tagName == "I") return;
+		showModal({
+			"templateString": modalTemplateStrings["detailInfo"],
+			"message": searchedDetails[detailUrlName]["description"],
+			"heading": detailName,
+			"sourceLink": searchedDetails[detailUrlName]["url"],
+			"sourceText": searchedDetails[detailUrlName]["source"],
+			"prerequisites": searchedDetails[detailUrlName]["prerequisites"]
+		});
 	});
 
 	let detailButtonTextElem = document.createElement("span");
@@ -586,8 +573,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 	detailButtonElem.appendChild(detailButtonTextElem);
 
 	let detailButtonCloseElem = document.createElement("i");
-	detailButtonCloseElem.classList.add("fas")
-	detailButtonCloseElem.classList.add("fa-close")
+	detailButtonCloseElem.classList.add("fas", "fa-close");
 	detailButtonCloseElem.addEventListener("click", _ => detailButtonElem.remove());
 	detailButtonElem.appendChild(detailButtonCloseElem);
 
@@ -595,7 +581,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 }
 
 const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
-	detailName = getTitleCase(detailName);
+	detailName = detailName.toSmartTitleCase();
 	let detailUrlName = getDetailUrlNameForDetailName(detailName);
 
 	let classUrlName = "";
@@ -606,36 +592,34 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 			document.getElementById("classAndLevel").value.match(/^\S*/)[0]
 		);
 	} else if (detailTypes.includes("Race")) {
-		mainRaceName = getTitleCase(detailName.match(/\S*$/g)[0]);
+		mainRaceName = detailName.match(/\S*$/g)[0].toSmartTitleCase();
 		mainRaceUrlName = getDetailUrlNameForDetailName(mainRaceName);
 	};
 
 	if (detailUrlName in searchedDetails) {
 		if (Object.keys(searchedDetails[detailUrlName]).length)
 			addDetailButtonIfNotExist(detailName, detailUrlName);
-		return
+		return;
 	};
 	searchedDetails[detailUrlName] = {};
 
 	let checkedUrls = [];
-	for (const detailType of detailTypes) {
-		if ((detailType == "Subclass") && !classUrlName)
-			continue;
+	for (let detailType of detailTypes) {
+		if ((detailType == "Subclass") && !classUrlName) continue;
 
 		let urls = [];
 		for (let urlPathname of pathnamesForDetailType[detailType]) {
-			for (const variable of urlPathname.matchAll(/\((.*?)\)/g)) {
+			for (let variable of urlPathname.matchAll(/\((.*?)\)/g)) {
 				let variableValue = eval(variable[1]);
 				urlPathname = urlPathname.replace(variable[0], variableValue);
 			};
 			let url = "http://dnd5e.wikidot.com/" + urlPathname;
-			if (checkedUrls.includes(url))
-				continue;
+			if (checkedUrls.includes(url)) continue;
 			urls.push(url);
 			checkedUrls.push(url);
 		};
 
-		for (const url of urls) {
+		for (let url of urls) {
 			await fetch(CORS_PROXY + url)
 				.then((response) => {
 					if (response.status == 200) return response.text();
@@ -646,11 +630,10 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 
 					let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
-					let tableOfContentElem = contentElem.querySelector("#toc");
-					if (tableOfContentElem) tableOfContentElem.remove();
+					contentElem.querySelector("#toc")?.remove();
 
 					let source = "";
-					for (const elem of contentElem.getElementsByTagName("p")) {
+					for (let elem of contentElem.getElementsByTagName("p")) {
 						if (!(elem.innerText.startsWith("Source: "))) continue;
 						source = elem.innerText.substring("Source: ".length);
 						elem.remove()
@@ -666,35 +649,27 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 						let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
 						let wholeRaceName = detailName.trim().toLowerCase();
 						let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
-						if (subraceRowElem) {
-							for (const rowElem of rowElems) {
-								if (rowElem != subraceRowElem)
-									rowElem.remove();
-							};
-						} else {
+						if (subraceRowElem)
+							rowElems.forEach(rowElem => { if (rowElem != subraceRowElem) rowElem.remove() });
+						else {
 							detailName = mainRaceName;
 							detailUrlName = mainRaceUrlName;
-						}
+						};
 					};
 
 					for (let i = 1; i <= 3; i++) {
-						for (const elem of contentElem.getElementsByTagName("h" + i)) {
+						for (let elem of contentElem.getElementsByTagName("h" + i))
 							elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
-						};
 					};
-					for (const elem of contentElem.getElementsByTagName("a")) {
+					for (let elem of contentElem.getElementsByTagName("a"))
 						elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
-					};
-					for (const elem of contentElem.getElementsByTagName("li")) {
+					for (let elem of contentElem.getElementsByTagName("li"))
 						elem.innerText = "* " + elem.innerText.trim();
-					};
-					for (const elem of contentElem.getElementsByClassName("hover")) {
+					for (let elem of contentElem.getElementsByClassName("hover"))
 						elem.firstElementChild.innerText = " (" + elem.firstElementChild.innerText.toLowerCase() + ")";
-					};
-					for (const elem of contentElem.getElementsByTagName("table")) {
+					for (let elem of contentElem.getElementsByTagName("table")) {
 						let rows = elem.rows;
-						if (elem.rows[0].cells.length == 1)
-							elem.rows[0].remove()
+						if (elem.rows[0].cells.length == 1) elem.rows[0].remove()
 
 						elem.innerText = [...rows].map(row => {
 							return "| " + [...row.cells].map(cell => {
@@ -722,31 +697,23 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 
 function checkForDetail(text, detailTypes) {
 	let detailTypesForRegexString = {};
+
 	if (detailTypes.includes("Class"))
 		detailTypesForRegexString["/^(\\w+)/g"] = ["Class"];
-	if (detailTypes.includes("Background") || detailTypes.includes("Race")) {
-		const regexString = "/\\s*(.+)\\s*/g";
-		detailTypesForRegexString[regexString] = [];
-		for (const type of ["Background", "Race"]) {
-			if (detailTypes.includes(type))
-				detailTypesForRegexString[regexString].push(type);
-		};
-	} if (detailTypes.includes("Feat") || detailTypes.includes("Subclass")) {
-		const regexString = "/^\\s*([\\w\(\)][\\w \(\)]*)(:| - )\\s*$/gm";
-		detailTypesForRegexString[regexString] = [];
-		for (const type of ["Feat", "Subclass"]) {
-			if (detailTypes.includes(type))
-				detailTypesForRegexString[regexString].push(type);
-		};
-	};
 
-	for (const [regexString, types] of Object.entries(detailTypesForRegexString)) {
-		for (const detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
-			const detailName = detail[1].trim();
+	if (detailTypes.includes("Background") || detailTypes.includes("Race"))
+		detailTypesForRegexString["/\\s*(.+)\\s*/g"] = ["Background", "Race"].filter(item => detailTypes.includes(item));
+
+	if (detailTypes.includes("Feat") || detailTypes.includes("Subclass"))
+		detailTypesForRegexString["/^\\s*([\\w\(\)][\\w \(\)]*)(:| - )\\s*$/gm"] = ["Feat", "Subclass"].filter(item => detailTypes.includes(item));
+
+	Object.entries(detailTypesForRegexString).forEach(([regexString, types]) => {
+		for (let detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
+			let detailName = detail[1].trim();
 			if (!detailName) continue;
 			searchAndAddDetail(detailName, types);
 		};
-	};
+	});
 };
 
 // -- Rolls
@@ -764,17 +731,11 @@ function roll(expression) {
 
 	let output = ["Roll: " + expression];
 	expression = expression.replaceAll(/(\d*)d(\d+)/g, (_, p1, p2) => {
-		if (p1 == "")
-			p1 = 1
-
 		let rolls = [];
-		for (let i = 0; i < p1; i++) {
-			rolls.push(rollDie(p2));
-		};
-		return rolls.join("+");
+		for (let i = 0; i < (p1 || 1); i++) rolls.push(rollDie(p2));
+		return rolls.length ? rolls.join("+") : [0];
 	});
-	if (expression.includes(" "))
-		output.push("Roll: " + expression);
+	if (expression.includes(" ")) output.push("Roll: " + expression);
 	output.push("Total: " + eval(expression));
 	alert(output.join("\n"), "Roll")
 };
@@ -782,14 +743,14 @@ function roll(expression) {
 // Event Listeners
 
 function inputEventListener(evt) {
-	const elem = evt.target;
+	let elem = evt.target;
 	if (!elem.validity.valid) return
 
 	if (elem.className.startsWith("weapon__")) {
-		const cellElem = elem.parentElement;
-		const rowElem = cellElem.parentElement;
-		const cellIndex = [...rowElem.children].indexOf(cellElem);
-		const tbodyElem = rowElem.parentElement;
+		let cellElem = elem.parentElement;
+		let rowElem = cellElem.parentElement;
+		let cellIndex = [...rowElem.children].indexOf(cellElem);
+		let tbodyElem = rowElem.parentElement;
 
 		characterSheetData["weapons"][[...tbodyElem.children].indexOf(rowElem)][cellIndex] = elem.value;
 		if (characterSheetData["weapons"].at(-1).join("")) {
@@ -834,14 +795,13 @@ function inputEventListener(evt) {
 		updateAbilityDependentModifiers(elem.id.substring(0, elem.id.length - "AbilityModifier".length));
 };
 
-for (const elem of document.querySelectorAll("input,textarea")) {
-	if (elem.id)
-		elem.addEventListener("input", inputEventListener);
-};
+document.querySelectorAll("input,textarea").forEach(elem => {
+	if (elem.id) elem.addEventListener("input", inputEventListener);
+});
 document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 	elem.addEventListener("click", _ => {
-		const inputElem = elem.previousElementSibling;
-		const newValue = (inputElem.value + 1) % 3;
+		let inputElem = elem.previousElementSibling;
+		let newValue = (inputElem.value + 1) % 3;
 		inputElem.setAttribute("value", newValue);
 		inputElem.value = newValue;
 		characterSheetData[inputElem.id] = newValue;
@@ -860,9 +820,8 @@ document.querySelectorAll("[name='doubleCheckbox'] + label").forEach(elem => {
 document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, index) => {
 	elem.addEventListener("click", _ => {
 		let inputElem = elem.previousElementSibling;
-		for (let i = 0; i < (index % 3); i++) {
+		for (let i = 0; i < (index % 3); i++)
 			inputElem = inputElem.previousElementSibling;
-		};
 
 		let newValue = (index % 3) + 1;
 		newValue = (inputElem.value == newValue) ? 0 : newValue;
@@ -905,4 +864,6 @@ showModal({
 	"message": "This is an online digital character sheet that can be used for games such as DnD.\n\nYou can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether.",
 	"heading": "Welcome",
 	"icon": "fa-dice-d20"
+}).then(_ => {
+	Object.entries(characterSheetData).forEach(([key, value]) => updateDataValueAndInput(key, value))
 });

@@ -30,6 +30,7 @@
     margin: 0em;
     box-sizing: border-box;
     padding: 0em;
+	font-family: inherit;
 }
 body {
 	position: relative;
@@ -112,6 +113,12 @@ header > * {
 	gap: 0.25em;
 	text-align: center;
 }
+#race::-webkit-contacts-auto-fill-button {
+	width: 0em;
+	height: 0em;
+	margin: 0em;
+	pointer-events: none;
+}
 
 /* -- Footer */
 
@@ -125,9 +132,12 @@ footer {
 footer div {
 	display: flex;
 	flex-direction: column;
-	justify-content: space-around;
+	justify-content: center;
 	align-items: center;
-	height: 4.25em;
+	height: 3.75em;
+}
+footer div:has(span:not(:empty)) {
+	justify-content: space-between;
 }
 footer span:empty {
 	display: none;
@@ -208,7 +218,6 @@ footer i {
 }
 #modal__message {
 	overflow: auto;
-	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 0.5em;
@@ -233,6 +242,9 @@ footer i {
 	flex-direction: column;
 	gap: 0.3em;
 	font-size: 1.1em;
+}
+.modal__characterSheetButton * {
+	pointer-events: none;
 }
 .modal__characterName {
 	font-weight: bold;
