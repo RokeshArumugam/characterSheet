@@ -52,7 +52,7 @@ const modalTemplates = {
 			<i id="modal__icon" class="fas"></i>
 			<span id="modal__heading">Alert</span>
 			<div id="modal__message" data-heading="Welcome to Character Sheet!"></div>
-			<input id="modal__characterSheetFileInput" type="file">
+			<input id="modal__characterSheetFileInput" type="file" accept=".characterSheet">
 			<ul id="modal__characterSheetList"></ul>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Start a New Character</button>
@@ -273,14 +273,19 @@ function showModal(options) {
 				});
 				break;
 			case modalTemplates["welcome"]:
-				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", evt => {
+				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", inputEvt => {
 					let reader = new FileReader();
-					reader.addEventListener("load", evt => {
-						characterSheetData = JSON.parse(evt.target.result);
-						evt.target.parentElement.close();
-						resolve(null);
+					reader.addEventListener("load", loadEvt => {
+						try {
+							characterSheetData = JSON.parse(loadEvt.target.result);
+							inputEvt.target.parentElement.close();
+							resolve(null);
+						} catch (error) {
+							inputEvt.target.setCustomValidity("File contents are invalid");
+							inputEvt.target.reportValidity();
+						};
 					});
-					reader.readAsText(evt.target.files[0]);
+					reader.readAsText(inputEvt.target.files[0]);
 				});
 
 				let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
@@ -852,7 +857,7 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 			"href",
 			"data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(characterSheetData))
 		);
-		linkElem.setAttribute("download", "Character Sheet (" + characterSheetData["characterName"] + ")" + ".json");
+		linkElem.setAttribute("download", characterSheetData["characterName"] + ".characterSheet");
 		linkElem.click();
 	});
 });
@@ -868,7 +873,7 @@ document.addEventListener("keydown", evt => {
 		evt.preventDefault();
 		button = document.getElementsByClassName("donationButton")[0];
 	};
-	if (document.getElementsByTagName("dialog")[0]) return
+	if (document.getElementById("modal")) return
 	button?.click();
 });
 

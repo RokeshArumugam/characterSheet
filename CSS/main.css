@@ -395,6 +395,9 @@ input, input[type="file"]::file-selector-button, textarea, input[type="checkbox"
 	&:focus-visible {
 		border-color: var(--primary-color);
 	}
+	&:invalid {
+		border-color: var(--danger-color);
+	}
 }
 input, textarea, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
 	background-color: var(--background-color);
