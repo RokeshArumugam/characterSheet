@@ -396,16 +396,6 @@ String.prototype.toSmartTitleCase = function () {
 	);
 }
 
-function debounce(callback, delay = 1000) {
-	let timeout;
-	return (...args) => {
-		clearTimeout(timeout);
-		timeout = setTimeout(() => {
-			callback(...args);
-		}, delay);
-	};
-};
-
 function getDetailUrlNameForDetailName(detailName) {
 	return detailName.toLowerCase().replace(/[\(\)]/g, "").replaceAll(" ", "-")
 };
@@ -501,16 +491,16 @@ function updateDataValueAndInput(id, value) {
 	};
 	switch (id) {
 		case "classAndLevel":
-			checkForDetail(value, ["Class"]);
+			checkForDetail(id, ["Class"]);
 			break;
 		case "background":
-			checkForDetail(value, ["Background"]);
+			checkForDetail(id, ["Background"]);
 			break;
 		case "race":
-			checkForDetail(value, ["Race"]);
+			checkForDetail(id, ["Race"]);
 			break;
 		case "featuresAndTraits":
-			checkForDetail(value, ["Subclass", "Feat"]);
+			checkForDetail(id, ["Subclass", "Feat"]);
 			break;
 		default:
 			break;
@@ -585,7 +575,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 	document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0].appendChild(detailButtonElem);
 }
 
-const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
+async function searchAndAddDetail(detailName, detailTypes) {
 	detailName = detailName.toSmartTitleCase();
 	let detailUrlName = getDetailUrlNameForDetailName(detailName);
 
@@ -698,28 +688,37 @@ const searchAndAddDetail = debounce(async (detailName, detailTypes) => {
 			if (Object.keys(searchedDetails[detailUrlName]).length) return;
 		};
 	};
-});
-
-function checkForDetail(text, detailTypes) {
-	let detailTypesForRegexString = {};
-
-	if (detailTypes.includes("Class"))
-		detailTypesForRegexString["/^(\\w+)/g"] = ["Class"];
-
-	if (detailTypes.includes("Background") || detailTypes.includes("Race"))
-		detailTypesForRegexString["/\\s*(.+)\\s*/g"] = ["Background", "Race"].filter(item => detailTypes.includes(item));
-
-	if (detailTypes.includes("Feat") || detailTypes.includes("Subclass"))
-		detailTypesForRegexString["/^\\s*([\\w\(\)][\\w \(\)]*)(:| - )\\s*$/gm"] = ["Feat", "Subclass"].filter(item => detailTypes.includes(item));
-
-	Object.entries(detailTypesForRegexString).forEach(([regexString, types]) => {
-		for (let detail of text.matchAll(new RegExp(...regexString.split("/").slice(1)))) {
-			let detailName = detail[1].trim();
-			if (!detailName) continue;
-			searchAndAddDetail(detailName, types);
-		};
-	});
 };
+
+const checkForDetail = (() => {
+	let delay = 1000;
+	let timeouts = {};
+	return (inputId, detailTypes) => {
+		clearTimeout(timeouts[inputId]);
+		timeouts[inputId] = setTimeout(() => {
+			let detailTypesForRegexString = {};
+
+			if (detailTypes.includes("Class"))
+				detailTypesForRegexString["/^(\\w+)/g"] = ["Class"];
+
+			if (detailTypes.includes("Background") || detailTypes.includes("Race"))
+				detailTypesForRegexString["/\\s*(.+)\\s*/g"] = ["Background", "Race"].filter(item => detailTypes.includes(item));
+
+			if (detailTypes.includes("Feat") || detailTypes.includes("Subclass"))
+				detailTypesForRegexString["/^\\s*([\\w\(\)][\\w \(\)]*)(:| - )\\s*$/gm"] = ["Feat", "Subclass"].filter(item => detailTypes.includes(item));
+
+			Object.entries(detailTypesForRegexString).forEach(([regexString, types]) => {
+				for (
+					let detail of document.getElementById(inputId).value.matchAll(new RegExp(...regexString.split("/").slice(1)))
+				) {
+					let detailName = detail[1].trim();
+					if (!detailName) continue;
+					searchAndAddDetail(detailName, types);
+				};
+			});
+		}, delay);
+	};
+})();
 
 // -- Rolls
 
@@ -760,7 +759,7 @@ function inputEventListener(evt) {
 		characterSheetData["weapons"][[...tbodyElem.children].indexOf(rowElem)][cellIndex] = elem.value;
 		if (characterSheetData["weapons"].at(-1).join("")) {
 			characterSheetData["weapons"].push(["", "", ""]);
-			addWeaponRow(["", "", ""]);
+			addWeaponRow(characterSheetData["weapons"].at(-1));
 		};
 
 		while ((characterSheetData["weapons"].length > minimumWeaponRows) && !(characterSheetData["weapons"].at(-2).join(""))) {
@@ -776,19 +775,19 @@ function inputEventListener(evt) {
 
 	switch (elem.id) {
 		case "classAndLevel":
-			checkForDetail(elem.value, ["Class"]);
+			checkForDetail(elem.id, ["Class"]);
 			break;
 		case "background":
-			checkForDetail(elem.value, ["Background"]);
+			checkForDetail(elem.id, ["Background"]);
 			break;
 		case "race":
-			checkForDetail(elem.value, ["Race"]);
+			checkForDetail(elem.id, ["Race"]);
 			break;
 		case "proficiencyBonus":
 			updateProficiencyDependentModifiers();
 			break;
 		case "featuresAndTraits":
-			checkForDetail(elem.value, ["Subclass", "Feat"]);
+			checkForDetail(elem.id, ["Subclass", "Feat"]);
 			break;
 		default:
 			break;
