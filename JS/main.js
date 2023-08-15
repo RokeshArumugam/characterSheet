@@ -856,6 +856,21 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 		linkElem.click();
 	});
 });
+document.addEventListener("keydown", evt => {
+	let button;
+	if ((evt.ctrlKey || evt.metaKey) && evt.key == "s") {
+		evt.preventDefault();
+		button = document.getElementsByClassName("saveButton")[0];
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "r") {
+		evt.preventDefault();
+		button = document.getElementsByClassName("rollButton")[0];
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "d") {
+		evt.preventDefault();
+		button = document.getElementsByClassName("donationButton")[0];
+	};
+	if (document.getElementsByTagName("dialog")[0]) return
+	button?.click();
+});
 
 // Main
 
