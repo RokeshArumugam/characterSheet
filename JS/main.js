@@ -861,6 +861,19 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 		linkElem.click();
 	});
 });
+document.addEventListener("click", evt => {
+	let modalElem = document.getElementById("modal");
+	if (!modalElem) return;
+
+	let rect = modalElem.getBoundingClientRect();
+	if (
+		evt.clientY < rect.top ||
+		evt.clientY > rect.top + rect.height ||
+		evt.clientX < rect.left ||
+		evt.clientX > rect.left + rect.width
+	)
+		document.dispatchEvent(new KeyboardEvent("keydown", { "key": "Escape" }));;
+});
 document.addEventListener("keydown", evt => {
 	let button;
 	if ((evt.ctrlKey || evt.metaKey) && evt.key == "s") {
