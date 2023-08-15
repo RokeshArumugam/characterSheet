@@ -10,6 +10,8 @@ const modalTypes = {
 	Warning: "fa-exclamation-triangle",
 	Error: "fa-times-circle",
 	Prompt: "fa-question-circle",
+	Save: "fa-floppy-disk",
+	Welcome: "fa-dice-d20",
 	Donation: "fa-heart"
 };
 const alertTemplateString = `
@@ -46,6 +48,29 @@ const showInfoTemplateString = `
 		</div>
 	</dialog>
 `;
+const showSaveTemplateString = `
+	<dialog id="modal" role="alertdialog">
+		<i id="modal__icon" class="fas"></i>
+		<span id="modal__heading">Alert</span>
+		<div id="modal__message"></div>
+		<div id="modal__buttonContainer">
+			<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
+			<button id="modal__button--download" class="modal__button primaryButton">Download</button>
+		</div>
+	</dialog>
+`;
+const showWelcomeTemplateString = `
+	<dialog id="modal" role="alertdialog">
+		<i id="modal__icon" class="fas"></i>
+		<span id="modal__heading">Alert</span>
+		<div id="modal__message" data-heading="Welcome to Character Sheet!"></div>
+		<input id="modal__characterSheetFileInput" type="file">
+		<ul id="modal__characterSheetList"></ul>
+		<div id="modal__buttonContainer">
+			<button class="modal__button primaryButton">Start a New Character</button>
+		</div>
+	</dialog>
+`;
 
 const pathnamesForDetailType = {
 	"Class": ["(detailUrlName)"],
@@ -65,6 +90,10 @@ const skillsForAbilities = {
 }
 
 const minimumWeaponRows = 3;
+let existingCharacterSheetIds = Object.keys(localStorage);
+let characterSheetId;
+do characterSheetId = String(Math.random());
+while (existingCharacterSheetIds.includes(characterSheetId));
 let characterSheetData = {
 	"characterName": "",
 	"classAndLevel": "",
@@ -325,6 +354,109 @@ window.showInfo = (message, heading = "Information", sourceLink, sourceText, pre
 		modalElem.showModal();
 	});
 };
+window.showSave = (message, heading = "Save") => {
+	return new Promise((resolve, reject) => {
+		let modalElem = createModal(showSaveTemplateString, message, modalTypes.Save, heading);
+		modalElem.querySelector("#modal__button--download").addEventListener("click", () => {
+			modalElem.close();
+			resolve(true);
+		});
+		modalElem.querySelector("#modal__button--cancel").addEventListener("click", () => {
+			modalElem.close();
+			resolve(null);
+		});
+		modalElem.addEventListener("cancel", () => resolve(null));
+		document.body.appendChild(modalElem);
+		modalElem.showModal();
+	})
+};
+window.showWelcome = (message, heading = "Welcome") => {
+	return new Promise((resolve, reject) => {
+		let modalElem = createModal(showWelcomeTemplateString, message, modalTypes.Welcome, heading);
+
+		modalElem.querySelector("#modal__characterSheetFileInput").addEventListener("input", (evt) => {
+			let reader = new FileReader();
+			reader.addEventListener("load", evt => {
+				for (let [key, value] of Object.entries(JSON.parse(evt.target.result)))
+					updateDataValueAndInput(key, value);
+				modalElem.close();
+				resolve(null);
+			});
+			reader.readAsText(evt.target.files[0]);
+		});
+
+		let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
+		let characterSheetListElem = modalElem.querySelector("#modal__characterSheetList");
+		for (
+			let [existingCharacterSheetId, existingCharacterSheetData] of existingCharacterSheetIds.map(
+				id => [id, JSON.parse(localStorage.getItem(id))]
+			).sort((a, b) => b[1]["lastSaved"] - a[1]["lastSaved"])
+		) {
+			let liElem = document.createElement("li");
+			liElem.classList.add("modal__characterSheet");
+
+			let buttonElem = document.createElement("div");
+			buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
+			buttonElem.addEventListener("click", () => {
+				characterSheetId = existingCharacterSheetId;
+				for (let [key, value] of Object.entries(existingCharacterSheetData))
+					updateDataValueAndInput(key, value);
+				modalElem.close()
+				resolve(null);
+			});
+			liElem.appendChild(buttonElem);
+
+			let nameElem = document.createElement("span");
+			nameElem.classList.add("modal__characterName");
+			nameElem.innerText = existingCharacterSheetData["characterName"] || "Unamed character";
+			buttonElem.appendChild(nameElem);
+
+			let descriptionElem = document.createElement("span");
+			descriptionElem.classList.add("modal__characterDescription");
+			descriptionElem.innerText = (existingCharacterSheetData["race"] || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"] || "<unknown class and level>");
+			buttonElem.appendChild(descriptionElem);
+
+			let metadataElem = document.createElement("div");
+			metadataElem.classList.add("modal__characterSheetMetadata");
+
+			let timestampElem = document.createElement("span");
+			timestampElem.classList.add("modal__characterSheetLastSave");
+			timestampElem.innerText = "Last saved "
+
+			let seconds = Math.round((Date.now() - existingCharacterSheetData["lastAutosave"]) / 1000);
+			if (seconds < 60)
+				timestampElem.innerText += timeFormatter.format(-seconds, "seconds");
+			else if (seconds < (60 * 60))
+				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60), "minutes");
+			else if (seconds < (60 * 60 * 24))
+				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60), "hours");
+			else if (seconds < (60 * 60 * 24 * 30.5))
+				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24), "days");
+			else
+				timestampElem.innerText += timeFormatter.format(-Math.round(seconds / 60 / 60 / 24 / 30.5), "months");
+			metadataElem.appendChild(timestampElem);
+
+			let deleteElem = document.createElement("i");
+			deleteElem.classList.add("fas", "fa-trash-can", "modal__characterSheetDelete")
+			deleteElem.addEventListener("click", evt => {
+				evt.target.parentElement.parentElement.remove();
+				localStorage.removeItem(existingCharacterSheetId);
+			});
+			metadataElem.appendChild(deleteElem);
+
+			liElem.appendChild(metadataElem);
+			characterSheetListElem.appendChild(liElem);
+		};
+
+		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", () => {
+			modalElem.close();
+			resolve(null);
+		});
+		modalElem.addEventListener("cancel", () => resolve(null));
+		document.body.appendChild(modalElem);
+		modalElem.showModal();
+	})
+};
 
 // Main Functions
 
@@ -367,12 +499,25 @@ function addWeaponRow(weapon) {
 	weaponsElem.appendChild(rowElem)
 };
 
+function autosaveCharacterSheet() {
+	characterSheetData["lastAutosave"] = Date.now();
+	localStorage.setItem(characterSheetId, JSON.stringify(characterSheetData));
+};
+
 function updateDataValueAndInput(id, value) {
 	characterSheetData[id] = value;
+	autosaveCharacterSheet();
 
 	const elem = document.getElementById(id);
 
-	if (elem.type == "checkbox")
+	if (elem.id == "lastAutosave") {
+		let datetimeString = new Date(value).toLocaleString("en-gb").slice(0, -3);
+		if (datetimeString.slice(0, 10) == new Date().toLocaleString("en-gb").slice(0, 10))
+			datetimeString = datetimeString.slice(12)
+		else
+			datetimeString = datetimeString.slice(0, 6) + datetimeString.slice(8)
+		elem.innerText = "Last autosave: " + datetimeString;
+	} else if (elem.type == "checkbox")
 		elem.checked = value
 	else if (elem.id == "weapons") {
 		document.getElementById("weapons").innerHTML = "";
@@ -401,20 +546,6 @@ function updateDataValueAndInput(id, value) {
 		default:
 			break;
 	}
-};
-
-function importDataFromUrl() {
-	const keys = Object.keys(characterSheetData);
-	let values = Object.values(characterSheetData);
-	if (currentUrlParams.has("values"))
-		values = JSON.parse(atob(currentUrlParams.get("values")));
-	for (let i = 0; i < values.length; i++) {
-		updateDataValueAndInput(keys[i], values[i]);
-	};
-};
-
-function exportDataToUrl() {
-	return window.location.origin + window.location.pathname + "?values=" + btoa(JSON.stringify(Object.values(characterSheetData)));
 };
 
 // -- Updating Modifiers
@@ -707,6 +838,7 @@ function inputEventListener(evt) {
 		characterSheetData[elem.id] = elem.checked;
 	else
 		characterSheetData[elem.id] = (typeof characterSheetData[elem.id] == "number") ? Number(elem.value) : elem.value;
+	autosaveCharacterSheet();
 
 	switch (elem.id) {
 		case "classAndLevel":
@@ -781,17 +913,23 @@ document.getElementsByClassName("donationButton")[0].addEventListener("click", _
 	);
 });
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
-	const url = exportDataToUrl();
-	navigator.clipboard.writeText(url);
-	alert(
-		"After you click 'Close', the data in this tab will be saved so as long as you don't close the tab you can come back to this character sheet later.\n\nYou can also use this link (which has been copied) to access a character sheet with these values:\n[" + url + "](" + url + ")",
-		modalTypes.Success,
-		'Link Copied!'
-	).then(_ => {
-		window.location.replace(url);
+	showSave(
+		"You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet is also automatically saved in your browser so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
+		"Saving This Character Sheet"
+	).then(response => {
+		if (!response) return;
+		let linkElem = document.createElement("a");
+		linkElem.setAttribute(
+			"href",
+			"data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(characterSheetData))
+		);
+		linkElem.setAttribute("download", "Character Sheet (" + characterSheetData["characterName"] + ")" + ".json");
+		linkElem.click();
 	});
 });
 
 // Main
 
-importDataFromUrl();
+showWelcome(
+	"This is an online digital character sheet that can be used for games such as DnD.\n\nYou can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether."
+);

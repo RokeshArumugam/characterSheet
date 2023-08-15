@@ -122,8 +122,15 @@ footer {
 	border-top: var(--border);
 	padding-bottom: max(1em, env(safe-area-inset-bottom));
 }
-footer span {
-	font-size: 1.2em;
+footer div {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	height: 4.25em;
+}
+footer span:empty {
+	display: none;
 }
 footer i {
 	font-size: 2.5em;
@@ -159,8 +166,6 @@ footer i {
 	display: grid;
 	place-items: center;
 	font-size: 4.5em;
-}
-#modal__icon.fa-info-circle, #modal__icon.fa-question-circle {
 	color: var(--primary-color)
 }
 #modal__icon.fa-check-circle {
@@ -203,6 +208,7 @@ footer i {
 }
 #modal__message {
 	overflow: auto;
+	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 0.5em;
@@ -211,7 +217,45 @@ footer i {
 #modal__message::before {
 	content: attr(data-heading);
 }
-#modal h2, #modal__box h3, #modal__box h4 {
+#modal #modal__characterSheetList {
+	overflow: auto;
+	gap: 1em;
+}
+.modal__characterSheet {
+	list-style-type: none;
+	align-self: flex-start;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+.modal__characterSheetButton {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3em;
+	font-size: 1.1em;
+}
+.modal__characterName {
+	font-weight: bold;
+	letter-spacing: 0.1ch;
+	font-size: 1.25em;
+}
+.modal__characterSheetMetadata {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.5em;
+}
+.modal__characterSheetLastSave {
+	opacity: 0.8;
+}
+.modal__characterSheetDelete {
+	cursor: pointer;
+	font-size: 0.925em;
+	color: var(--danger-color);
+	font-size: 1.3em;
+}
+#modal :is(h2, h3, h4) {
 	margin-top: 1em;
 }
 #modal p {
@@ -324,23 +368,37 @@ a:visited {
 
 /* Inputs */
 
-input, textarea, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
+input, input[type="file"]::file-selector-button, textarea, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
 	border: var(--border-thickness) solid var(--border-color-input);
 	border-radius: var(--border-radius);
 	outline: none;
 	width: 100%;
 	padding: 0.25em 0.5em;
-	background-color: var(--background-color);
 	font-size: 1em;
-	color: var(--on-background-color);
 	appearance: none;
 	resize: none;
+}
+input, textarea, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
+	background-color: var(--background-color);
+	color: var(--on-background-color);
 }
 input, input[type="checkbox"] + label, input[name="doubleCheckbox"] + label, input[name="tripleCheckbox"] ~ label {
 	text-align: center;
 }
 label[for] {
 	cursor: pointer;
+}
+
+/* -- File */
+
+input[type="file"] {
+	cursor: pointer;
+}
+input[type="file"]::file-selector-button {
+	width: auto;
+	cursor: pointer;
+	background-color: var(--primary-color);
+	color: var(--on-primary-color);
 }
 
 /* -- Number */
