@@ -226,25 +226,27 @@ footer i {
 #modal__message::before {
 	content: attr(data-heading);
 }
-#modal #modal__characterSheetList {
+#modal__characterSheetsContainer {
 	overflow: auto;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(34ch, 1fr));
+	place-items: center;
 	gap: 1em;
+	min-height: 7.5em;
 	padding: 0.5em;
 }
-#modal #modal__characterSheetList:empty::before {
+#modal__characterSheetsContainer:empty::before {
 	content: "No previous character sheets found on this device";
-	margin: auto;
 	opacity: 0.5;
 	font-size: 1.3em;
 	font-weight: bold;
 	text-align: center;
 }
 .modal__characterSheet {
-	list-style-type: none;
-	align-self: flex-start;
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
+	width: fit-content;
 }
 #modal .modal__characterSheetButton {
 	display: grid;

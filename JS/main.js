@@ -51,9 +51,9 @@ const modalTemplates = {
 		<dialog id="modal" role="alertdialog">
 			<i id="modal__icon" class="fas"></i>
 			<span id="modal__heading">Alert</span>
-			<div id="modal__message" data-heading="Welcome to Character Sheet!"></div>
+			<div id="modal__message"></div>
 			<input id="modal__characterSheetFileInput" type="file" accept=".characterSheet">
-			<ul id="modal__characterSheetList"></ul>
+			<div id="modal__characterSheetsContainer"></div>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Start a New Character</button>
 			</div>
@@ -289,14 +289,14 @@ function showModal(options) {
 				});
 
 				let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
-				let characterSheetListElem = modalElem.getElementById("modal__characterSheetList");
+				let characterSheetListElem = modalElem.getElementById("modal__characterSheetsContainer");
 				existingCharacterSheetIds.map(
 					id => [id, JSON.parse(localStorage.getItem(id))]
 				).sort(
 					(a, b) => b[1]["lastAutosave"] - a[1]["lastAutosave"]
 				).forEach(([existingCharacterSheetId, existingCharacterSheetData]) => {
-					let liElem = document.createElement("li");
-					liElem.classList.add("modal__characterSheet");
+					let characterSheetElem = document.createElement("div");
+					characterSheetElem.classList.add("modal__characterSheet");
 
 					let buttonElem = document.createElement("div");
 					buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
@@ -310,7 +310,7 @@ function showModal(options) {
 						parentElement.close()
 						resolve(null);
 					});
-					liElem.appendChild(buttonElem);
+					characterSheetElem.appendChild(buttonElem);
 
 					let nameElem = document.createElement("span");
 					nameElem.classList.add("modal__characterName");
@@ -350,9 +350,8 @@ function showModal(options) {
 						);
 						break;
 					};
-					liElem.appendChild(timestampElem);
-
-					characterSheetListElem.appendChild(liElem);
+					characterSheetElem.appendChild(timestampElem);
+					characterSheetListElem.appendChild(characterSheetElem);
 				});
 				break;
 			default:
@@ -706,7 +705,7 @@ const checkForDetailsInInput = (() => {
 			let regexes = [];
 
 			if (detailTypes.includes("Class"))
-				regexes.push({ "regexObject": /^(\w+)/g, "detailTypes": ["Class"] });
+				regexes.push({ "regexObject": /^\s*([\w\-]+)\s*/g, "detailTypes": ["Class"] });
 
 			if (detailTypes.includes("Background") || detailTypes.includes("Race"))
 				regexes.push(
@@ -843,7 +842,7 @@ document.getElementsByClassName("donationButton")[0].addEventListener("click", _
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
 	showModal({
 		"template": modalTemplates["save"],
-		"message": "You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet is also automatically saved in your browser so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
+		"message": "You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
 		"heading": "Saving This Character Sheet",
 		"icon": "fa-floppy-disk"
 	}).then(response => {
@@ -889,12 +888,16 @@ document.addEventListener("keydown", evt => {
 
 // Main
 
-showModal({
-	"template": modalTemplates["welcome"],
-	"message": "This is an online digital character sheet that can be used for games such as DnD.\n\nYou can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether.",
-	"heading": "Welcome",
-	"icon": "fa-dice-d20"
-}).then(_ => {
-	autosaveCharacterSheet();
-	Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
-});
+fetch("README.md")
+	.then(response => response.text())
+	.then(response => {
+		showModal({
+			"template": modalTemplates["welcome"],
+			"message": response.replace(/^.+\n/, ""),
+			"heading": "Welcome",
+			"icon": "fa-dice-d20"
+		}).then(_ => {
+			autosaveCharacterSheet();
+			Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
+		});
+	})

@@ -1,0 +1,14 @@
+# Character Sheet
+This is a digital character sheet that is heavily inspired by the [D&D 5E character sheet](https://media.wizards.com/2016/dnd/downloads/5E_CharacterSheet_Fillable.pdf) by the Wizards of the Coast.
+
+This character sheet automatically updates ability, saving throw and skill modifiers. It also automatically provides buttons that display information about your class, background, race, feats and subclasses depending on what you type into the sheet.
+
+* Class must be one word (may be hyphenated)
+* Feats and subclasses must be on one line and end with ':' or ' - '
+
+The information is scraped from [http://dnd5e.wikidot.com](http://dnd5e.wikidot.com).
+
+## Loading and Saving
+You can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether.
+
+To save, you can download a copy of this character sheet and upload it the next time you visit this website. Your character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.
