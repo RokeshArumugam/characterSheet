@@ -286,6 +286,7 @@ footer i {
 #modal table {
 	overflow: hidden;
 	margin: auto;
+	margin-bottom: var(--border-thickness);
 	border: var(--border);
 	border-radius: var(--border-radius);
 	border-spacing: 0px;
