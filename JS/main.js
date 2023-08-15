@@ -301,9 +301,13 @@ function showModal(options) {
 					let buttonElem = document.createElement("div");
 					buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
 					buttonElem.addEventListener("click", evt => {
+						if (evt.target.classList.contains("modal__characterSheetDelete")) return;
 						characterSheetId = existingCharacterSheetId;
 						characterSheetData = existingCharacterSheetData;
-						evt.target.parentElement.parentElement.parentElement.close()
+						let parentElement = evt.target;
+						do parentElement = parentElement.parentElement
+						while (parentElement.tagName != "DIALOG");
+						parentElement.close()
 						resolve(null);
 					});
 					liElem.appendChild(buttonElem);
@@ -313,13 +317,18 @@ function showModal(options) {
 					nameElem.innerText = existingCharacterSheetData["characterName"] || "Unamed character";
 					buttonElem.appendChild(nameElem);
 
+					let deleteElem = document.createElement("i");
+					deleteElem.classList.add("fas", "fa-times-circle", "modal__characterSheetDelete")
+					deleteElem.addEventListener("click", evt => {
+						evt.target.parentElement.parentElement.remove();
+						localStorage.removeItem(existingCharacterSheetId);
+					});
+					buttonElem.appendChild(deleteElem);
+
 					let descriptionElem = document.createElement("span");
 					descriptionElem.classList.add("modal__characterDescription");
 					descriptionElem.innerText = (existingCharacterSheetData["race"] || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"] || "<unknown class and level>");
 					buttonElem.appendChild(descriptionElem);
-
-					let metadataElem = document.createElement("div");
-					metadataElem.classList.add("modal__characterSheetMetadata");
 
 					let timestampElem = document.createElement("span");
 					timestampElem.classList.add("modal__characterSheetLastSave");
@@ -341,17 +350,8 @@ function showModal(options) {
 						);
 						break;
 					};
-					metadataElem.appendChild(timestampElem);
+					liElem.appendChild(timestampElem);
 
-					let deleteElem = document.createElement("i");
-					deleteElem.classList.add("fas", "fa-trash-can", "modal__characterSheetDelete")
-					deleteElem.addEventListener("click", evt => {
-						evt.target.parentElement.parentElement.remove();
-						localStorage.removeItem(existingCharacterSheetId);
-					});
-					metadataElem.appendChild(deleteElem);
-
-					liElem.appendChild(metadataElem);
 					characterSheetListElem.appendChild(liElem);
 				});
 				break;
@@ -857,6 +857,7 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 		linkElem.click();
 	});
 });
+
 document.addEventListener("click", evt => {
 	let modalElem = document.getElementById("modal");
 	if (!modalElem || evt.target.tagName != "HTML") return;
