@@ -425,6 +425,13 @@ function autosaveCharacterSheet() {
 	if (JSON.stringify(characterSheetData) == JSON.stringify(emptyCharacterSheetData)) return;
 	characterSheetData["lastAutosave"] = Date.now();
 	localStorage.setItem(characterSheetId, JSON.stringify(characterSheetData));
+
+	let datetimeString = new Date(characterSheetData["lastAutosave"]).toLocaleString("en-gb").slice(0, -3);
+	if (datetimeString.slice(0, 10) == new Date().toLocaleString("en-gb").slice(0, 10))
+		datetimeString = datetimeString.slice(12);
+	else
+		datetimeString = datetimeString.slice(0, 6) + datetimeString.slice(8);
+	document.getElementsByClassName("lastAutosave")[0].innerText = "Last autosave: " + datetimeString;
 };
 
 function addWeaponRow(weaponData) {
@@ -464,20 +471,11 @@ function addWeaponRow(weaponData) {
 	weaponsElem.appendChild(rowElem)
 };
 
-function updateDataValueAndInput(id, value) {
-	characterSheetData[id] = value;
-	autosaveCharacterSheet();
-
+function updateInput(id, value) {
 	let elem = document.getElementById(id);
+	if (!elem) return;
 
-	if (elem.id == "lastAutosave") {
-		let datetimeString = new Date(value).toLocaleString("en-gb").slice(0, -3);
-		if (datetimeString.slice(0, 10) == new Date().toLocaleString("en-gb").slice(0, 10))
-			datetimeString = datetimeString.slice(12)
-		else
-			datetimeString = datetimeString.slice(0, 6) + datetimeString.slice(8)
-		elem.innerText = "Last autosave: " + datetimeString;
-	} else if (elem.type == "checkbox")
+	if (elem.type == "checkbox")
 		elem.checked = value
 	else if (elem.id == "weapons") {
 		document.getElementById("weapons").innerHTML = "";
@@ -489,35 +487,26 @@ function updateDataValueAndInput(id, value) {
 			value = "+" + value;
 		elem.value = value;
 	};
-	switch (id) {
-		case "classAndLevel":
-			checkForDetail(id, ["Class"]);
-			break;
-		case "background":
-			checkForDetail(id, ["Background"]);
-			break;
-		case "race":
-			checkForDetail(id, ["Race"]);
-			break;
-		case "featuresAndTraits":
-			checkForDetail(id, ["Subclass", "Feat"]);
-			break;
-		default:
-			break;
-	}
+	checkForDetailsInInput(id);
+};
+
+function updateCharacterSheetDataAndInput(id, value) {
+	characterSheetData[id] = value;
+	autosaveCharacterSheet();
+	updateInput(id, value);
 };
 
 // -- Updating Modifiers
 
 function updateSavingThrowModifier(abilityName) {
-	updateDataValueAndInput(
+	updateCharacterSheetDataAndInput(
 		abilityName + "SavingThrowModifier",
 		characterSheetData[abilityName + "AbilityModifier"] + (characterSheetData[abilityName + "SavingThrowProficiencyLevel"] * characterSheetData["proficiencyBonus"])
 	);
 };
 
 function updateSkillModifier(skillName) {
-	updateDataValueAndInput(
+	updateCharacterSheetDataAndInput(
 		skillName + "SkillModifier",
 		characterSheetData[Object.keys(skillsForAbilities).filter(key => skillsForAbilities[key].includes(skillName)) + "AbilityModifier"] + (characterSheetData[skillName + "SkillProficiencyLevel"] * characterSheetData["proficiencyBonus"])
 	);
@@ -536,7 +525,7 @@ function updateProficiencyDependentModifiers() {
 };
 
 function updateAbilityModifier(abilityName) {
-	updateDataValueAndInput(
+	updateCharacterSheetDataAndInput(
 		abilityName + "AbilityModifier",
 		Math.floor((characterSheetData[abilityName + "AbilityScore"] - 10) / 2)
 	);
@@ -690,30 +679,56 @@ async function searchAndAddDetail(detailName, detailTypes) {
 	};
 };
 
-const checkForDetail = (() => {
+const checkForDetailsInInput = (() => {
 	let delay = 1000;
 	let timeouts = {};
-	return (inputId, detailTypes) => {
+	return (inputId) => {
 		clearTimeout(timeouts[inputId]);
 		timeouts[inputId] = setTimeout(() => {
-			let detailTypesForRegexString = {};
+			let detailTypes = [];
+			switch (inputId) {
+				case "classAndLevel":
+					detailTypes = ["Class"];
+					break;
+				case "background":
+					detailTypes = ["Background"];
+					break;
+				case "race":
+					detailTypes = ["Race"];
+					break;
+				case "featuresAndTraits":
+					detailTypes = ["Subclass", "Feat"];
+					break;
+				default:
+					break;
+			};
+
+			let regexes = [];
 
 			if (detailTypes.includes("Class"))
-				detailTypesForRegexString["/^(\\w+)/g"] = ["Class"];
+				regexes.push({ "regexObject": /^(\w+)/g, "detailTypes": ["Class"] });
 
 			if (detailTypes.includes("Background") || detailTypes.includes("Race"))
-				detailTypesForRegexString["/\\s*(.+)\\s*/g"] = ["Background", "Race"].filter(item => detailTypes.includes(item));
+				regexes.push(
+					{
+						"regexObject": /\s*(.+)\s*/g,
+						"detailTypes": ["Background", "Race"].filter(item => detailTypes.includes(item))
+					}
+				);
 
 			if (detailTypes.includes("Feat") || detailTypes.includes("Subclass"))
-				detailTypesForRegexString["/^\\s*([\\w\(\)][\\w \(\)]*)(:| - )\\s*$/gm"] = ["Feat", "Subclass"].filter(item => detailTypes.includes(item));
+				regexes.push(
+					{
+						"regexObject": /^\s*([\w\(\)][\w \(\)]*)(:| - )\s*$/gm,
+						"detailTypes": ["Feat", "Subclass"].filter(item => detailTypes.includes(item))
+					}
+				);
 
-			Object.entries(detailTypesForRegexString).forEach(([regexString, types]) => {
-				for (
-					let detail of document.getElementById(inputId).value.matchAll(new RegExp(...regexString.split("/").slice(1)))
-				) {
+			regexes.forEach(regex => {
+				for (let detail of document.getElementById(inputId).value.matchAll(regex["regexObject"])) {
 					let detailName = detail[1].trim();
 					if (!detailName) continue;
-					searchAndAddDetail(detailName, types);
+					searchAndAddDetail(detailName, regex["detailTypes"]);
 				};
 			});
 		}, delay);
@@ -773,25 +788,7 @@ function inputEventListener(evt) {
 		characterSheetData[elem.id] = (typeof characterSheetData[elem.id] == "number") ? Number(elem.value) : elem.value;
 	autosaveCharacterSheet();
 
-	switch (elem.id) {
-		case "classAndLevel":
-			checkForDetail(elem.id, ["Class"]);
-			break;
-		case "background":
-			checkForDetail(elem.id, ["Background"]);
-			break;
-		case "race":
-			checkForDetail(elem.id, ["Race"]);
-			break;
-		case "proficiencyBonus":
-			updateProficiencyDependentModifiers();
-			break;
-		case "featuresAndTraits":
-			checkForDetail(elem.id, ["Subclass", "Feat"]);
-			break;
-		default:
-			break;
-	};
+	checkForDetailsInInput(elem.id);
 
 	if (elem.classList.contains("ability__score"))
 		updateAbilityModifier(elem.id.substring(0, elem.id.length - "AbilityScore".length));
@@ -897,5 +894,6 @@ showModal({
 	"heading": "Welcome",
 	"icon": "fa-dice-d20"
 }).then(_ => {
-	Object.entries(characterSheetData).forEach(([key, value]) => updateDataValueAndInput(key, value))
+	autosaveCharacterSheet();
+	Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
 });
