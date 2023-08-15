@@ -421,6 +421,12 @@ function sanitizeHtmlAndConvertMarkdownLinks(html) {
 
 // -- Data Manipulation and Population
 
+function autosaveCharacterSheet() {
+	if (JSON.stringify(characterSheetData) == JSON.stringify(emptyCharacterSheetData)) return;
+	characterSheetData["lastAutosave"] = Date.now();
+	localStorage.setItem(characterSheetId, JSON.stringify(characterSheetData));
+};
+
 function addWeaponRow(weaponData) {
 	let weaponsElem = document.getElementById("weapons");
 
@@ -456,12 +462,6 @@ function addWeaponRow(weaponData) {
 	rowElem.appendChild(damageOrTypeElem);
 
 	weaponsElem.appendChild(rowElem)
-};
-
-function autosaveCharacterSheet() {
-	if (JSON.stringify(characterSheetData) == JSON.stringify(emptyCharacterSheetData)) return;
-	characterSheetData["lastAutosave"] = Date.now();
-	localStorage.setItem(characterSheetId, JSON.stringify(characterSheetData));
 };
 
 function updateDataValueAndInput(id, value) {
@@ -862,7 +862,7 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 });
 document.addEventListener("click", evt => {
 	let modalElem = document.getElementById("modal");
-	if (!modalElem) return;
+	if (!modalElem || evt.target.tagName != "HTML") return;
 
 	let rect = modalElem.getBoundingClientRect();
 	if (
