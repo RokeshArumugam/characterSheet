@@ -421,9 +421,9 @@ function sanitizeHtmlAndConvertMarkdownLinks(html) {
 
 // -- Data Manipulation and Population
 
-function autosaveCharacterSheet() {
+function autosaveCharacterSheet(updateLastAutosave = true) {
 	if (JSON.stringify(characterSheetData) == JSON.stringify(emptyCharacterSheetData)) return;
-	characterSheetData["lastAutosave"] = Date.now();
+	if (updateLastAutosave) characterSheetData["lastAutosave"] = Date.now();
 	localStorage.setItem(characterSheetId, JSON.stringify(characterSheetData));
 
 	let datetimeString = new Date(characterSheetData["lastAutosave"]).toLocaleString("en-gb").slice(0, -3);
@@ -892,14 +892,12 @@ document.addEventListener("keydown", evt => {
 
 fetch("README.md")
 	.then(response => response.text())
-	.then(response => {
-		showModal({
-			"template": modalTemplates["welcome"],
-			"message": response.replace(/^.+\n/, "").replace(/^\n#/gm, "#"),
-			"heading": "Welcome",
-			"icon": "fa-dice-d20"
-		}).then(_ => {
-			autosaveCharacterSheet();
-			Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
-		});
-	})
+	.then(response => showModal({
+		"template": modalTemplates["welcome"],
+		"message": response.replace(/^.+\n/, "").replace(/^\n#/gm, "#"),
+		"heading": "Welcome",
+		"icon": "fa-dice-d20"
+	})).then(_ => {
+		autosaveCharacterSheet(false);
+		Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
+	});
