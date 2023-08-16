@@ -184,7 +184,18 @@ const emptyCharacterSheetData = {
 	"electrumPieces": 0,
 	"goldPieces": 0,
 	"platinumPieces": 0,
-	"equipmentNotes": ""
+	"equipmentNotes": "",
+	"age": "",
+	"height": "",
+	"weight": "",
+	"eyes": "",
+	"skin": "",
+	"hair": "",
+	"characterAppearance": "",
+	"alliesAndOrganisations": "",
+	"characterBackstory": "",
+	"additionalFeaturesAndTraits": "",
+	"treasure": ""
 };
 let characterSheetData = Object.assign({}, emptyCharacterSheetData);
 let searchedDetails = {};
@@ -506,6 +517,8 @@ function updateInput(id, value) {
 			value = "+" + value;
 		elem.value = value;
 	};
+	if (["characterName", "characterName2"].includes(elem.id))
+		document.getElementById((elem.id == "characterName") ? "characterName2" : "characterName").value = elem.value;
 	checkForDetailsInInput(id);
 };
 
@@ -785,7 +798,10 @@ function inputEventListener(evt) {
 	let elem = evt.target;
 	if (!elem.validity.valid) return
 
-	if (elem.className.startsWith("weapon__")) {
+	if (["characterName", "characterName2"].includes(elem.id)) {
+		characterSheetData["characterName"] = elem.value;
+		document.getElementById((elem.id == "characterName") ? "characterName2" : "characterName").value = elem.value;
+	} else if (elem.className.startsWith("weapon__")) {
 		let cellElem = elem.parentElement;
 		let rowElem = cellElem.parentElement;
 		let cellIndex = [...rowElem.children].indexOf(cellElem);
@@ -859,6 +875,26 @@ document.getElementsByClassName("donationButton")[0].addEventListener("click", _
 		'Donations',
 		"fa-heart"
 	);
+});
+document.getElementsByClassName("previousButton")[0].addEventListener("click", evt => {
+	let headers = Array.from(document.getElementsByTagName("header"));
+	let newIndex = headers.indexOf(document.querySelector("header:not(.hidden)")) - 1;
+	headers.forEach((header, index) => header.classList.toggle("hidden", index != newIndex))
+	Array.from(document.getElementsByTagName("main")).forEach(
+		(main, index) => main.classList.toggle("hidden", index != newIndex)
+	);
+	evt.target.classList.toggle("invisible", newIndex == 0);
+	evt.target.nextElementSibling.nextElementSibling.classList.remove("invisible");
+});
+document.getElementsByClassName("nextButton")[0].addEventListener("click", evt => {
+	let headers = Array.from(document.getElementsByTagName("header"));
+	let newIndex = headers.indexOf(document.querySelector("header:not(.hidden)")) + 1;
+	headers.forEach((header, index) => header.classList.toggle("hidden", index != newIndex))
+	Array.from(document.getElementsByTagName("main")).forEach(
+		(main, index) => main.classList.toggle("hidden", index != newIndex)
+	);
+	evt.target.classList.toggle("invisible", newIndex == (headers.length - 1));
+	evt.target.previousElementSibling.previousElementSibling.classList.remove("invisible");
 });
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
 	showModal({

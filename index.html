@@ -47,6 +47,35 @@
             </div>
         </div>
     </header>
+    <header class="hidden">
+        <input type="text" id="characterName2" placeholder="Character Name" autocomplete="off">
+        <div class="header__cellsContainer">
+            <div class="header__cell">
+                <input type="text" id="age">
+                <span class="box__heading">Age</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="height">
+                <span class="box__heading">Height</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="weight">
+                <span class="box__heading">Weight</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="eyes">
+                <span class="box__heading">Eyes</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="skin">
+                <span class="box__heading">Skin</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="hair">
+                <span class="box__heading">Hair</span>
+            </div>
+        </div>
+    </header>
     <main>
         <div class="abilities">
             <div class="ability box">
@@ -414,12 +443,36 @@
             <span class="box__heading">Equipment</span>
         </div>
     </main>
+    <main class="hidden">
+        <div class="characterAppearance box">
+            <textarea id="characterAppearance"></textarea>
+            <span class="box__heading">Character Appearance</span>
+        </div>
+        <div class="alliesAndOrganisations box">
+            <textarea id="alliesAndOrganisations"></textarea>
+            <span class="box__heading">Allies & Organisations</span>
+        </div>
+        <div class="characterBackstory box">
+            <textarea id="characterBackstory"></textarea>
+            <span class="box__heading">Character Backstory</span>
+        </div>
+        <div class="additionalFeaturesAndTraits box">
+            <textarea id="additionalFeaturesAndTraits"></textarea>
+            <span class="box__heading">Additional Features & Traits</span>
+        </div>
+        <div class="treasure box">
+            <textarea id="treasure"></textarea>
+            <span class="box__heading">Treasure</span>
+        </div>
+    </main>
     <footer>
         <i class="fas fa-hand-holding-heart donationButton" title="Donate: Ctrl/Cmd + Shift + D"></i>
+        <i class="fas fa-arrow-left-long previousButton invisible" title="Go to previous page"></i>
         <div class="saveButtonContainer">
             <i class="fas fa-floppy-disk saveButton" title="Save: Ctrl/Cmd + S"></i>
             <span class="lastAutosave"></span>
         </div>
+        <i class="fas fa-arrow-right-long nextButton" title="Go to next page"></i>
         <i class="fas fa-dice-d20 rollButton" title="Roll: Ctrl/Cmd + Shift + R"
             onclick="prompt('Please enter the roll you wish to make', 'Roll', 'd20').then(expression => { if (expression) roll(expression) });"></i>
     </footer>
