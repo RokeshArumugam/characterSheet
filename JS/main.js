@@ -319,6 +319,7 @@ function showModal(options) {
 
 					let deleteElem = document.createElement("i");
 					deleteElem.classList.add("fas", "fa-times-circle", "modal__characterSheetDelete")
+					deleteElem.title = "Delete " + existingCharacterSheetData["characterName"];
 					deleteElem.addEventListener("click", evt => {
 						evt.target.parentElement.parentElement.remove();
 						localStorage.removeItem(existingCharacterSheetId);
@@ -557,6 +558,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName) {
 
 	let detailButtonCloseElem = document.createElement("i");
 	detailButtonCloseElem.classList.add("fas", "fa-close");
+	detailButtonCloseElem.title = "Remove";
 	detailButtonCloseElem.addEventListener("click", _ => detailButtonElem.remove());
 	detailButtonElem.appendChild(detailButtonCloseElem);
 
