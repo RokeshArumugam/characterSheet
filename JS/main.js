@@ -24,29 +24,6 @@ const modalTemplates = {
 			</div>
 		</dialog>
 	`,
-	"detailInfo": `
-		<dialog id="modal" role="alertdialog">
-			<i id="modal__icon" class="fas"></i>
-			<span id="modal__heading">Alert</span>
-			<a target="_blank" id="modal__source"></a>
-			<div id="modal__prerequisites"></div>
-			<div id="modal__message" data-heading="Description"></div>
-			<div id="modal__buttonContainer">
-				<button class="modal__button primaryButton">Close</button>
-			</div>
-		</dialog>
-	`,
-	"save": `
-		<dialog id="modal" role="alertdialog">
-			<i id="modal__icon" class="fas"></i>
-			<span id="modal__heading">Alert</span>
-			<div id="modal__message"></div>
-			<div id="modal__buttonContainer">
-				<button id="modal__button--cancel" class="modal__button primaryButton">Cancel</button>
-				<button id="modal__button--download" class="modal__button primaryButton">Download</button>
-			</div>
-		</dialog>
-	`,
 	"welcome": `
 		<dialog id="modal" role="alertdialog">
 			<i id="modal__icon" class="fas"></i>
@@ -56,6 +33,35 @@ const modalTemplates = {
 			<div id="modal__characterSheetsContainer"></div>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Start a New Character</button>
+			</div>
+		</dialog>
+	`,
+	"save": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<div id="modal__message"></div>
+			<div class="modal__fileContainer">
+				<div class="modal__file">
+					<i class="far fa-file modal__fileIcon" draggable="true"></i>
+					<span class="modal__fileName"></span>
+				</div>
+				<button class="modal__fileDownload primaryButton">Download</button>
+			</div>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Cancel</button>
+			</div>
+		</dialog>
+	`,
+	"detailInfo": `
+		<dialog id="modal" role="alertdialog">
+			<i id="modal__icon" class="fas"></i>
+			<span id="modal__heading">Alert</span>
+			<a target="_blank" id="modal__source"></a>
+			<div id="modal__prerequisites"></div>
+			<div id="modal__message" data-heading="Description"></div>
+			<div id="modal__buttonContainer">
+				<button class="modal__button primaryButton">Close</button>
 			</div>
 		</dialog>
 	`
@@ -249,29 +255,6 @@ function showModal(options) {
 					resolve(modalFieldElem.value);
 				});
 				break;
-			case modalTemplates["detailInfo"]:
-				if (options["sourceLink"]) {
-					let sourceElem = modalElem.getElementById("modal__source");
-					sourceElem.href = options["sourceLink"];
-					sourceElem.innerText = "Source: " + (options["sourceText"] || options["sourceLink"]);
-				};
-				if (options["prerequisites"]?.length) {
-					let prerequisitesElem = modalElem.getElementById("modal__prerequisites");
-					let listElem = document.createElement("ul");
-					for (let prerequisite of prerequisites) {
-						let listItemElem = document.createElement("li");
-						listItemElem.innerText = prerequisite;
-						listElem.appendChild(listItemElem);
-					};
-					prerequisitesElem.appendChild(listElem);
-				};
-				break;
-			case modalTemplates["save"]:
-				modalElem.getElementById("modal__button--download").addEventListener("click", evt => {
-					evt.target.parentElement.parentElement.close();
-					resolve(true);
-				});
-				break;
 			case modalTemplates["welcome"]:
 				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", inputEvt => {
 					let reader = new FileReader();
@@ -354,6 +337,42 @@ function showModal(options) {
 					characterSheetElem.appendChild(timestampElem);
 					characterSheetListElem.appendChild(characterSheetElem);
 				});
+				break;
+			case modalTemplates["save"]:
+				let downloadUrl = window.URL.createObjectURL(
+					new Blob([JSON.stringify(characterSheetData)], { "type": "text/json" })
+				);
+				let fileName = characterSheetData["characterName"] + ".characterSheet";
+				let downloadLinkElem = document.createElement("a");
+				downloadLinkElem.setAttribute("href", downloadUrl);
+				downloadLinkElem.setAttribute("download", fileName);
+
+				modalElem.getElementsByClassName("modal__fileName")[0].innerText = fileName;
+				modalElem.getElementsByClassName("modal__fileIcon")[0].addEventListener("dragstart", evt => {
+					evt.dataTransfer.setData("DownloadURL", "text/json:" + fileName + ":" + downloadUrl);
+				});
+				modalElem.getElementsByClassName("modal__fileDownload")[0].addEventListener("click", evt => {
+					evt.target.parentElement.parentElement.close();
+					downloadLinkElem.click();
+					resolve(null);
+				});
+				break;
+			case modalTemplates["detailInfo"]:
+				if (options["sourceLink"]) {
+					let sourceElem = modalElem.getElementById("modal__source");
+					sourceElem.href = options["sourceLink"];
+					sourceElem.innerText = "Source: " + (options["sourceText"] || options["sourceLink"]);
+				};
+				if (options["prerequisites"]?.length) {
+					let prerequisitesElem = modalElem.getElementById("modal__prerequisites");
+					let listElem = document.createElement("ul");
+					for (let prerequisite of prerequisites) {
+						let listItemElem = document.createElement("li");
+						listItemElem.innerText = prerequisite;
+						listElem.appendChild(listItemElem);
+					};
+					prerequisitesElem.appendChild(listElem);
+				};
 				break;
 			default:
 				break;
@@ -847,15 +866,6 @@ document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => 
 		"message": "You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
 		"heading": "Saving This Character Sheet",
 		"icon": "fa-floppy-disk"
-	}).then(response => {
-		if (!response) return;
-		let linkElem = document.createElement("a");
-		linkElem.setAttribute(
-			"href",
-			"data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(characterSheetData))
-		);
-		linkElem.setAttribute("download", characterSheetData["characterName"] + ".characterSheet");
-		linkElem.click();
 	});
 });
 
