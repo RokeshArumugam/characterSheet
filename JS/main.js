@@ -654,7 +654,7 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					for (let elem of contentElem.getElementsByTagName("p")) {
 						if (!(elem.innerText.startsWith("Source: "))) continue;
 						source = elem.innerText.substring("Source: ".length);
-						elem.remove()
+						elem.remove();
 					};
 
 					let prerequisites = [];
@@ -699,11 +699,11 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					let description = contentElem.innerText.trim().replace(/\n\n+/g, "\n");
 
 					searchedDetails[detailUrlName] = {
-						"detailType": detailType,
-						"description": description,
-						"prerequisites": prerequisites,
-						"source": source,
-						"url": url
+						detailType,
+						description,
+						prerequisites,
+						source,
+						url
 					};
 
 					addDetailButtonIfNotExist(detailName, detailUrlName);
@@ -743,20 +743,16 @@ const checkForDetailsInInput = (() => {
 				regexes.push({ "regexObject": /^\s*([\w\-]+)\s*/g, "detailTypes": ["Class"] });
 
 			if (detailTypes.includes("Background") || detailTypes.includes("Race"))
-				regexes.push(
-					{
-						"regexObject": /\s*(.+)\s*/g,
-						"detailTypes": ["Background", "Race"].filter(item => detailTypes.includes(item))
-					}
-				);
+				regexes.push({
+					"regexObject": /\s*(.+)\s*/g,
+					"detailTypes": ["Background", "Race"].filter(item => detailTypes.includes(item))
+				});
 
 			if (detailTypes.includes("Feat") || detailTypes.includes("Subclass"))
-				regexes.push(
-					{
-						"regexObject": /^\s*([\w\(\)][\w \(\)]*)(:| - )\s*$/gm,
-						"detailTypes": ["Feat", "Subclass"].filter(item => detailTypes.includes(item))
-					}
-				);
+				regexes.push({
+					"regexObject": /^\s*([\w\(\)][\w \(\)]*)(:| - )\s*$/gm,
+					"detailTypes": ["Feat", "Subclass"].filter(item => detailTypes.includes(item))
+				});
 
 			regexes.forEach(regex => {
 				for (let detail of document.getElementById(inputId).value.matchAll(regex["regexObject"])) {
