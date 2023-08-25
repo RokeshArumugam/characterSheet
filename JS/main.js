@@ -721,11 +721,7 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					let description = contentElem.innerText.trim().replace(/\n\n+/g, "\n");
 
 					searchedDetails[detailUrlName] = {
-						detailType,
-						description,
-						prerequisites,
-						source,
-						url
+						detailType, description, prerequisites, source, url
 					};
 
 					addDetailButtonIfNotExist(detailName, detailUrlName, detailType);
