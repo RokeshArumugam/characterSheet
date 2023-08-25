@@ -651,7 +651,7 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					contentElem.querySelector("#toc")?.remove();
 
 					let source = "";
-					for (let elem of contentElem.getElementsByTagName("p")) {
+					for (let elem of contentElem.querySelectorAll("p:has(~ h1:first-of-type)")) {
 						if (!(elem.innerText.startsWith("Source: "))) continue;
 						source = elem.innerText.substring("Source: ".length);
 						elem.remove();
@@ -667,9 +667,15 @@ async function searchAndAddDetail(detailName, detailTypes) {
 						let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
 						let wholeRaceName = detailName.trim().toLowerCase();
 						let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
-						if (subraceRowElem)
+						if (subraceRowElem) {
+							for (let elem of subraceRowElem.getElementsByTagName("p")) {
+								if (!(elem.innerText.startsWith("Source: "))) continue;
+								source = elem.innerText.substring("Source: ".length);
+								elem.remove();
+								break;
+							};
 							rowElems.forEach(rowElem => { if (rowElem != subraceRowElem) rowElem.remove() });
-						else {
+						} else {
 							detailName = mainRaceName;
 							detailUrlName = mainRaceUrlName;
 						};
