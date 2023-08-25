@@ -527,6 +527,39 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	content: "\f560";
 }
 
+/* Detail Buttons */
+
+.detailButtonsContainer {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0.5em;
+}
+.detailButtonsContainer:empty {
+	display: none;
+}
+.detailButton {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+.detailButton span {
+	flex-grow: 1;
+}
+.detailButton i {
+	--diameter: 1.25em;
+	display: grid;
+	place-items: center;
+	border-radius: 50%;
+	width: var(--diameter);
+	height: var(--diameter);
+	background-color: var(--on-primary-color);
+	color: var(--primary-color);
+}
+.detailButtonsContainer + textarea {
+	flex-grow: 1;
+}
+
 /* Abilities */
 
 .abilities {
@@ -798,36 +831,6 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	display: flex;
 	flex-direction: column;
 }
-.featuresAndTraits__detailButtonsContainer {
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	gap: 0.5em;
-}
-.featuresAndTraits__detailButtonsContainer:empty {
-	display: none;
-}
-.featuresAndTraits__detailButton {
-	display: flex;
-	align-items: center;
-	gap: 0.5em;
-}
-.featuresAndTraits__detailButton span {
-	flex-grow: 1;
-}
-.featuresAndTraits__detailButton i {
-	--diameter: 1.25em;
-	display: grid;
-	place-items: center;
-	border-radius: 50%;
-	width: var(--diameter);
-	height: var(--diameter);
-	background-color: var(--on-primary-color);
-	color: var(--primary-color);
-}
-.featuresAndTraits textarea {
-	flex-grow: 1;
-}
 
 /* Passive Wisdom and Other Proficiencies And Languages */
 
@@ -875,8 +878,11 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 .currency input {
 	width: 7.5ch
 }
-.equipment__notes {
+.equipment__notesContainer {
 	grid-area: equipment__notes;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
 }
 .equipment .box__heading {
 	grid-area: box__heading;
