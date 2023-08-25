@@ -534,6 +534,8 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	justify-content: center;
 	flex-wrap: wrap;
 	gap: 0.5em;
+	max-height: 15%;
+	overflow: auto;
 }
 .detailButtonsContainer:empty {
 	display: none;

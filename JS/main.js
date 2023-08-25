@@ -630,7 +630,9 @@ async function searchAndAddDetail(detailName, detailTypes) {
 
 	if (detailUrlName in searchedDetails) {
 		if (Object.keys(searchedDetails[detailUrlName]).length)
-			addDetailButtonIfNotExist(detailName, detailUrlName);
+			addDetailButtonIfNotExist(
+				detailName, detailUrlName, searchedDetails[detailUrlName]["detailType"]
+			);
 		return;
 	};
 	searchedDetails[detailUrlName] = {};
@@ -776,7 +778,7 @@ const checkForDetailsInInput = (() => {
 					"regexObject": /^\s*([\w\(\)][\w \(\)]*)(:| - )\s*$/gm,
 					"detailTypes": ["Feat", "Subclass"].filter(item => detailTypes.includes(item))
 				});
-			
+
 			if (detailTypes.includes("Adventuring Gear"))
 				regexes.push({ "regexObject": /^\s*(.*)'s pack\s*$/igm, "detailTypes": ["Adventuring Gear"] });
 
