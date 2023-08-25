@@ -250,6 +250,7 @@ function showModal(options) {
 				if (parentElements.length > 1) parentElements = [parentElements[0]];
 				childElem = document.createElement("p");
 				childElem.innerHTML = sanitizeHtmlAndConvertMarkdownLinks(line);
+				if (!childElem.innerHTML) continue;
 			};
 			parentElements.at(-1).appendChild(childElem);
 		};
@@ -709,17 +710,22 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					for (let elem of contentElem.getElementsByClassName("hover"))
 						elem.firstElementChild.innerText = " (" + elem.firstElementChild.innerText.toLowerCase() + ")";
 					for (let elem of contentElem.getElementsByTagName("table")) {
-						let rows = elem.rows;
 						if (elem.rows[0].cells.length == 1) elem.rows[0].remove()
+						if (elem.rows[0].cells[0].innerText.trim() == elem.rows[0].innerText.trim()) {
+							let heading = document.createElement("h2");
+							heading.innerText = "## " + elem.rows[0].innerText.trim() + "\n";
+							elem.before(heading);
+							elem.rows[0].remove();
+						};
 
-						elem.innerText = [...rows].map(row => {
+						elem.innerText = [...elem.rows].map(row => {
 							return "| " + [...row.cells].map(cell => {
 								return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
 							}).join(" | ") + " |"
-						}).join("\n");
+						}).join("\n") + "\n";
 					};
 
-					let description = contentElem.innerText.trim().replace(/\n\n+/g, "\n");
+					let description = contentElem.innerText.trim().replace(/([^\|])\n\n+([^\|])/g, "$1\n$2");
 
 					searchedDetails[detailUrlName] = {
 						detailType, description, prerequisites, source, url
