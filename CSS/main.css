@@ -327,7 +327,7 @@ footer span:empty {
 	gap: 0.25em;
 }
 #modal__prerequisites::before, #modal__message::before {
-	font-size: 1.5em;
+	font-size: 1.75em;
 	font-weight: bold;
 }
 #modal__prerequisites::before {
