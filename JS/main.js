@@ -76,7 +76,8 @@ const pathnamesForDetailType = {
 	"Subclass": ["(classUrlName):(detailUrlName)"],
 	"Feat": ["feat:(detailUrlName)", "feat:(detailUrlName)-ua"],
 	"Adventuring Gear": ["(detailUrlName)"],
-	"Armor": ["(detailUrlName)"]
+	"Armor": ["(detailUrlName)"],
+	"Wondrous Item": ["wondrous-items:(detailUrlName)"]
 };
 
 const skillsForAbilities = {
@@ -573,7 +574,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName, detailType) {
 	if (document.getElementById("detailButton-" + detailUrlName)) return;
 
 	let detailButtonsContainerElem;
-	if (["Adventuring Gear", "Armor"].includes(detailType))
+	if (["Adventuring Gear", "Armor", "Wondrous Item"].includes(detailType))
 		detailButtonsContainerElem = document.getElementsByClassName("equipment__detailButtonsContainer")[0];
 	else
 		detailButtonsContainerElem = document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0];
@@ -752,7 +753,7 @@ const checkForDetailsInInput = (() => {
 					detailTypes = ["Subclass", "Feat"];
 					break;
 				case "equipmentNotes":
-					detailTypes = ["Adventuring Gear", "Armor"];
+					detailTypes = ["Adventuring Gear", "Armor", "Wondrous Item"];
 					break;
 				default:
 					break;
@@ -780,6 +781,9 @@ const checkForDetailsInInput = (() => {
 
 			if (detailTypes.includes("Armor"))
 				regexes.push({ "regexObject": /^\s*(.*) armou?r\s*$/igm, "detailTypes": ["Armor"] });
+
+			if (detailTypes.includes("Wondrous Item"))
+				regexes.push({ "regexObject": /^\s*([\w ]+?)( ?x ?\d+)?\s*$/gm, "detailTypes": ["Wondrous Item"] });
 
 			regexes.forEach(regex => {
 				for (let detail of document.getElementById(inputId).value.matchAll(regex["regexObject"])) {
