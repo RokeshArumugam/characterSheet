@@ -5,8 +5,8 @@ This character sheet automatically updates ability, saving throw and skill modif
 
 * Class should be one word (may be hyphenated)
 * Feats and subclasses should be on one line and end with ':' or ' - '
-* Adventuring gear (packs) should be on one line and end with "'s pack"
-* Armor should be on one line and end with ' armor' or ' armour'
+* Adventuring gear (packs) should be on one line and end with "'s pack" and maybe ' x' + a number
+* Armor should be on one line and end with ' armor' or ' armour' and maybe ' x' + a number
 * Wondrous items should be on one line and may end with ' x' + a number
 
 The information is scraped from [http://dnd5e.wikidot.com](http://dnd5e.wikidot.com).

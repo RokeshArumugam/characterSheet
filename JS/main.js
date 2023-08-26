@@ -783,10 +783,10 @@ const checkForDetailsInInput = (() => {
 				});
 
 			if (detailTypes.includes("Adventuring Gear"))
-				regexes.push({ "regexObject": /^\s*(.*)'s pack\s*$/igm, "detailTypes": ["Adventuring Gear"] });
+				regexes.push({ "regexObject": /^\s*(.*)'s pack( ?x ?\d+)?\s*$/igm, "detailTypes": ["Adventuring Gear"] });
 
 			if (detailTypes.includes("Armor"))
-				regexes.push({ "regexObject": /^\s*(.*) armou?r\s*$/igm, "detailTypes": ["Armor"] });
+				regexes.push({ "regexObject": /^\s*(.*) armou?r( ?x ?\d+)?\s*$/igm, "detailTypes": ["Armor"] });
 
 			if (detailTypes.includes("Wondrous Item"))
 				regexes.push({ "regexObject": /^\s*([\w ]+?)( ?x ?\d+)?\s*$/gm, "detailTypes": ["Wondrous Item"] });
