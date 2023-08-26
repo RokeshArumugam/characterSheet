@@ -725,7 +725,10 @@ async function searchAndAddDetail(detailName, detailTypes) {
 						}).join("\n") + "\n";
 					};
 
-					let description = contentElem.innerText.trim().replace(/([^\|])\n\n+([^\|])/g, "$1\n$2");
+					let description = contentElem.innerText.trim()
+						.replace(/([^\n])\n\n+([^\n\|])/g, "$1\n$2")
+						.replace(/([^\n\|])\n\n+([^\n])/g, "$1\n$2")
+						.replace(/\|\n\n\n+\|/g, "|\n\n|");
 
 					searchedDetails[detailUrlName] = {
 						detailType, description, prerequisites, source, url
