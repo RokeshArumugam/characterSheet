@@ -713,7 +713,7 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					contentElem.querySelector("#toc")?.remove();
 
 					let source = "";
-					for (let elem of contentElem.querySelectorAll("p:has(~ h1:first-of-type),p:not(:has(~ h1))")) {
+					for (let elem of contentElem.querySelectorAll("p" + (contentElem.getElementsByTagName("h1").length ? ":has(~ h1:first-of-type)" : ""))) {
 						if (!(elem.innerText.startsWith("Source: "))) continue;
 						source = elem.innerText.substring("Source: ".length);
 						elem.remove();
