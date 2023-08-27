@@ -19,6 +19,23 @@
         <span>This character sheet is best viewed on a desktop/laptop or an iPad/tablet.</span>
     </div>
     <header>
+        <input type="text" id="spellcastingClass" placeholder="Spellcasting Class" autocomplete="off">
+        <div class="header__cellsContainer">
+            <div class="header__cell">
+                <input type="text" id="spellcastingAbility">
+                <span class="box__heading">Spellcasting Ability</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="spellSaveDc">
+                <span class="box__heading">Spell Save DC</span>
+            </div>
+            <div class="header__cell">
+                <input type="text" id="spellAttackBonus">
+                <span class="box__heading">Spell Attack Bonus</span>
+            </div>
+        </div>
+    </header>
+    <header class="hidden">
         <input type="text" id="characterName" placeholder="Character Name" autocomplete="off">
         <div class="header__cellsContainer">
             <div class="header__cell">
@@ -77,6 +94,124 @@
         </div>
     </header>
     <main>
+        <div class="spellsColumn">
+            <template id="spellRowTemplate">
+                <tr>
+                    <td>
+                        <input type="checkbox"class="spell__prepared">
+                        <label title="Prepared"></label>
+                    </td>
+                    <td>
+                        <input type="text" class="spell__name" placeholder="Spell Name" autocomplete="off">
+                    </td>
+                </tr>
+            </template>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">0</span>
+                    <span class="spellsContainer__levelName box__heading">Cantrips</span>
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel0"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">1</span>
+                    <input type="text" id="spellSlotsTotalLevel1" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel1" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel1"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">2</span>
+                    <input type="text" id="spellSlotsTotalLevel2" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel2" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel2"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="spellsColumn">
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">3</span>
+                    <input type="text" id="spellSlotsTotalLevel3" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel3" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel3"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">4</span>
+                    <input type="text" id="spellSlotsTotalLevel4" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel4" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel4"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">5</span>
+                    <input type="text" id="spellSlotsTotalLevel5" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel5" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel5"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="spellsColumn">
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">6</span>
+                    <input type="text" id="spellSlotsTotalLevel6" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel6" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel6"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">7</span>
+                    <input type="text" id="spellSlotsTotalLevel7" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel7" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel7"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">8</span>
+                    <input type="text" id="spellSlotsTotalLevel8" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel8" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel8"></tbody>
+                </table>
+            </div>
+            <div class="spellsContainer">
+                <div class="spellsContainer__header box">
+                    <span class="spellsContainer__level">9</span>
+                    <input type="text" id="spellSlotsTotalLevel9" class="spellsContainer__slotsTotal" placeholder="Slots Total">
+                    <input type="text" id="spellSlotsExpendedLevel9" class="spellsContainer__slotsExpended" placeholder="Slots Expended">
+                </div>
+                <table class="spellsContainer__table">
+                    <tbody id="spellsLevel9"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <main class="hidden">
         <div class="abilities">
             <div class="ability box">
                 <span class="box__heading">Strength</span>
@@ -394,7 +529,21 @@
                         <th>Damage/Type</th>
                     </tr>
                 </thead>
-                <tbody id="weapons"></tbody>
+                <tbody id="weapons">
+                    <template id="weaponRowTemplate">
+                        <tr class="weapon__row">
+                            <td>
+                                <input type="text" class="weapon__name">
+                            </td>
+                            <td>
+                                <input type="text" pattern="[\+\-]?\d*" class="weapon__atkBonus">
+                            </td>
+                            <td>
+                                <input type="text" class="weapon__damageOrType">
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
             </table>
             <textarea id="attacksNotes" class="attacks__notes"></textarea>
             <span class="box__heading">Attacks & Spellcasting</span>

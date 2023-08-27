@@ -88,7 +88,6 @@ const skillsForAbilities = {
 	"wisdom": ["animalHandling", "insight", "medicine", "perception", "survival"],
 	"charisma": ["deception", "intimidation", "performance", "persuasion"]
 }
-const minimumWeaponRows = 3;
 
 let existingCharacterSheetIds = Object.keys(localStorage);
 let characterSheetId;
@@ -178,7 +177,7 @@ const emptyCharacterSheetData = {
 	"ideals": "",
 	"bonds": "",
 	"flaws": "",
-	"weapons": Array(minimumWeaponRows).fill(["", "", ""]),
+	"weapons": Array.from({ length: 3 }, () => ["", "", ""]),
 	"attacksNotes": "",
 	"featuresAndTraits": "",
 	"passivePerception": "",
@@ -199,9 +198,44 @@ const emptyCharacterSheetData = {
 	"alliesAndOrganisations": "",
 	"characterBackstory": "",
 	"additionalFeaturesAndTraits": "",
-	"treasure": ""
+	"treasure": "",
+	"spellcastingClass": "",
+	"spellcastingAbility": "",
+	"spellSaveDc": "",
+	"spellAttackBonus": "",
+	"spellsLevel0": Array.from({ length: 8 }, () => [null, ""]),
+	"spellsLevel1": Array.from({ length: 13 }, () => [false, ""]),
+	"spellSlotsTotalLevel1": "",
+	"spellSlotsExpendedLevel1": "",
+	"spellsLevel2": Array.from({ length: 13 }, () => [false, ""]),
+	"spellSlotsTotalLevel2": "",
+	"spellSlotsExpendedLevel2": "",
+	"spellsLevel3": Array.from({ length: 13 }, () => [false, ""]),
+	"spellSlotsTotalLevel3": "",
+	"spellSlotsExpendedLevel3": "",
+	"spellsLevel4": Array.from({ length: 13 }, () => [false, ""]),
+	"spellSlotsTotalLevel4": "",
+	"spellSlotsExpendedLevel4": "",
+	"spellsLevel5": Array.from({ length: 9 }, () => [false, ""]),
+	"spellSlotsTotalLevel5": "",
+	"spellSlotsExpendedLevel5": "",
+	"spellsLevel6": Array.from({ length: 9 }, () => [false, ""]),
+	"spellSlotsTotalLevel6": "",
+	"spellSlotsExpendedLevel6": "",
+	"spellsLevel7": Array.from({ length: 9 }, () => [false, ""]),
+	"spellSlotsTotalLevel7": "",
+	"spellSlotsExpendedLevel7": "",
+	"spellsLevel8": Array.from({ length: 7 }, () => [false, ""]),
+	"spellSlotsTotalLevel8": "",
+	"spellSlotsExpendedLevel8": "",
+	"spellsLevel9": Array.from({ length: 7 }, () => [false, ""]),
+	"spellSlotsTotalLevel9": "",
+	"spellSlotsExpendedLevel9": ""
 };
-let characterSheetData = Object.assign({}, emptyCharacterSheetData);
+let characterSheetData = structuredClone
+	(emptyCharacterSheetData);
+const weaponRowTemplate = document.getElementById("weaponRowTemplate");
+const spellRowTemplate = document.getElementById("spellRowTemplate");
 let searchedDetails = {};
 
 // Utility Functions
@@ -471,39 +505,32 @@ function autosaveCharacterSheet(updateLastAutosave = true) {
 
 function addWeaponRow(weaponData) {
 	let weaponsElem = document.getElementById("weapons");
+	let rowElem = weaponRowTemplate.content.cloneNode(true).firstElementChild;
+	Array.from(rowElem.getElementsByTagName("input")).forEach((elem, index) => {
+		elem.value = weaponData[index];
+		elem.addEventListener("input", inputEventListener);
+	});
+	weaponsElem.appendChild(rowElem);
+};
 
-	let rowElem = document.createElement("tr");
-	rowElem.classList.add("weapon__row")
-
-	let nameElem = document.createElement("td");
-	let nameInputElem = document.createElement("input");
-	nameInputElem.type = "text";
-	nameInputElem.classList.add("weapon__name");
-	nameInputElem.value = weaponData[0];
-	nameInputElem.addEventListener("input", inputEventListener);
-	nameElem.appendChild(nameInputElem);
-	rowElem.appendChild(nameElem);
-
-	let atkBonusElem = document.createElement("td");
-	let atkBonusInputElem = document.createElement("input");
-	atkBonusInputElem.type = "text";
-	atkBonusInputElem.pattern = "[\\+\\-]?\\d*";
-	atkBonusInputElem.classList.add("weapon__atkBonus");
-	atkBonusInputElem.value = weaponData[1];
-	atkBonusInputElem.addEventListener("input", inputEventListener);
-	atkBonusElem.appendChild(atkBonusInputElem);
-	rowElem.appendChild(atkBonusElem);
-
-	let damageOrTypeElem = document.createElement("td");
-	let damageOrTypeInputElem = document.createElement("input");
-	damageOrTypeInputElem.type = "text";
-	damageOrTypeInputElem.classList.add("weapon__damageOrType");
-	damageOrTypeInputElem.value = weaponData[2];
-	damageOrTypeInputElem.addEventListener("input", inputEventListener);
-	damageOrTypeElem.appendChild(damageOrTypeInputElem);
-	rowElem.appendChild(damageOrTypeElem);
-
-	weaponsElem.appendChild(rowElem)
+function addSpellRow(id, spellData) {
+	let spellsElem = document.getElementById(id);
+	let rowElem = spellRowTemplate.content.cloneNode(true).firstElementChild;
+	let preparedElem = rowElem.getElementsByClassName("spell__prepared")[0];
+	if (preparedElem) {
+		preparedElem.id = id + "-" + (spellsElem.children.length + 1);
+		preparedElem.nextElementSibling.htmlFor = preparedElem.id;
+	}
+	Array.from(rowElem.getElementsByTagName("input")).forEach((elem, index) => {
+		if (spellData[index] == null)
+			elem.parentElement.remove();
+		else {
+			if (elem.type == "checkbox") elem.checked = spellData[index];
+			else elem.value = spellData[index];
+			elem.addEventListener("input", inputEventListener);
+		}
+	});
+	spellsElem.appendChild(rowElem);
 };
 
 function updateInput(id, value) {
@@ -513,8 +540,11 @@ function updateInput(id, value) {
 	if (elem.type == "checkbox")
 		elem.checked = value
 	else if (elem.id == "weapons") {
-		document.getElementById("weapons").innerHTML = "";
+		elem.innerHTML = "";
 		value.forEach(weaponData => addWeaponRow(weaponData));
+	} else if (elem.id.startsWith("spells")) {
+		elem.innerHTML = "";
+		value.forEach(spellData => addSpellRow(elem.id, spellData));
 	} else {
 		if (["doubleCheckbox", "tripleCheckbox"].includes(elem.name))
 			elem.setAttribute("value", value)
@@ -850,10 +880,35 @@ function inputEventListener(evt) {
 			addWeaponRow(characterSheetData["weapons"].at(-1));
 		};
 
-		while ((characterSheetData["weapons"].length > minimumWeaponRows) && !(characterSheetData["weapons"].at(-2).join(""))) {
+		while (
+			(characterSheetData["weapons"].length > emptyCharacterSheetData["weapons"].length) &&
+			!(characterSheetData["weapons"].at(-2).join(""))
+		) {
 			characterSheetData["weapons"].splice(characterSheetData["weapons"].length - 2, 1);
 			tbodyElem.children[tbodyElem.children.length - 2].remove();
-			tbodyElem.lastChild.firstChild.children[cellIndex].focus();
+			tbodyElem.lastElementChild.firstElementChild.children[cellIndex].focus();
+		};
+	} else if (elem.className.startsWith("spell__")) {
+		let cellElem = elem.parentElement;
+		let rowElem = cellElem.parentElement;
+		let cellIndex = [...rowElem.children].indexOf(cellElem);
+		let tbodyElem = rowElem.parentElement;
+		let emptyRow = [(tbodyElem.id == "spellsLevel0") ? null : false, ""];
+		let value = (elem.type == "checkbox") ? elem.checked : elem.value;
+
+		characterSheetData[tbodyElem.id][[...tbodyElem.children].indexOf(rowElem)][cellIndex + ((tbodyElem.id == "spellsLevel0") ? 1 : 0)] = value;
+		if (JSON.stringify(characterSheetData[tbodyElem.id].at(-1)) != JSON.stringify(emptyRow)) {
+			characterSheetData[tbodyElem.id].push(emptyRow);
+			addSpellRow(tbodyElem.id, characterSheetData[tbodyElem.id].at(-1));
+		};
+
+		while (
+			(characterSheetData[tbodyElem.id].length > emptyCharacterSheetData[tbodyElem.id].length) &&
+			(JSON.stringify(characterSheetData[tbodyElem.id].at(-2)) == JSON.stringify(emptyRow))
+		) {
+			characterSheetData[tbodyElem.id].splice(characterSheetData[tbodyElem.id].length - 2, 1);
+			tbodyElem.children[tbodyElem.children.length - 2].remove();
+			tbodyElem.lastElementChild.firstElementChild.children[cellIndex].focus();
 		};
 	} else if (elem.type == "checkbox")
 		characterSheetData[elem.id] = elem.checked;

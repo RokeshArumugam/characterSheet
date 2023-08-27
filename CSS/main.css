@@ -104,7 +104,7 @@ header > * {
 	flex-basis: 0em;
 	flex-grow: 1;
 }
-#characterName, #characterName2 {
+#spellcastingClass, #characterName, #characterName2 {
 	font-size: 2em;
 }
 .header__cellsContainer {
@@ -114,12 +114,19 @@ header > * {
 	gap: 0.5em;
 	min-width: 28em;
 }
+header:nth-of-type(1) .header__cellsContainer {
+	align-items: stretch;
+}
 .header__cell {
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
 	gap: 0.25em;
 	text-align: center;
+}
+header:nth-of-type(1) input {
+	flex-grow: 1;
+	font-size: 1.5em;
 }
 #race::-webkit-contacts-auto-fill-button {
 	width: 0em;
@@ -383,11 +390,17 @@ main {
 }
 main:nth-of-type(1) {
 	grid-template-areas:
+		"spellsColumn1 spellsColumn1 spellsColumn2 spellsColumn3"
+		"spellsColumn1 spellsColumn1 spellsColumn2 spellsColumn3"
+		"spellsColumn1 spellsColumn1 spellsColumn2 spellsColumn3";
+}
+main:nth-of-type(2) {
+	grid-template-areas:
 		"abilities bonusesAndSavingThrowsAndSkills combat personality"
 		"abilities bonusesAndSavingThrowsAndSkills attacks featuresAndTraits"
 		"passivePerceptionAndOtherProficienciesAndLanguages passivePerceptionAndOtherProficienciesAndLanguages equipment featuresAndTraits";
 }
-main:nth-of-type(2) {
+main:nth-of-type(3) {
 	grid-template-areas:
 		"characterAppearance characterAppearance alliesAndOrganisations alliesAndOrganisations"
 		"characterBackstory characterBackstory additionalFeaturesAndTraits additionalFeaturesAndTraits"
@@ -561,6 +574,55 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 .detailButtonsContainer + textarea {
 	flex-grow: 1;
 }
+
+/* Page 1 */
+
+.spellsColumn:nth-child(1) {
+	grid-area: spellsColumn1;
+}
+.spellsColumn:nth-child(2) {
+	grid-area: spellsColumn2;
+}
+.spellsColumn:nth-child(3) {
+	grid-area: spellsColumn3;
+}
+.spellsColumn {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+
+.spellsContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+.spellsContainer__header {
+	display: flex;
+	align-items: center;
+}
+.spellsContainer__level {
+	border: var(--border);
+	border-radius: var(--border-radius);
+	width: 4ch;
+	font-size: 1.5em;
+	font-weight: bold;
+	text-align: center;
+}
+.spellsContainer__levelName, .spellsContainer__header input {
+	flex-grow: 1;
+}
+.spellsContainer__header input {
+	flex-basis: 0em;
+}
+.spellsContainer__table {
+	border-spacing: 0.5em;
+}
+.spellsContainer__table td:nth-child(1) {
+	width: 1.3em;
+}
+
+/* Page 2 */
 
 /* Abilities */
 
@@ -890,13 +952,13 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	grid-area: box__heading;
 }
 
-/* Page 2 */
+/* Page 3 */
 
-main:nth-of-type(2) .box {
+main:nth-of-type(3) .box {
 	display: flex;
 	flex-direction: column;
 }
-main:nth-of-type(2) textarea {
+main:nth-of-type(3) textarea {
 	flex-grow: 1;
 }
 .characterAppearance {
@@ -914,5 +976,3 @@ main:nth-of-type(2) textarea {
 .treasure {
 	grid-area: treasure;
 }
-
-/* Page 3 */
