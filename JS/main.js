@@ -522,12 +522,12 @@ function addWeaponRow(weaponData) {
 	weaponsElem.appendChild(rowElem);
 };
 
-function addSpellRow(id, spellData) {
-	let spellsElem = document.getElementById(id);
+function addSpellRow(tbodyId, spellData) {
+	let spellsElem = document.getElementById(tbodyId);
 	let rowElem = spellRowTemplate.content.cloneNode(true).firstElementChild;
 	let preparedElem = rowElem.getElementsByClassName("spell__prepared")[0];
 	if (preparedElem) {
-		preparedElem.id = id + "-" + (spellsElem.children.length + 1);
+		preparedElem.id = tbodyId + "-" + (spellsElem.children.length + 1);
 		preparedElem.nextElementSibling.htmlFor = preparedElem.id;
 	}
 	Array.from(rowElem.getElementsByTagName("input")).forEach((elem, index) => {
@@ -540,7 +540,9 @@ function addSpellRow(id, spellData) {
 		}
 	});
 	spellsElem.appendChild(rowElem);
-	checkForDetailsInInput(spellsElem.lastElementChild.getElementsByClassName("spell__name")[0]);
+	let spellNameElem = spellsElem.lastElementChild.getElementsByClassName("spell__name")[0];
+	if ((tbodyId == "spellsLevel1") && (spellsElem.childElementCount == 1)) spellNameElem.placeholder = "Spell Name";
+	checkForDetailsInInput(spellNameElem);
 };
 
 function updateInput(id, value) {
