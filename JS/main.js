@@ -77,7 +77,17 @@ const pathnamesForDetailType = {
 	"Feat": ["feat:(detailUrlName)", "feat:(detailUrlName)-ua"],
 	"Adventuring Gear": ["(detailUrlName)"],
 	"Armor": ["(detailUrlName)"],
-	"Wondrous Item": ["wondrous-items:(detailUrlName)"]
+	"Wondrous Item": ["wondrous-items:(detailUrlName)"],
+	"spellsLevel0": ["spell:(detailUrlName)"],
+	"spellsLevel1": ["spell:(detailUrlName)"],
+	"spellsLevel2": ["spell:(detailUrlName)"],
+	"spellsLevel3": ["spell:(detailUrlName)"],
+	"spellsLevel4": ["spell:(detailUrlName)"],
+	"spellsLevel5": ["spell:(detailUrlName)"],
+	"spellsLevel6": ["spell:(detailUrlName)"],
+	"spellsLevel7": ["spell:(detailUrlName)"],
+	"spellsLevel8": ["spell:(detailUrlName)"],
+	"spellsLevel9": ["spell:(detailUrlName)"]
 };
 
 const skillsForAbilities = {
@@ -203,37 +213,36 @@ const emptyCharacterSheetData = {
 	"spellcastingAbility": "",
 	"spellSaveDc": "",
 	"spellAttackBonus": "",
-	"spellsLevel0": Array.from({ length: 8 }, () => [null, ""]),
-	"spellsLevel1": Array.from({ length: 13 }, () => [false, ""]),
+	"spellsLevel0": Array.from({ length: 6 }, () => [null, ""]),
+	"spellsLevel1": Array.from({ length: 10 }, () => [false, ""]),
 	"spellSlotsTotalLevel1": "",
 	"spellSlotsExpendedLevel1": "",
-	"spellsLevel2": Array.from({ length: 13 }, () => [false, ""]),
+	"spellsLevel2": Array.from({ length: 10 }, () => [false, ""]),
 	"spellSlotsTotalLevel2": "",
 	"spellSlotsExpendedLevel2": "",
-	"spellsLevel3": Array.from({ length: 13 }, () => [false, ""]),
+	"spellsLevel3": Array.from({ length: 10 }, () => [false, ""]),
 	"spellSlotsTotalLevel3": "",
 	"spellSlotsExpendedLevel3": "",
-	"spellsLevel4": Array.from({ length: 13 }, () => [false, ""]),
+	"spellsLevel4": Array.from({ length: 10 }, () => [false, ""]),
 	"spellSlotsTotalLevel4": "",
 	"spellSlotsExpendedLevel4": "",
-	"spellsLevel5": Array.from({ length: 9 }, () => [false, ""]),
+	"spellsLevel5": Array.from({ length: 6 }, () => [false, ""]),
 	"spellSlotsTotalLevel5": "",
 	"spellSlotsExpendedLevel5": "",
-	"spellsLevel6": Array.from({ length: 9 }, () => [false, ""]),
+	"spellsLevel6": Array.from({ length: 6 }, () => [false, ""]),
 	"spellSlotsTotalLevel6": "",
 	"spellSlotsExpendedLevel6": "",
-	"spellsLevel7": Array.from({ length: 9 }, () => [false, ""]),
+	"spellsLevel7": Array.from({ length: 6 }, () => [false, ""]),
 	"spellSlotsTotalLevel7": "",
 	"spellSlotsExpendedLevel7": "",
-	"spellsLevel8": Array.from({ length: 7 }, () => [false, ""]),
+	"spellsLevel8": Array.from({ length: 5 }, () => [false, ""]),
 	"spellSlotsTotalLevel8": "",
 	"spellSlotsExpendedLevel8": "",
-	"spellsLevel9": Array.from({ length: 7 }, () => [false, ""]),
+	"spellsLevel9": Array.from({ length: 5 }, () => [false, ""]),
 	"spellSlotsTotalLevel9": "",
 	"spellSlotsExpendedLevel9": ""
 };
-let characterSheetData = structuredClone
-	(emptyCharacterSheetData);
+let characterSheetData = structuredClone(emptyCharacterSheetData);
 const weaponRowTemplate = document.getElementById("weaponRowTemplate");
 const spellRowTemplate = document.getElementById("spellRowTemplate");
 let searchedDetails = {};
@@ -531,6 +540,7 @@ function addSpellRow(id, spellData) {
 		}
 	});
 	spellsElem.appendChild(rowElem);
+	checkForDetailsInInput(spellsElem.lastElementChild.getElementsByClassName("spell__name")[0]);
 };
 
 function updateInput(id, value) {
@@ -554,7 +564,7 @@ function updateInput(id, value) {
 	};
 	if (["characterName", "characterName2"].includes(elem.id))
 		document.getElementById((elem.id == "characterName") ? "characterName2" : "characterName").value = elem.value;
-	checkForDetailsInInput(id);
+	checkForDetailsInInput(elem);
 };
 
 function updateCharacterSheetDataAndInput(id, value) {
@@ -607,6 +617,8 @@ function addDetailButtonIfNotExist(detailName, detailUrlName, detailType) {
 	let detailButtonsContainerElem;
 	if (["Adventuring Gear", "Armor", "Wondrous Item"].includes(detailType))
 		detailButtonsContainerElem = document.getElementsByClassName("equipment__detailButtonsContainer")[0];
+	else if (detailType.startsWith("spells"))
+		detailButtonsContainerElem = document.getElementsByClassName(detailType + "__detailButtonsContainer")[0];
 	else
 		detailButtonsContainerElem = document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0];
 
@@ -774,11 +786,24 @@ async function searchAndAddDetail(detailName, detailTypes) {
 const checkForDetailsInInput = (() => {
 	let delay = 1000;
 	let timeouts = {};
-	return (inputId) => {
-		clearTimeout(timeouts[inputId]);
-		timeouts[inputId] = setTimeout(() => {
+	return (elem) => {
+		let identifier = elem.id;
+		if (!elem.id) {
+			let cellElem = elem.parentElement;
+			let rowElem = cellElem?.parentElement;
+			let tbodyElem = rowElem?.parentElement;
+			if (!tbodyElem) return;
+			identifier =
+				tbodyElem.id +
+				"-" +
+				([...tbodyElem.children].indexOf(rowElem) + 1) +
+				"-" +
+				([...rowElem.children].indexOf(cellElem) + 1);
+		};
+		clearTimeout(timeouts[identifier]);
+		timeouts[identifier] = setTimeout(() => {
 			let detailTypes = [];
-			switch (inputId) {
+			switch (elem.id) {
 				case "classAndLevel":
 					detailTypes = ["Class"];
 					break;
@@ -793,6 +818,13 @@ const checkForDetailsInInput = (() => {
 					break;
 				case "equipmentNotes":
 					detailTypes = ["Adventuring Gear", "Armor", "Wondrous Item"];
+					break;
+				default:
+					break;
+			};
+			switch (elem.className) {
+				case "spell__name":
+					detailTypes = ["Spell"];
 					break;
 				default:
 					break;
@@ -824,8 +856,14 @@ const checkForDetailsInInput = (() => {
 			if (detailTypes.includes("Wondrous Item"))
 				regexes.push({ "regexObject": /^\s*([\w ]+?)( ?x ?\d+)?\s*$/gm, "detailTypes": ["Wondrous Item"] });
 
+			if (detailTypes.includes("Spell"))
+				regexes.push({
+					"regexObject": /^\s*(.+)\s*$/g,
+					"detailTypes": [elem.parentElement.parentElement.parentElement.id]
+				});
+
 			regexes.forEach(regex => {
-				for (let detail of document.getElementById(inputId).value.matchAll(regex["regexObject"])) {
+				for (let detail of elem.value.matchAll(regex["regexObject"])) {
 					let detailName = detail[1].trim();
 					if (!detailName) continue;
 					searchAndAddDetail(detailName, regex["detailTypes"]);
@@ -916,7 +954,7 @@ function inputEventListener(evt) {
 		characterSheetData[elem.id] = (typeof characterSheetData[elem.id] == "number") ? Number(elem.value) : elem.value;
 	autosaveCharacterSheet();
 
-	checkForDetailsInInput(elem.id);
+	checkForDetailsInInput(elem);
 
 	if (elem.classList.contains("ability__score"))
 		updateAbilityModifier(elem.id.substring(0, elem.id.length - "AbilityScore".length));

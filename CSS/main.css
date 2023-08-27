@@ -547,7 +547,7 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	justify-content: center;
 	flex-wrap: wrap;
 	gap: 0.5em;
-	max-height: 15%;
+	max-height: 20%;
 	overflow: auto;
 }
 .detailButtonsContainer:empty {
@@ -590,11 +590,14 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
+	gap: 0.5em;
 }
 
 .spellsContainer {
+	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
+	justify-content: space-evenly;
 	align-items: stretch;
 }
 .spellsContainer__header {
@@ -614,6 +617,9 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 }
 .spellsContainer__header input {
 	flex-basis: 0em;
+}
+.spellsContainer .detailButtonsContainer {
+	margin-top: 0.5em;
 }
 .spellsContainer__table {
 	border-spacing: 0.5em;
