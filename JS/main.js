@@ -834,7 +834,7 @@ const checkForDetailsInInput = (() => {
 				regexes.push({ "regexObject": /^\s*([\w ]+?)( ?x ?\d+)?\s*$/gm, "detailTypes": ["Wondrous Item"] });
 
 			if (detailTypes.includes("Spell"))
-				regexes.push({ "regexObject": /^\s*(.+)\s*$/g, "detailTypes": ["Spell"] });
+				regexes.push({ "regexObject": /^\s*(.+?)( ?\(.+\))?\s*$/g, "detailTypes": ["Spell"] });
 
 			regexes.forEach((regex) => {
 				for (let detail of elem.value.matchAll(regex["regexObject"])) {
@@ -860,7 +860,6 @@ const checkForDetailsInInput = (() => {
 
 							addDetailButtonIfNotExist(detailName, detailUrlName, containerElem);
 						});
-
 				};
 			});
 		}, delay);

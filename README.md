@@ -5,7 +5,8 @@ This character sheet automatically updates ability, saving throw and skill modif
 
 * Class should be one word (may be hyphenated)
 * Feats and subclasses should be on one line and end with ':' or ' - '
-* Spells, race and background should be on one line
+* Spells should be on one line and may end with text in '()'
+* Race and background should be on one line
 * Adventuring gear (packs) should be on one line and end with "'s pack" and maybe ' x' + a number
 * Armor should be on one line and end with ' armor' or ' armour' and maybe ' x' + a number
 * Wondrous items should be on one line and may end with ' x' + a number
