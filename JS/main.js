@@ -1052,8 +1052,14 @@ document.addEventListener("keydown", evt => {
 	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "d") {
 		evt.preventDefault();
 		button = document.getElementsByClassName("donationButton")[0];
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "ArrowLeft") {
+		evt.preventDefault();
+		button = document.getElementsByClassName("previousButton")[0];
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "ArrowRight") {
+		evt.preventDefault();
+		button = document.getElementsByClassName("nextButton")[0];
 	};
-	if (document.getElementById("modal")) return
+	if (document.getElementById("modal")) return;
 	button?.click();
 });
 
