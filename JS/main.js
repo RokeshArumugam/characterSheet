@@ -854,7 +854,7 @@ const checkForDetailsInInput = (() => {
 							if (["Adventuring Gear", "Armor", "Wondrous Item"].includes(searchedDetails[detailUrlName]["detailType"]))
 								containerElem = document.getElementsByClassName("equipment__detailButtonsContainer")[0];
 							else if (searchedDetails[detailUrlName]["detailType"] == "Spell")
-								containerElem = document.getElementsByClassName(elem.parentElement.parentElement.parentElement.id + "__detailButtonsContainer")[0];
+								containerElem = elem.parentElement;
 							else
 								containerElem = document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0];
 

@@ -553,13 +553,23 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 .detailButtonsContainer:empty {
 	display: none;
 }
+.detailButtonsContainer + textarea {
+	flex-grow: 1;
+}
 .detailButton {
+	flex-shrink: 0;
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
 }
-.detailButton span {
-	flex-grow: 1;
+input + .detailButton {
+	padding: 0.25em 0.5em;
+}
+input + .detailButton span {
+	display: none;
+}
+input + .detailButton::before {
+	content: "Info";
 }
 .detailButton i {
 	--diameter: 1.25em;
@@ -570,9 +580,6 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 	height: var(--diameter);
 	background-color: var(--on-primary-color);
 	color: var(--primary-color);
-}
-.detailButtonsContainer + textarea {
-	flex-grow: 1;
 }
 
 /* Page 1 */
@@ -624,8 +631,12 @@ input[name="doubleCheckbox"][value="2"] + label::after {
 .spellsContainer__table {
 	border-spacing: 0.5em;
 }
-.spellsContainer__table td:nth-child(1) {
+.spellsContainer__table td:nth-last-child(2) {
 	width: 1.3em;
+}
+.spellsContainer__table td:nth-last-child(1) {
+	display: flex;
+	gap: 0.5em;
 }
 
 /* Page 2 */
