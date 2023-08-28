@@ -78,16 +78,7 @@ const pathnamesForDetailType = {
 	"Adventuring Gear": ["(detailUrlName)"],
 	"Armor": ["(detailUrlName)"],
 	"Wondrous Item": ["wondrous-items:(detailUrlName)"],
-	"spellsLevel0": ["spell:(detailUrlName)"],
-	"spellsLevel1": ["spell:(detailUrlName)"],
-	"spellsLevel2": ["spell:(detailUrlName)"],
-	"spellsLevel3": ["spell:(detailUrlName)"],
-	"spellsLevel4": ["spell:(detailUrlName)"],
-	"spellsLevel5": ["spell:(detailUrlName)"],
-	"spellsLevel6": ["spell:(detailUrlName)"],
-	"spellsLevel7": ["spell:(detailUrlName)"],
-	"spellsLevel8": ["spell:(detailUrlName)"],
-	"spellsLevel9": ["spell:(detailUrlName)"]
+	"Spell": ["spell:(detailUrlName)"]
 };
 
 const skillsForAbilities = {
@@ -613,16 +604,8 @@ function updateAbilityModifier(abilityName) {
 
 // -- Details
 
-function addDetailButtonIfNotExist(detailName, detailUrlName, detailType) {
+function addDetailButtonIfNotExist(detailName, detailUrlName, containerElem) {
 	if (document.getElementById("detailButton-" + detailUrlName)) return;
-
-	let detailButtonsContainerElem;
-	if (["Adventuring Gear", "Armor", "Wondrous Item"].includes(detailType))
-		detailButtonsContainerElem = document.getElementsByClassName("equipment__detailButtonsContainer")[0];
-	else if (detailType.startsWith("spells"))
-		detailButtonsContainerElem = document.getElementsByClassName(detailType + "__detailButtonsContainer")[0];
-	else
-		detailButtonsContainerElem = document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0];
 
 	let detailButtonElem = document.createElement("div");
 	detailButtonElem.id = "detailButton-" + detailUrlName;
@@ -649,11 +632,10 @@ function addDetailButtonIfNotExist(detailName, detailUrlName, detailType) {
 	detailButtonCloseElem.addEventListener("click", _ => detailButtonElem.remove());
 	detailButtonElem.appendChild(detailButtonCloseElem);
 
-	detailButtonsContainerElem.appendChild(detailButtonElem);
+	containerElem.appendChild(detailButtonElem);
 }
 
-async function searchAndAddDetail(detailName, detailTypes) {
-	detailName = detailName.toSmartTitleCase();
+async function searchDetail(detailName, detailTypes) {
 	let detailUrlName = getDetailUrlNameForDetailName(detailName);
 
 	let classUrlName = "";
@@ -666,19 +648,11 @@ async function searchAndAddDetail(detailName, detailTypes) {
 	} else if (detailTypes.includes("Race")) {
 		mainRaceName = detailName.match(/\S*$/g)[0].toSmartTitleCase();
 		mainRaceUrlName = getDetailUrlNameForDetailName(mainRaceName);
-	} else if (detailTypes.includes("Adventuring Gear")) {
-		detailName = "Adventuring Gear";
-		detailUrlName = "adventuring-gear";
-	} else if (detailTypes.includes("Armor")) {
-		detailName = "Armor";
-		detailUrlName = "armor";
 	};
 
 	if (detailUrlName in searchedDetails) {
 		if (Object.keys(searchedDetails[detailUrlName]).length)
-			addDetailButtonIfNotExist(
-				detailName, detailUrlName, searchedDetails[detailUrlName]["detailType"]
-			);
+			return detailUrlName;
 		return;
 	};
 	searchedDetails[detailUrlName] = {};
@@ -777,10 +751,9 @@ async function searchAndAddDetail(detailName, detailTypes) {
 					searchedDetails[detailUrlName] = {
 						detailType, description, prerequisites, source, url
 					};
-
-					addDetailButtonIfNotExist(detailName, detailUrlName, detailType);
 				}).catch(err => console.error(err));
-			if (Object.keys(searchedDetails[detailUrlName]).length) return;
+			if (Object.keys(searchedDetails[detailUrlName]).length)
+				return detailUrlName;
 		};
 	};
 };
@@ -824,12 +797,14 @@ const checkForDetailsInInput = (() => {
 				default:
 					break;
 			};
-			switch (elem.className) {
-				case "spell__name":
-					detailTypes = ["Spell"];
-					break;
-				default:
-					break;
+			if (!detailTypes.length) {
+				switch (elem.className) {
+					case "spell__name":
+						detailTypes = ["Spell"];
+						break;
+					default:
+						break;
+				};
 			};
 
 			let regexes = [];
@@ -859,16 +834,33 @@ const checkForDetailsInInput = (() => {
 				regexes.push({ "regexObject": /^\s*([\w ]+?)( ?x ?\d+)?\s*$/gm, "detailTypes": ["Wondrous Item"] });
 
 			if (detailTypes.includes("Spell"))
-				regexes.push({
-					"regexObject": /^\s*(.+)\s*$/g,
-					"detailTypes": [elem.parentElement.parentElement.parentElement.id]
-				});
+				regexes.push({ "regexObject": /^\s*(.+)\s*$/g, "detailTypes": ["Spell"] });
 
-			regexes.forEach(regex => {
+			regexes.forEach((regex) => {
 				for (let detail of elem.value.matchAll(regex["regexObject"])) {
-					let detailName = detail[1].trim();
+					let detailName = detail[1].trim().toSmartTitleCase();
 					if (!detailName) continue;
-					searchAndAddDetail(detailName, regex["detailTypes"]);
+
+					if (regex["detailTypes"].includes("Adventuring Gear"))
+						detailName = "Adventuring Gear";
+					else if (regex["detailTypes"].includes("Armor"))
+						detailName = "Armor";
+
+					searchDetail(detailName, regex["detailTypes"])
+						.then(detailUrlName => {
+							if (!searchedDetails[detailUrlName]) return;
+
+							let containerElem;
+							if (["Adventuring Gear", "Armor", "Wondrous Item"].includes(searchedDetails[detailUrlName]["detailType"]))
+								containerElem = document.getElementsByClassName("equipment__detailButtonsContainer")[0];
+							else if (searchedDetails[detailUrlName]["detailType"] == "Spell")
+								containerElem = document.getElementsByClassName(elem.parentElement.parentElement.parentElement.id + "__detailButtonsContainer")[0];
+							else
+								containerElem = document.getElementsByClassName("featuresAndTraits__detailButtonsContainer")[0];
+
+							addDetailButtonIfNotExist(detailName, detailUrlName, containerElem);
+						});
+
 				};
 			});
 		}, delay);
