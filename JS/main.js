@@ -810,7 +810,7 @@ const checkForDetailsInInput = (() => {
 			let regexes = [];
 
 			if (detailTypes.includes("Class"))
-				regexes.push({ "regexObject": /^\s*([\w\-]+)\s*/g, "detailTypes": ["Class"] });
+				regexes.push({ "regexObject": /^\s*(.+?)( ?(level)? ? \d+)?\s*$/g, "detailTypes": ["Class"] });
 
 			if (detailTypes.includes("Background") || detailTypes.includes("Race"))
 				regexes.push({
