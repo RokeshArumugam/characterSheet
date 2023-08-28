@@ -917,7 +917,7 @@ function inputEventListener(evt) {
 		) {
 			characterSheetData["weapons"].splice(characterSheetData["weapons"].length - 2, 1);
 			tbodyElem.children[tbodyElem.children.length - 2].remove();
-			tbodyElem.lastElementChild.firstElementChild.children[cellIndex].focus();
+			tbodyElem.lastElementChild.children[cellIndex].firstElementChild.focus();
 		};
 	} else if (elem.className.startsWith("spell__")) {
 		let cellElem = elem.parentElement;
@@ -939,7 +939,7 @@ function inputEventListener(evt) {
 		) {
 			characterSheetData[tbodyElem.id].splice(characterSheetData[tbodyElem.id].length - 2, 1);
 			tbodyElem.children[tbodyElem.children.length - 2].remove();
-			tbodyElem.lastElementChild.firstElementChild.children[cellIndex].focus();
+			tbodyElem.lastElementChild.children[cellIndex].firstElementChild.focus();
 		};
 	} else if (elem.type == "checkbox")
 		characterSheetData[elem.id] = elem.checked;
