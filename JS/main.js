@@ -30,7 +30,7 @@ const modalTemplates = {
 			<i id="modal__icon" class="fas"></i>
 			<span id="modal__heading">Alert</span>
 			<div id="modal__message"></div>
-			<input id="modal__characterSheetFileInput" type="file" accept=".characterSheet">
+			<input id="modal__characterSheetFileInput" type="file" accept=".pdf">
 			<div id="modal__characterSheetsContainer"></div>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Start a New Character</button>
