@@ -749,8 +749,7 @@ function showModal(options) {
 							characterSheetData["lastAutosave"] = Date.now();
 							evt.target.parentElement.close();
 							resolve(null);
-						}).catch((err) => {
-							console.error(err)
+						}).catch(() => {
 							evt.target.setCustomValidity("File contents are invalid. Must be the official editable PDF.");
 							evt.target.reportValidity();
 						});
@@ -1541,7 +1540,7 @@ document.getElementsByClassName("nextButton")[0].addEventListener("click", evt =
 document.getElementsByClassName("saveButton")[0].addEventListener("click", _ => {
 	showModal({
 		"template": modalTemplates["save"],
-		"message": "You can click 'Download' to download a copy of this character sheet and upload it the next time you visit this website.\n\nYour character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
+		"message": "You can click 'Download' to download an editable PDF of this character sheet and upload it the next time you visit this website.\n\nYour character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.",
 		"heading": "Saving This Character Sheet",
 		"icon": "fa-floppy-disk"
 	});

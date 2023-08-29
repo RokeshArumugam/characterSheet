@@ -14,6 +14,6 @@ This character sheet automatically updates ability, saving throw and skill modif
 The information is scraped from [http://dnd5e.wikidot.com](http://dnd5e.wikidot.com).
 
 ## Loading and Saving
-You can load a character sheet from a file, or you can use one that you have previously used on this device, or start a new character altogether.
+You can load a character sheet by uploading an editable PDF, or you can use one that you have previously used on this device, or start a new character altogether.
 
-To save, you can download a copy of this character sheet and upload it the next time you visit this website. Your character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.
+To save, you can download an editable PDF of this character sheet and upload it the next time you visit this website. Your character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.
