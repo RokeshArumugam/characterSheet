@@ -1362,7 +1362,6 @@ const checkForDetailsInInput = (() => {
 						detailName = "Adventuring Gear";
 					else if (regex["detailTypes"].includes("Armor"))
 						detailName = "Armor";
-					continue; // For testing
 
 					searchDetail(detailName, regex["detailTypes"])
 						.then(detailUrlName => {
