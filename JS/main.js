@@ -639,19 +639,120 @@ function showModal(options) {
 				});
 				break;
 			case modalTemplates["welcome"]:
-				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", inputEvt => {
-					let reader = new FileReader();
-					reader.addEventListener("load", loadEvt => {
-						try {
-							characterSheetData = JSON.parse(loadEvt.target.result);
-							inputEvt.target.parentElement.close();
+				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", evt => {
+					evt.target.files[0].arrayBuffer()
+						.then(pdfBytes => PDFLib.PDFDocument.load(pdfBytes))
+						.then(pdfDoc => {
+							pdfDoc.getForm().getFields().forEach(field => {
+								let fieldName = field.getName();
+								let dataKey = pdfKeyMap[fieldName]
+								if (!dataKey) return;
+
+								let data = (field.constructor.name == "PDFCheckBox") ? field.isChecked() : (field.getText() ?? "");
+								if (typeof dataKey != "object") dataKey = [dataKey];
+
+								if (dataKey[0] == "inspiration") {
+									data = ["yes", "y"].includes(data.toLowerCase()) || (parseInt(data) > 0);
+								} else if (["proficiencyBonus", "armorClass", "initiative", "speed", "hitPointMaximum", "currentHitPoints", "temporaryHitPoints"].includes(dataKey[0]) || dataKey[0].endsWith("Score") || dataKey[0].endsWith("Modifier") || dataKey[0].endsWith("Pieces")) {
+									data = parseInt(data);
+									if (isNaN(data)) data = 0;
+								} else if (dataKey[0].endsWith("ProficiencyLevel")) {
+									data = Math.max(characterSheetData[dataKey[0]], data ? 1 : 0);
+								} else if (["deathSaveSuccesses", "deathSaveFailures"].includes(dataKey[0])) {
+									if (["Check Box 12", "Check Box 15"].includes(fieldName))
+										data = Math.max(characterSheetData[dataKey[0]], data ? 1 : 0);
+									else if (["Check Box 13", "Check Box 16"].includes(fieldName))
+										data = Math.max(characterSheetData[dataKey[0]], data ? 2 : 0);
+									else if (["Check Box 14", "Check Box 17"].includes(fieldName))
+										data = Math.max(characterSheetData[dataKey[0]], data ? 3 : 0);
+								} else if (
+									(dataKey[0] == "weapons") &&
+									(dataKey[1] == (emptyCharacterSheetData["weapons"].length - 1)) &&
+									(characterSheetData["weapons"].length == emptyCharacterSheetData["weapons"].length)
+								) {
+									characterSheetData["weapons"].push([...emptyCharacterSheetData["weapons"][0]]);
+								} else if (dataKey[0] == "attacksNotes") {
+									let delimiterIndex = data.indexOf("\n\n");
+									if (delimiterIndex != -1) {
+										let dataHead = data.slice(0, delimiterIndex);
+										let dataBody = data.slice(delimiterIndex + 2);
+										let extraWeapons = Array.from(dataHead.matchAll(/^(.*), (.*), (.*)$/gm));
+										if (extraWeapons.length) {
+											data = dataHead.replace(/^(.*), (.*), (.*)$/gm, "").trim() + dataBody;
+											characterSheetData["weapons"] = characterSheetData["weapons"].slice(0, emptyCharacterSheetData["weapons"].length)
+											extraWeapons.forEach(extraWeapon => {
+												characterSheetData["weapons"].push(extraWeapon.slice(1));
+											});
+											characterSheetData["weapons"].push([...emptyCharacterSheetData["weapons"][0]]);
+										}
+									};
+								} else if ((dataKey[0] == "otherProficienciesAndLanguages")) {
+									let savingThrowExpertise;
+									let skillExpertise;
+									let delimiterIndex = data.indexOf("\n\n");
+									if (delimiterIndex != -1) {
+										let dataHead = data.slice(0, delimiterIndex);
+										let dataBody = data.slice(delimiterIndex + 2);
+										savingThrowExpertise = dataHead.match(/^Expertise in Saving Throws: (.+)$/im)?.[1];
+										skillExpertise = dataHead.match(/^Expertise in Skill Checks: (.+)$/im)?.[1];
+										if (savingThrowExpertise || skillExpertise)
+											data = dataHead.replace(/^Expertise in (Saving Throws|Skill Checks): .+$/igm, "").trim() + dataBody;
+									}
+									savingThrowExpertise?.split(", ").forEach(savingThrow => {
+										characterSheetData[savingThrow.toLowerCamelCase() + "SavingThrowProficiencyLevel"] = 2;
+									});
+									skillExpertise?.split(", ").forEach(skill => {
+										characterSheetData[skill.toLowerCamelCase() + "SkillProficiencyLevel"] = 2;
+									});
+								} else if ((dataKey[0] == "additionalFeaturesAndTraits")) {
+									let delimiterIndex = data.indexOf("\n\n");
+									if (delimiterIndex != -1) {
+										let dataHead = data.slice(0, delimiterIndex);
+										let dataBody = data.slice(delimiterIndex + 2);
+										let appearance = dataHead.match(/^Character Appearance: ([^]*)/im)?.[1];
+										if (appearance) {
+											data = dataHead.replace(/^Character Appearance: [^]*/im, "").trim() + dataBody;
+											characterSheetData["characterAppearance"] = appearance;
+										};
+									};
+								} else if (
+									dataKey[0].startsWith("spells") &&
+									(dataKey[1] == (emptyCharacterSheetData[dataKey[0]].length - 1)) &&
+									(characterSheetData[dataKey[0]].length == emptyCharacterSheetData[dataKey[0]].length)
+								) {
+									characterSheetData[dataKey[0]].push([...emptyCharacterSheetData[dataKey[0]][0]]);
+								} else if (
+									dataKey[0].startsWith("spells") &&
+									[
+										"Spells 1022", "Spells 1033", "Spells 1045", "Spells 1059", "Spells 1072", "Spells 1081", "Spells 1090", "Spells 1099", "Spells 10106", "Spells 101013"
+									].includes(fieldName)) {
+									let extraSpells = data.split(", ").slice(1).map(spell => {
+										return [spell.includes("prepared"), spell.replace(/^\(u?n?prepared\) /, "")]
+									})
+									if (extraSpells.length) {
+										data = data.split(", ")[0];
+										characterSheetData[dataKey[0]] = characterSheetData[dataKey[0]].slice(
+											0,
+											emptyCharacterSheetData[dataKey[0]].length - ((fieldName == "Spells 1033") ? 1 : 0)
+										)
+										extraSpells.forEach(extraSpell => {
+											characterSheetData[dataKey[0]].push(extraSpell);
+										});
+										characterSheetData[dataKey[0]].push([...emptyCharacterSheetData[dataKey[0]][0]]);
+									};
+								};
+
+								if (dataKey.length == 1) characterSheetData[dataKey[0]] = data;
+								else if (dataKey.length == 2) characterSheetData[dataKey[0]][dataKey[1]] = data;
+								else if (dataKey.length == 3) characterSheetData[dataKey[0]][dataKey[1]][dataKey[2]] = data;
+							});
+							evt.target.parentElement.close();
 							resolve(null);
-						} catch (error) {
-							inputEvt.target.setCustomValidity("File contents are invalid");
-							inputEvt.target.reportValidity();
-						};
-					});
-					reader.readAsText(inputEvt.target.files[0]);
+						}).catch((err) => {
+							console.error(err)
+							evt.target.setCustomValidity("File contents are invalid");
+							evt.target.reportValidity();
+						});
 				});
 
 				let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
@@ -726,8 +827,7 @@ function showModal(options) {
 					.then(response => response.arrayBuffer())
 					.then(pdfBytes => PDFLib.PDFDocument.load(pdfBytes))
 					.then(pdfDoc => {
-						const form = pdfDoc.getForm();
-						form.getFields().forEach(field => {
+						pdfDoc.getForm().getFields().forEach(field => {
 							let fieldName = field.getName();
 							let dataKey = pdfKeyMap[fieldName]
 							if (!dataKey) return;
@@ -738,7 +838,7 @@ function showModal(options) {
 
 							if (dataKey[0] == "inspiration") {
 								data = data ? "Yes" : "No";
-							} else if (dataKey[0].endsWith("Modifier") || dataKey[0].endsWith("Bonus") || (dataKey[0] == "initiative")) {
+							} else if (["proficiencyBonus", "initiative"].includes(dataKey[0]) || dataKey[0].endsWith("Modifier")) {
 								data = ((data > 0) ? "+" : "") + data;
 							} else if (["deathSaveSuccesses", "deathSaveFailures"].includes(dataKey[0])) {
 								if (["Check Box 12", "Check Box 15"].includes(fieldName)) data = (data >= 1);
@@ -752,7 +852,7 @@ function showModal(options) {
 								).map(
 									weapon => weapon.join(", ")
 								).join("\n");
-								data += ((data && extraWeapons) ? "\n" : "") + extraWeapons;
+								data = extraWeapons + ((data && extraWeapons) ? "\n\n" : "") + data;
 							} else if ((dataKey[0] == "otherProficienciesAndLanguages")) {
 								let savingThrowExpertise = [];
 								let skillExpertise = [];
@@ -767,7 +867,7 @@ function showModal(options) {
 								if (skillExpertise.length) expertiseText += "Expertise in Skill Checks: " + skillExpertise.join(", ") + "\n";
 								if (expertiseText) data = expertiseText + "\n" + data;
 							} else if ((dataKey[0] == "additionalFeaturesAndTraits") && characterSheetData["characterAppearance"]) {
-								data = "Character Appearance: " + characterSheetData["characterAppearance"] + "\n" + data;
+								data = "Character Appearance: " + characterSheetData["characterAppearance"] + "\n\n" + data;
 							} else if (
 								dataKey[0].startsWith("spells") &&
 								[
@@ -872,6 +972,14 @@ String.prototype.toSmartTitleCase = function () {
 			return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
 		}
 	);
+}
+String.prototype.toLowerCamelCase = function () {
+	return this.replace(
+		/\w\S*/g,
+		(word, offset) => {
+			return (offset ? word.charAt(0).toUpperCase() : word.charAt(0).toLowerCase()) + word.substring(1).toLowerCase();
+		}
+	).replaceAll(" ", "");
 }
 
 function getDetailUrlNameForDetailName(detailName) {
@@ -1483,6 +1591,6 @@ fetch("README.md")
 		"heading": "Welcome",
 		"icon": "fa-dice-d20"
 	})).then(_ => {
-		autosaveCharacterSheet(false);
+		autosaveCharacterSheet();
 		Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
 	});
