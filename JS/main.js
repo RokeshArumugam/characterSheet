@@ -746,11 +746,12 @@ function showModal(options) {
 								else if (dataKey.length == 2) characterSheetData[dataKey[0]][dataKey[1]] = data;
 								else if (dataKey.length == 3) characterSheetData[dataKey[0]][dataKey[1]][dataKey[2]] = data;
 							});
+							characterSheetData["lastAutosave"] = Date.now();
 							evt.target.parentElement.close();
 							resolve(null);
 						}).catch((err) => {
 							console.error(err)
-							evt.target.setCustomValidity("File contents are invalid");
+							evt.target.setCustomValidity("File contents are invalid. Must be the official editable PDF.");
 							evt.target.reportValidity();
 						});
 				});
@@ -1591,6 +1592,6 @@ fetch("README.md")
 		"heading": "Welcome",
 		"icon": "fa-dice-d20"
 	})).then(_ => {
-		autosaveCharacterSheet();
+		autosaveCharacterSheet(false);
 		Object.entries(characterSheetData).forEach(([key, value]) => updateInput(key, value))
 	});
