@@ -44,7 +44,7 @@ const modalTemplates = {
 			<div id="modal__message"></div>
 			<div class="modal__fileContainer">
 				<div class="modal__file">
-					<i class="far fa-file modal__fileIcon" draggable="true"></i>
+					<i class="fas fa-file-pdf modal__fileIcon" draggable="true"></i>
 					<span class="modal__fileName"></span>
 				</div>
 				<button class="modal__fileDownload primaryButton">Download</button>
@@ -233,6 +233,339 @@ const emptyCharacterSheetData = {
 	"spellSlotsTotalLevel9": "",
 	"spellSlotsExpendedLevel9": ""
 };
+const pdfKeyMap = {
+	"CharacterName": "characterName",
+	"CharacterName 2": "characterName",
+	"ClassLevel": "classAndLevel",
+	"Background": "background",
+	"PlayerName": "playerName",
+	"Race ": "race",
+	"Alignment": "alignment",
+	"XP": "experiencePoints",
+	"STR": "strengthAbilityModifier",
+	"STRmod": "strengthAbilityScore",
+	"DEX": "dexterityAbilityModifier",
+	"DEXmod ": "dexterityAbilityScore",
+	"CON": "constitutionAbilityModifier",
+	"CONmod": "constitutionAbilityScore",
+	"INT": "intelligenceAbilityModifier",
+	"INTmod": "intelligenceAbilityScore",
+	"WIS": "wisdomAbilityModifier",
+	"WISmod": "wisdomAbilityScore",
+	"CHA": "charismaAbilityModifier",
+	"CHamod": "charismaAbilityScore",
+	"Inspiration": "inspiration",
+	"ProfBonus": "proficiencyBonus",
+	"Check Box 11": "strengthSavingThrowProficiencyLevel",
+	"ST Strength": "strengthSavingThrowModifier",
+	"Check Box 18": "dexteritySavingThrowProficiencyLevel",
+	"ST Dexterity": "dexteritySavingThrowModifier",
+	"Check Box 19": "constitutionSavingThrowProficiencyLevel",
+	"ST Constitution": "constitutionSavingThrowModifier",
+	"Check Box 20": "intelligenceSavingThrowProficiencyLevel",
+	"ST Intelligence": "intelligenceSavingThrowModifier",
+	"Check Box 21": "wisdomSavingThrowProficiencyLevel",
+	"ST Wisdom": "wisdomSavingThrowModifier",
+	"Check Box 22": "charismaSavingThrowProficiencyLevel",
+	"ST Charisma": "charismaSavingThrowModifier",
+	"Check Box 23": "acrobaticsSkillProficiencyLevel",
+	"Acrobatics": "acrobaticsSkillModifier",
+	"Check Box 24": "animalHandlingSkillProficiencyLevel",
+	"Animal": "animalHandlingSkillModifier",
+	"Check Box 25": "arcanaSkillProficiencyLevel",
+	"Arcana": "arcanaSkillModifier",
+	"Check Box 26": "athleticsSkillProficiencyLevel",
+	"Athletics": "athleticsSkillModifier",
+	"Check Box 27": "deceptionSkillProficiencyLevel",
+	"Deception ": "deceptionSkillModifier",
+	"Check Box 28": "historySkillProficiencyLevel",
+	"History ": "historySkillModifier",
+	"Check Box 29": "insightSkillProficiencyLevel",
+	"Insight": "insightSkillModifier",
+	"Check Box 30": "intimidationSkillProficiencyLevel",
+	"Intimidation": "intimidationSkillModifier",
+	"Check Box 31": "investigationSkillProficiencyLevel",
+	"Investigation ": "investigationSkillModifier",
+	"Check Box 32": "medicineSkillProficiencyLevel",
+	"Medicine": "medicineSkillModifier",
+	"Check Box 33": "natureSkillProficiencyLevel",
+	"Nature": "natureSkillModifier",
+	"Check Box 34": "perceptionSkillProficiencyLevel",
+	"Perception ": "perceptionSkillModifier",
+	"Check Box 35": "performanceSkillProficiencyLevel",
+	"Performance": "performanceSkillModifier",
+	"Check Box 36": "persuasionSkillProficiencyLevel",
+	"Persuasion": "persuasionSkillModifier",
+	"Check Box 37": "religionSkillProficiencyLevel",
+	"Religion": "religionSkillModifier",
+	"Check Box 38": "sleightOfHandSkillProficiencyLevel",
+	"SleightofHand": "sleightOfHandSkillModifier",
+	"Check Box 39": "stealthSkillProficiencyLevel",
+	"Stealth ": "stealthSkillModifier",
+	"Check Box 40": "survivalSkillProficiencyLevel",
+	"Survival": "survivalSkillModifier",
+	"AC": "armorClass",
+	"Initiative": "initiative",
+	"Speed": "speed",
+	"HPMax": "hitPointMaximum",
+	"HPCurrent": "currentHitPoints",
+	"HPTemp": "temporaryHitPoints",
+	"HDTotal": "totalHitDice",
+	"HD": "currentHitDice",
+	"Check Box 12": "deathSaveSuccesses",
+	"Check Box 13": "deathSaveSuccesses",
+	"Check Box 14": "deathSaveSuccesses",
+	"Check Box 15": "deathSaveFailures",
+	"Check Box 16": "deathSaveFailures",
+	"Check Box 17": "deathSaveFailures",
+	"PersonalityTraits ": "personalityTraits",
+	"Ideals": "ideals",
+	"Bonds": "bonds",
+	"Flaws": "flaws",
+	"Wpn Name": ["weapons", 0, 0],
+	"Wpn1 AtkBonus": ["weapons", 0, 1],
+	"Wpn1 Damage": ["weapons", 0, 2],
+	"Wpn Name 2": ["weapons", 1, 0],
+	"Wpn2 AtkBonus ": ["weapons", 1, 1],
+	"Wpn2 Damage ": ["weapons", 1, 2],
+	"Wpn Name 3": ["weapons", 2, 0],
+	"Wpn3 AtkBonus  ": ["weapons", 2, 1],
+	"Wpn3 Damage ": ["weapons", 2, 2],
+	"AttacksSpellcasting": "attacksNotes",
+	"Features and Traits": "featuresAndTraits",
+	"Passive": "passivePerception",
+	"ProficienciesLang": "otherProficienciesAndLanguages",
+	"CP": "copperPieces",
+	"SP": "silverPieces",
+	"EP": "electrumPieces",
+	"GP": "goldPieces",
+	"PP": "platinumPieces",
+	"Equipment": "equipmentNotes",
+	"Age": "age",
+	"Height": "height",
+	"Weight": "weight",
+	"Eyes": "eyes",
+	"Skin": "skin",
+	"Hair": "hair",
+	"Allies": "alliesAndOrganisations",
+	"Backstory": "characterBackstory",
+	"Feat+Traits": "additionalFeaturesAndTraits",
+	"Treasure": "treasure",
+	"Spellcasting Class 2": "spellcastingClass",
+	"SpellcastingAbility 2": "spellcastingAbility",
+	"SpellSaveDC  2": "spellSaveDc",
+	"SpellAtkBonus 2": "spellAttackBonus",
+	"Spells 1014": ["spellsLevel0", 0, 1],
+	"Spells 1016": ["spellsLevel0", 1, 1],
+	"Spells 1017": ["spellsLevel0", 2, 1],
+	"Spells 1018": ["spellsLevel0", 3, 1],
+	"Spells 1019": ["spellsLevel0", 4, 1],
+	"Spells 1020": ["spellsLevel0", 5, 1],
+	"Spells 1021": ["spellsLevel0", 6, 1],
+	"Spells 1022": ["spellsLevel0", 7, 1],
+	"Check Box 251": ["spellsLevel1", 0, 0],
+	"Spells 1015": ["spellsLevel1", 0, 1],
+	"Check Box 309": ["spellsLevel1", 1, 0],
+	"Spells 1023": ["spellsLevel1", 1, 1],
+	"Check Box 3010": ["spellsLevel1", 2, 0],
+	"Spells 1024": ["spellsLevel1", 2, 1],
+	"Check Box 3011": ["spellsLevel1", 3, 0],
+	"Spells 1025": ["spellsLevel1", 3, 1],
+	"Check Box 3012": ["spellsLevel1", 4, 0],
+	"Spells 1026": ["spellsLevel1", 4, 1],
+	"Check Box 3013": ["spellsLevel1", 5, 0],
+	"Spells 1027": ["spellsLevel1", 5, 1],
+	"Check Box 3014": ["spellsLevel1", 6, 0],
+	"Spells 1028": ["spellsLevel1", 6, 1],
+	"Check Box 3015": ["spellsLevel1", 7, 0],
+	"Spells 1029": ["spellsLevel1", 7, 1],
+	"Check Box 3016": ["spellsLevel1", 8, 0],
+	"Spells 1030": ["spellsLevel1", 8, 1],
+	"Check Box 3017": ["spellsLevel1", 9, 0],
+	"Spells 1031": ["spellsLevel1", 9, 1],
+	"Check Box 3018": ["spellsLevel1", 10, 0],
+	"Spells 1032": ["spellsLevel1", 10, 1],
+	"Check Box 3019": ["spellsLevel1", 11, 0],
+	"Spells 1033": ["spellsLevel1", 11, 1],
+	"SlotsTotal 19": "spellSlotsTotalLevel1",
+	"SlotsRemaining 19": "spellSlotsExpendedLevel1",
+	"Check Box 313": ["spellsLevel2", 0, 0],
+	"Spells 1046": ["spellsLevel2", 0, 1],
+	"Check Box 310": ["spellsLevel2", 1, 0],
+	"Spells 1034": ["spellsLevel2", 1, 1],
+	"Check Box 3020": ["spellsLevel2", 2, 0],
+	"Spells 1035": ["spellsLevel2", 2, 1],
+	"Check Box 3021": ["spellsLevel2", 3, 0],
+	"Spells 1036": ["spellsLevel2", 3, 1],
+	"Check Box 3022": ["spellsLevel2", 4, 0],
+	"Spells 1037": ["spellsLevel2", 4, 1],
+	"Check Box 3023": ["spellsLevel2", 5, 0],
+	"Spells 1038": ["spellsLevel2", 5, 1],
+	"Check Box 3024": ["spellsLevel2", 6, 0],
+	"Spells 1039": ["spellsLevel2", 6, 1],
+	"Check Box 3025": ["spellsLevel2", 7, 0],
+	"Spells 1040": ["spellsLevel2", 7, 1],
+	"Check Box 3026": ["spellsLevel2", 8, 0],
+	"Spells 1041": ["spellsLevel2", 8, 1],
+	"Check Box 3027": ["spellsLevel2", 9, 0],
+	"Spells 1042": ["spellsLevel2", 9, 1],
+	"Check Box 3028": ["spellsLevel2", 10, 0],
+	"Spells 1043": ["spellsLevel2", 10, 1],
+	"Check Box 3029": ["spellsLevel2", 11, 0],
+	"Spells 1044": ["spellsLevel2", 11, 1],
+	"Check Box 3030": ["spellsLevel2", 12, 0],
+	"Spells 1045": ["spellsLevel2", 12, 1],
+	"SlotsTotal 20": "spellSlotsTotalLevel2",
+	"SlotsRemaining 20": "spellSlotsExpendedLevel2",
+	"Check Box 315": ["spellsLevel3", 0, 0],
+	"Spells 1048": ["spellsLevel3", 0, 1],
+	"Check Box 314": ["spellsLevel3", 1, 0],
+	"Spells 1047": ["spellsLevel3", 1, 1],
+	"Check Box 3031": ["spellsLevel3", 2, 0],
+	"Spells 1049": ["spellsLevel3", 2, 1],
+	"Check Box 3032": ["spellsLevel3", 3, 0],
+	"Spells 1050": ["spellsLevel3", 3, 1],
+	"Check Box 3033": ["spellsLevel3", 4, 0],
+	"Spells 1051": ["spellsLevel3", 4, 1],
+	"Check Box 3034": ["spellsLevel3", 5, 0],
+	"Spells 1052": ["spellsLevel3", 5, 1],
+	"Check Box 3035": ["spellsLevel3", 6, 0],
+	"Spells 1053": ["spellsLevel3", 6, 1],
+	"Check Box 3036": ["spellsLevel3", 7, 0],
+	"Spells 1054": ["spellsLevel3", 7, 1],
+	"Check Box 3037": ["spellsLevel3", 8, 0],
+	"Spells 1055": ["spellsLevel3", 8, 1],
+	"Check Box 3038": ["spellsLevel3", 9, 0],
+	"Spells 1056": ["spellsLevel3", 9, 1],
+	"Check Box 3039": ["spellsLevel3", 10, 0],
+	"Spells 1057": ["spellsLevel3", 10, 1],
+	"Check Box 3040": ["spellsLevel3", 11, 0],
+	"Spells 1058": ["spellsLevel3", 11, 1],
+	"Check Box 3041": ["spellsLevel3", 12, 0],
+	"Spells 1059": ["spellsLevel3", 12, 1],
+	"SlotsTotal 21": "spellSlotsTotalLevel3",
+	"SlotsRemaining 21": "spellSlotsExpendedLevel3",
+	"Check Box 317": ["spellsLevel4", 0, 0],
+	"Spells 1061": ["spellsLevel4", 0, 1],
+	"Check Box 316": ["spellsLevel4", 1, 0],
+	"Spells 1060": ["spellsLevel4", 1, 1],
+	"Check Box 3042": ["spellsLevel4", 2, 0],
+	"Spells 1062": ["spellsLevel4", 2, 1],
+	"Check Box 3043": ["spellsLevel4", 3, 0],
+	"Spells 1063": ["spellsLevel4", 3, 1],
+	"Check Box 3044": ["spellsLevel4", 4, 0],
+	"Spells 1064": ["spellsLevel4", 4, 1],
+	"Check Box 3045": ["spellsLevel4", 5, 0],
+	"Spells 1065": ["spellsLevel4", 5, 1],
+	"Check Box 3046": ["spellsLevel4", 6, 0],
+	"Spells 1066": ["spellsLevel4", 6, 1],
+	"Check Box 3047": ["spellsLevel4", 7, 0],
+	"Spells 1067": ["spellsLevel4", 7, 1],
+	"Check Box 3048": ["spellsLevel4", 8, 0],
+	"Spells 1068": ["spellsLevel4", 8, 1],
+	"Check Box 3049": ["spellsLevel4", 9, 0],
+	"Spells 1069": ["spellsLevel4", 9, 1],
+	"Check Box 3050": ["spellsLevel4", 10, 0],
+	"Spells 1070": ["spellsLevel4", 10, 1],
+	"Check Box 3051": ["spellsLevel4", 11, 0],
+	"Spells 1071": ["spellsLevel4", 11, 1],
+	"Check Box 3052": ["spellsLevel4", 12, 0],
+	"Spells 1072": ["spellsLevel4", 12, 1],
+	"SlotsTotal 22": "spellSlotsTotalLevel4",
+	"SlotsRemaining 22": "spellSlotsExpendedLevel4",
+	"Check Box 319": ["spellsLevel5", 0, 0],
+	"Spells 1074": ["spellsLevel5", 0, 1],
+	"Check Box 318": ["spellsLevel5", 1, 0],
+	"Spells 1073": ["spellsLevel5", 1, 1],
+	"Check Box 3053": ["spellsLevel5", 2, 0],
+	"Spells 1075": ["spellsLevel5", 2, 1],
+	"Check Box 3054": ["spellsLevel5", 3, 0],
+	"Spells 1076": ["spellsLevel5", 3, 1],
+	"Check Box 3055": ["spellsLevel5", 4, 0],
+	"Spells 1077": ["spellsLevel5", 4, 1],
+	"Check Box 3056": ["spellsLevel5", 5, 0],
+	"Spells 1078": ["spellsLevel5", 5, 1],
+	"Check Box 3057": ["spellsLevel5", 6, 0],
+	"Spells 1079": ["spellsLevel5", 6, 1],
+	"Check Box 3058": ["spellsLevel5", 7, 0],
+	"Spells 1080": ["spellsLevel5", 7, 1],
+	"Check Box 3059": ["spellsLevel5", 8, 0],
+	"Spells 1081": ["spellsLevel5", 8, 1],
+	"SlotsTotal 23": "spellSlotsTotalLevel5",
+	"SlotsRemaining 23": "spellSlotsExpendedLevel5",
+	"Check Box 321": ["spellsLevel6", 0, 0],
+	"Spells 1083": ["spellsLevel6", 0, 1],
+	"Check Box 320": ["spellsLevel6", 1, 0],
+	"Spells 1082": ["spellsLevel6", 1, 1],
+	"Check Box 3060": ["spellsLevel6", 2, 0],
+	"Spells 1084": ["spellsLevel6", 2, 1],
+	"Check Box 3061": ["spellsLevel6", 3, 0],
+	"Spells 1085": ["spellsLevel6", 3, 1],
+	"Check Box 3062": ["spellsLevel6", 4, 0],
+	"Spells 1086": ["spellsLevel6", 4, 1],
+	"Check Box 3063": ["spellsLevel6", 5, 0],
+	"Spells 1087": ["spellsLevel6", 5, 1],
+	"Check Box 3064": ["spellsLevel6", 6, 0],
+	"Spells 1088": ["spellsLevel6", 6, 1],
+	"Check Box 3065": ["spellsLevel6", 7, 0],
+	"Spells 1089": ["spellsLevel6", 7, 1],
+	"Check Box 3066": ["spellsLevel6", 8, 0],
+	"Spells 1090": ["spellsLevel6", 8, 1],
+	"SlotsTotal 24": "spellSlotsTotalLevel6",
+	"SlotsRemaining 24": "spellSlotsExpendedLevel6",
+	"Check Box 323": ["spellsLevel7", 0, 0],
+	"Spells 1092": ["spellsLevel7", 0, 1],
+	"Check Box 322": ["spellsLevel7", 1, 0],
+	"Spells 1091": ["spellsLevel7", 1, 1],
+	"Check Box 3067": ["spellsLevel7", 2, 0],
+	"Spells 1093": ["spellsLevel7", 2, 1],
+	"Check Box 3068": ["spellsLevel7", 3, 0],
+	"Spells 1094": ["spellsLevel7", 3, 1],
+	"Check Box 3069": ["spellsLevel7", 4, 0],
+	"Spells 1095": ["spellsLevel7", 4, 1],
+	"Check Box 3070": ["spellsLevel7", 5, 0],
+	"Spells 1096": ["spellsLevel7", 5, 1],
+	"Check Box 3071": ["spellsLevel7", 6, 0],
+	"Spells 1097": ["spellsLevel7", 6, 1],
+	"Check Box 3072": ["spellsLevel7", 7, 0],
+	"Spells 1098": ["spellsLevel7", 7, 1],
+	"Check Box 3073": ["spellsLevel7", 8, 0],
+	"Spells 1099": ["spellsLevel7", 8, 1],
+	"SlotsTotal 25": "spellSlotsTotalLevel7",
+	"SlotsRemaining 25": "spellSlotsExpendedLevel7",
+	"Check Box 325": ["spellsLevel8", 0, 0],
+	"Spells 10101": ["spellsLevel8", 0, 1],
+	"Check Box 324": ["spellsLevel8", 1, 0],
+	"Spells 10100": ["spellsLevel8", 1, 1],
+	"Check Box 3074": ["spellsLevel8", 2, 0],
+	"Spells 10102": ["spellsLevel8", 2, 1],
+	"Check Box 3075": ["spellsLevel8", 3, 0],
+	"Spells 10103": ["spellsLevel8", 3, 1],
+	"Check Box 3076": ["spellsLevel8", 4, 0],
+	"Spells 10104": ["spellsLevel8", 4, 1],
+	"Check Box 3077": ["spellsLevel8", 5, 0],
+	"Spells 10105": ["spellsLevel8", 5, 1],
+	"Check Box 3078": ["spellsLevel8", 6, 0],
+	"Spells 10106": ["spellsLevel8", 6, 1],
+	"SlotsTotal 26": "spellSlotsTotalLevel8",
+	"SlotsRemaining 26": "spellSlotsExpendedLevel8",
+	"Check Box 327": ["spellsLevel9", 0, 0],
+	"Spells 10108": ["spellsLevel9", 0, 1],
+	"Check Box 326": ["spellsLevel9", 1, 0],
+	"Spells 10107": ["spellsLevel9", 1, 1],
+	"Check Box 3079": ["spellsLevel9", 2, 0],
+	"Spells 10109": ["spellsLevel9", 2, 1],
+	"Check Box 3080": ["spellsLevel9", 3, 0],
+	"Spells 101010": ["spellsLevel9", 3, 1],
+	"Check Box 3081": ["spellsLevel9", 4, 0],
+	"Spells 101011": ["spellsLevel9", 4, 1],
+	"Check Box 3082": ["spellsLevel9", 5, 0],
+	"Spells 101012": ["spellsLevel9", 5, 1],
+	"Check Box 3083": ["spellsLevel9", 6, 0],
+	"Spells 101013": ["spellsLevel9", 6, 1],
+	"SlotsTotal 27": "spellSlotsTotalLevel9",
+	"SlotsRemaining 27": "spellSlotsExpendedLevel9"
+}
 let characterSheetData = structuredClone(emptyCharacterSheetData);
 const weaponRowTemplate = document.getElementById("weaponRowTemplate");
 const spellRowTemplate = document.getElementById("spellRowTemplate");
@@ -241,7 +574,7 @@ let searchedDetails = {};
 // Utility Functions
 
 function showModal(options) {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		options["template"] ??= modalTemplates["alert"];
 		let modalElem = new DOMParser().parseFromString(options["template"], "text/html");
 		let messageElem = modalElem.getElementById("modal__message");
@@ -389,17 +722,93 @@ function showModal(options) {
 				});
 				break;
 			case modalTemplates["save"]:
-				let downloadUrl = window.URL.createObjectURL(
-					new Blob([JSON.stringify(characterSheetData)], { "type": "text/json" })
-				);
-				let fileName = characterSheetData["characterName"] + ".characterSheet";
+				let downloadUri = await fetch("fillableCharacterSheet.pdf")
+					.then(response => response.arrayBuffer())
+					.then(pdfBytes => PDFLib.PDFDocument.load(pdfBytes))
+					.then(pdfDoc => {
+						const form = pdfDoc.getForm();
+						form.getFields().forEach(field => {
+							let fieldName = field.getName();
+							let dataKey = pdfKeyMap[fieldName]
+							if (!dataKey) return;
+
+							let data = characterSheetData;
+							if (typeof dataKey != "object") dataKey = [dataKey];
+							for (let key of dataKey) data = data[key];
+
+							if (dataKey[0] == "inspiration") {
+								data = data ? "Yes" : "No";
+							} else if (dataKey[0].endsWith("Modifier") || dataKey[0].endsWith("Bonus") || (dataKey[0] == "initiative")) {
+								data = ((data > 0) ? "+" : "") + data;
+							} else if (["deathSaveSuccesses", "deathSaveFailures"].includes(dataKey[0])) {
+								if (["Check Box 12", "Check Box 15"].includes(fieldName)) data = (data >= 1);
+								else if (["Check Box 13", "Check Box 16"].includes(fieldName)) data = (data >= 2);
+								else if (["Check Box 14", "Check Box 17"].includes(fieldName)) data = (data >= 3);
+							} else if (dataKey[0] == "attacksNotes") {
+								let extraWeapons = characterSheetData["weapons"].slice(
+									emptyCharacterSheetData["weapons"].length
+								).filter(
+									weapon => weapon.join("")
+								).map(
+									weapon => weapon.join(", ")
+								).join("\n");
+								data += ((data && extraWeapons) ? "\n" : "") + extraWeapons;
+							} else if ((dataKey[0] == "otherProficienciesAndLanguages")) {
+								let savingThrowExpertise = [];
+								let skillExpertise = [];
+								let expertiseText = "";
+								for (let key of Object.keys(characterSheetData).filter(key => key.endsWith("ProficiencyLevel"))) {
+									if (characterSheetData[key] != 2) continue;
+									let keyStem = key.replace(/(SavingThrow|Skill)ProficiencyLevel$/, "").replace(/([A-Z])/g, " $1").toSmartTitleCase();
+									if (key.includes("SavingThrow")) savingThrowExpertise.push(keyStem);
+									else skillExpertise.push(keyStem);
+								};
+								if (savingThrowExpertise.length) expertiseText += "Expertise in Saving Throws: " + savingThrowExpertise.join(", ") + "\n";
+								if (skillExpertise.length) expertiseText += "Expertise in Skill Checks: " + skillExpertise.join(", ") + "\n";
+								if (expertiseText) data = expertiseText + "\n" + data;
+							} else if ((dataKey[0] == "additionalFeaturesAndTraits") && characterSheetData["characterAppearance"]) {
+								data = "Character Appearance: " + characterSheetData["characterAppearance"] + "\n" + data;
+							} else if (
+								dataKey[0].startsWith("spells") &&
+								[
+									"Spells 1022", "Spells 1033", "Spells 1045", "Spells 1059", "Spells 1072", "Spells 1081", "Spells 1090", "Spells 1099", "Spells 10106", "Spells 101013"
+								].includes(fieldName)) {
+								let extraSpells = characterSheetData[dataKey[0]].slice(
+									dataKey[1] + 1
+								).filter(
+									spell => spell[0] || spell[1]
+								).map(
+									spell => (spell[0] ? "(prepared) " : "(unprepared) ") + spell[1]
+								).join(", ");
+								data += ((data && extraSpells) ? ", " : "") + extraSpells;
+							};
+
+							switch (field.constructor.name) {
+								case "PDFTextField":
+									field.setText(String(data));
+									break;
+								case "PDFCheckBox":
+									if (data) field.check();
+									else field.uncheck();
+									break;
+								default:
+									break;
+							}
+						})
+						return pdfDoc.saveAsBase64({ dataUri: true });
+					});
+
+				let fileName = characterSheetData["characterName"] + ".pdf";
 				let downloadLinkElem = document.createElement("a");
-				downloadLinkElem.setAttribute("href", downloadUrl);
+				downloadLinkElem.setAttribute("href", downloadUri);
 				downloadLinkElem.setAttribute("download", fileName);
 
 				modalElem.getElementsByClassName("modal__fileName")[0].innerText = fileName;
 				modalElem.getElementsByClassName("modal__fileIcon")[0].addEventListener("dragstart", evt => {
-					evt.dataTransfer.setData("DownloadURL", "text/json:" + fileName + ":" + downloadUrl);
+					evt.dataTransfer.setData(
+						"DownloadURL",
+						downloadUri.slice("data:".length, "data:application.pdf;".length) + fileName + ";" + downloadUri.slice("data:application.pdf;".length)
+					);
 				});
 				modalElem.getElementsByClassName("modal__fileDownload")[0].addEventListener("click", evt => {
 					evt.target.parentElement.parentElement.close();
@@ -845,6 +1254,7 @@ const checkForDetailsInInput = (() => {
 						detailName = "Adventuring Gear";
 					else if (regex["detailTypes"].includes("Armor"))
 						detailName = "Armor";
+					continue; // For testing
 
 					searchDetail(detailName, regex["detailTypes"])
 						.then(detailUrlName => {
