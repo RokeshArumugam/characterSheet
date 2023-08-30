@@ -1571,12 +1571,15 @@ document.addEventListener("keydown", evt => {
 	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && (evt.key == "d")) {
 		evt.preventDefault();
 		button = document.getElementsByClassName("donationButton")[0];
-	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && (["ArrowLeft", "ArrowRight"].includes(evt.key))) {
-		if (!["INPUT", "TEXTAREA"].includes(evt.target.tagName)) {
-			evt.preventDefault();
-			button = document.getElementsByClassName((evt.key == "ArrowLeft") ? "previousButton" : "nextButton")[0];
-			if (button.classList.contains("invisible")) button = undefined;
-		};
+	} else if (
+		(evt.ctrlKey || evt.metaKey) &&
+		evt.shiftKey &&
+		(["ArrowLeft", "ArrowRight"].includes(evt.key)) &&
+		!["INPUT", "TEXTAREA"].includes(evt.target.tagName)
+	) {
+		evt.preventDefault();
+		button = document.getElementsByClassName((evt.key == "ArrowLeft") ? "previousButton" : "nextButton")[0];
+		if (button.classList.contains("invisible")) button = undefined;
 	};
 	if (document.getElementById("modal")) return;
 	button?.click();
