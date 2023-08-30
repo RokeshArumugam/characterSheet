@@ -1560,21 +1560,23 @@ document.addEventListener("click", evt => {
 });
 document.addEventListener("keydown", evt => {
 	let button;
-	if ((evt.ctrlKey || evt.metaKey) && evt.key == "s") {
+	if (evt.key == "Escape" && ["INPUT", "TEXTAREA"].includes(evt.target.tagName)) {
+		evt.target.blur();
+	} else if ((evt.ctrlKey || evt.metaKey) && (evt.key == "s")) {
 		evt.preventDefault();
 		button = document.getElementsByClassName("saveButton")[0];
-	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "r") {
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && (evt.key == "r")) {
 		evt.preventDefault();
 		button = document.getElementsByClassName("rollButton")[0];
-	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "d") {
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && (evt.key == "d")) {
 		evt.preventDefault();
 		button = document.getElementsByClassName("donationButton")[0];
-	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "ArrowLeft") {
-		evt.preventDefault();
-		button = document.getElementsByClassName("previousButton")[0];
-	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key == "ArrowRight") {
-		evt.preventDefault();
-		button = document.getElementsByClassName("nextButton")[0];
+	} else if ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && (["ArrowLeft", "ArrowRight"].includes(evt.key))) {
+		if (!["INPUT", "TEXTAREA"].includes(evt.target.tagName)) {
+			evt.preventDefault();
+			button = document.getElementsByClassName((evt.key == "ArrowLeft") ? "previousButton" : "nextButton")[0];
+			if (button.classList.contains("invisible")) button = undefined;
+		};
 	};
 	if (document.getElementById("modal")) return;
 	button?.click();
