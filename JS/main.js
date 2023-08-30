@@ -78,7 +78,7 @@ const modalTemplates = {
 	`
 };
 
-const CORS_PROXY = "https://corsproxy.io/?";
+const CORS_PROXIES = ["https://corsproxy.io/?"];
 const pathnamesForDetailType = {
 	"Class": ["(detailUrlName)"],
 	"Background": ["background:(detailUrlName)"],
@@ -1175,85 +1175,92 @@ async function searchDetail(detailName, detailTypes) {
 		};
 
 		for (let url of urls) {
-			await fetch(CORS_PROXY + url)
-				.then((response) => {
-					if (response.status == 200) return response.text();
-					else if (response.status != 404) console.error("Status Code (" + url + "): " + response.status);
-				}).then((data) => {
-					if (!data) return;
+			for (const CORS_PROXY of CORS_PROXIES) {
+				let fetchFailed = await fetch(CORS_PROXY + url)
+					.then((response) => {
+						if (response.status == 200) return response.text();
+						else if (response.status != 404) console.error("Status Code (" + url + "): " + response.status);
+					}).then((data) => {
+						if (!data) return;
 
-					let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
+						let contentElem = new DOMParser().parseFromString(data, "text/html").getElementById("page-content");
 
-					contentElem.querySelector("#toc")?.remove();
+						contentElem.querySelector("#toc")?.remove();
 
-					let source = "";
-					for (let elem of contentElem.querySelectorAll("p" + (contentElem.getElementsByTagName("h1").length ? ":has(~ h1:first-of-type)" : ""))) {
-						if (!(elem.innerText.startsWith("Source: "))) continue;
-						source = elem.innerText.substring("Source: ".length);
-						elem.remove();
-					};
+						let source = "";
+						for (let elem of contentElem.querySelectorAll("p" + (contentElem.getElementsByTagName("h1").length ? ":has(~ h1:first-of-type)" : ""))) {
+							if (!(elem.innerText.startsWith("Source: "))) continue;
+							source = elem.innerText.substring("Source: ".length);
+							elem.remove();
+						};
 
-					let prerequisites = [];
-					if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
-						prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
-						contentElem.firstElementChild.remove();
-					};
+						let prerequisites = [];
+						if (contentElem.firstElementChild.innerText.startsWith("Prerequisite: ")) {
+							prerequisites = contentElem.firstElementChild.innerText.substring("Prerequisite: ".length).split(",");
+							contentElem.firstElementChild.remove();
+						};
 
-					if (detailType == "Race") {
-						let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
-						let wholeRaceName = detailName.trim().toLowerCase();
-						let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
-						if (subraceRowElem) {
-							for (let elem of subraceRowElem.getElementsByTagName("p")) {
-								if (!(elem.innerText.startsWith("Source: "))) continue;
-								source = elem.innerText.substring("Source: ".length);
-								elem.remove();
-								break;
+						if (detailType == "Race") {
+							let rowElems = [...contentElem.getElementsByClassName("row")].slice(1);
+							let wholeRaceName = detailName.trim().toLowerCase();
+							let subraceRowElem = rowElems.find(row => row.querySelector("h3 > span").innerText.trim().toLowerCase() == wholeRaceName);
+							if (subraceRowElem) {
+								for (let elem of subraceRowElem.getElementsByTagName("p")) {
+									if (!(elem.innerText.startsWith("Source: "))) continue;
+									source = elem.innerText.substring("Source: ".length);
+									elem.remove();
+									break;
+								};
+								rowElems.forEach(rowElem => { if (rowElem != subraceRowElem) rowElem.remove() });
+							} else {
+								detailName = mainRaceName;
+								detailUrlName = mainRaceUrlName;
 							};
-							rowElems.forEach(rowElem => { if (rowElem != subraceRowElem) rowElem.remove() });
-						} else {
-							detailName = mainRaceName;
-							detailUrlName = mainRaceUrlName;
-						};
-					};
-
-					for (let i = 1; i <= 3; i++) {
-						for (let elem of contentElem.getElementsByTagName("h" + i))
-							elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
-					};
-					for (let elem of contentElem.getElementsByTagName("a"))
-						elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
-					for (let elem of contentElem.getElementsByTagName("li"))
-						elem.innerText = "* " + elem.innerText.trim();
-					for (let elem of contentElem.getElementsByClassName("hover"))
-						elem.firstElementChild.innerText = " (" + elem.firstElementChild.innerText.toLowerCase() + ")";
-					for (let elem of contentElem.getElementsByTagName("table")) {
-						if (elem.rows[0].cells.length == 1) elem.rows[0].remove()
-						if (elem.rows[0].cells[0].innerText.trim() == elem.rows[0].innerText.trim()) {
-							let heading = document.createElement("h2");
-							heading.innerText = "## " + elem.rows[0].innerText.trim() + "\n";
-							elem.before(heading);
-							elem.rows[0].remove();
 						};
 
-						elem.innerText = [...elem.rows].map(row => {
-							return "| " + [...row.cells].map(cell => {
-								return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
-							}).join(" | ") + " |"
-						}).join("\n") + "\n";
-					};
+						for (let i = 1; i <= 3; i++) {
+							for (let elem of contentElem.getElementsByTagName("h" + i))
+								elem.innerText = "#".repeat(i) + " " + elem.innerText.trim();
+						};
+						for (let elem of contentElem.getElementsByTagName("a"))
+							elem.innerText = "[" + elem.innerText.trim() + "](" + elem.href + ")";
+						for (let elem of contentElem.getElementsByTagName("li"))
+							elem.innerText = "* " + elem.innerText.trim();
+						for (let elem of contentElem.getElementsByClassName("hover"))
+							elem.firstElementChild.innerText = " (" + elem.firstElementChild.innerText.toLowerCase() + ")";
+						for (let elem of contentElem.getElementsByTagName("table")) {
+							if (elem.rows[0].cells.length == 1) elem.rows[0].remove()
+							if (elem.rows[0].cells[0].innerText.trim() == elem.rows[0].innerText.trim()) {
+								let heading = document.createElement("h2");
+								heading.innerText = "## " + elem.rows[0].innerText.trim() + "\n";
+								elem.before(heading);
+								elem.rows[0].remove();
+							};
 
-					let description = contentElem.innerText.trim()
-						.replace(/([^\n])\n\n+([^\n\|])/g, "$1\n$2")
-						.replace(/([^\n\|])\n\n+([^\n])/g, "$1\n$2")
-						.replace(/\|\n\n\n+\|/g, "|\n\n|");
+							elem.innerText = [...elem.rows].map(row => {
+								return "| " + [...row.cells].map(cell => {
+									return cell.innerText.trim().replaceAll("\n", " ").replaceAll("|", "!")
+								}).join(" | ") + " |"
+							}).join("\n") + "\n";
+						};
 
-					searchedDetails[detailUrlName] = {
-						detailType, description, prerequisites, source, url
-					};
-				}).catch(err => console.error(err));
-			if (Object.keys(searchedDetails[detailUrlName]).length)
-				return detailUrlName;
+						let description = contentElem.innerText.trim()
+							.replace(/([^\n])\n\n+([^\n\|])/g, "$1\n$2")
+							.replace(/([^\n\|])\n\n+([^\n])/g, "$1\n$2")
+							.replace(/\|\n\n\n+\|/g, "|\n\n|");
+
+						searchedDetails[detailUrlName] = {
+							detailType, description, prerequisites, source, url
+						};
+					}).catch(err => {
+						console.error(err)
+						return true;
+					});
+				if (fetchFailed) continue;
+				if (Object.keys(searchedDetails[detailUrlName]).length)
+					return detailUrlName;
+				break;
+			};
 		};
 	};
 };
