@@ -1395,9 +1395,13 @@ function roll(expression) {
 	expression = expression.replace(/(\d*)d(\d+)/g, (_, p1, p2) => {
 		let rolls = [];
 		for (let i = 0; i < (p1 || 1); i++) rolls.push(rollDie(p2));
-		return rolls.length ? rolls.join("+") : [0];
+		return rolls.join("+") || "0";
 	});
-	if (expression.includes(" ")) output.push("Roll: " + expression);
+	if (expression.match(/[^\d\+\-\* ]/)) {
+		alert("The roll you entered wasn't understood.", "Invalid Roll", "fa-times-circle");
+		return;
+	};
+	if (expression.match(/[^\d]/)) output.push("Roll: " + expression);
 	output.push("Total: " + eval(expression));
 	alert(output.join("\n"), "Roll")
 };
