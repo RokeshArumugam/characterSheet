@@ -1190,8 +1190,7 @@ async function searchDetail(detailName, detailTypes) {
 			await fetch(CORS_PROXY + url)
 				.then((response) => {
 					if (response.status == 200) return response.text();
-					else if (response.status == 404) return null;
-					else console.error("Status Code: " + response.status);
+					else if (response.status != 404) console.error("Status Code (" + url + "): " + response.status);
 				}).then((data) => {
 					if (!data) return;
 
