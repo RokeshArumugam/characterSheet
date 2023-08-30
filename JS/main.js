@@ -1160,10 +1160,10 @@ async function searchDetail(detailName, detailTypes) {
 	let mainRaceUrlName = "";
 	if (detailTypes.includes("Subclass")) {
 		classUrlName = getDetailUrlNameForDetailName(
-			document.getElementById("classAndLevel").value.match(/^\S*/)[0]
+			document.getElementById("classAndLevel").value.match(/^\s*(.+?)(,? ?(level)? ? \d+)?\s*$/i)?.[1] ?? ""
 		);
 	} else if (detailTypes.includes("Race")) {
-		mainRaceName = detailName.match(/\S*$/g)[0].toSmartTitleCase();
+		mainRaceName = detailName.match(/\S*$/)[0].toSmartTitleCase();
 		mainRaceUrlName = getDetailUrlNameForDetailName(mainRaceName);
 	};
 
