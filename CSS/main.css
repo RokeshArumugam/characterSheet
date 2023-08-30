@@ -168,6 +168,11 @@ footer div:has(span:not(:empty)) {
 footer span:empty {
 	display: none;
 }
+footer .copyrightNotice {
+	grid-column: 1 / -1;
+	text-align: center;
+	font-size: 0.75em;
+}
 
 /* Modal */
 
