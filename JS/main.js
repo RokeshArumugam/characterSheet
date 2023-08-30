@@ -597,7 +597,7 @@ function showModal(options) {
 		if (typeof options["message"] !== "string") options["message"] = String(options["message"]);
 
 		let parentElements = [messageElem];
-		for (let line of options["message"].split("\n")) {
+		for (let line of options["message"].split("\n")) { // converting Markdown message into HTML elements
 			let childElem;
 			if (line.startsWith("| ")) {
 				if (parentElements.at(-1).tagName != "TABLE") {
@@ -653,20 +653,19 @@ function showModal(options) {
 				modalElem.getElementById("modal__characterSheetFileInput").addEventListener("input", evt => {
 					evt.target.files[0].arrayBuffer()
 						.then(pdfBytes => PDFLib.PDFDocument.load(pdfBytes))
-						.then(pdfDoc => {
+						.then(pdfDoc => { // parse PDF into characterSheetData
 							pdfDoc.getForm().getFields().forEach(field => {
 								let fieldName = field.getName();
 								let dataKey = pdfKeyMap[fieldName]
 								if (!dataKey) return;
+								if (typeof dataKey != "object") dataKey = [dataKey];
 
 								let data = (field.constructor.name == "PDFCheckBox") ? field.isChecked() : (field.getText() ?? "");
-								if (typeof dataKey != "object") dataKey = [dataKey];
 
 								if (dataKey[0] == "inspiration") {
 									data = ["yes", "y"].includes(data.toLowerCase()) || (parseInt(data) > 0);
 								} else if (["proficiencyBonus", "armorClass", "initiative", "speed", "hitPointMaximum", "currentHitPoints", "temporaryHitPoints"].includes(dataKey[0]) || dataKey[0].endsWith("Score") || dataKey[0].endsWith("Modifier") || dataKey[0].endsWith("Pieces")) {
-									data = parseInt(data);
-									if (isNaN(data)) data = 0;
+									data = parseInt(data) || 0;
 								} else if (dataKey[0].endsWith("ProficiencyLevel")) {
 									data = Math.max(characterSheetData[dataKey[0]], data ? 1 : 0);
 								} else if (["deathSaveSuccesses", "deathSaveFailures"].includes(dataKey[0])) {
@@ -676,12 +675,6 @@ function showModal(options) {
 										data = Math.max(characterSheetData[dataKey[0]], data ? 2 : 0);
 									else if (["Check Box 14", "Check Box 17"].includes(fieldName))
 										data = Math.max(characterSheetData[dataKey[0]], data ? 3 : 0);
-								} else if (
-									(dataKey[0] == "weapons") &&
-									(dataKey[1] == (emptyCharacterSheetData["weapons"].length - 1)) &&
-									(characterSheetData["weapons"].length == emptyCharacterSheetData["weapons"].length)
-								) {
-									characterSheetData["weapons"].push([...emptyCharacterSheetData["weapons"][0]]);
 								} else if (dataKey[0] == "attacksNotes") {
 									let delimiterIndex = data.indexOf("\n\n");
 									if (delimiterIndex != -1) {
@@ -694,8 +687,7 @@ function showModal(options) {
 											extraWeapons.forEach(extraWeapon => {
 												characterSheetData["weapons"].push(extraWeapon.slice(1));
 											});
-											characterSheetData["weapons"].push([...emptyCharacterSheetData["weapons"][0]]);
-										}
+										};
 									};
 								} else if ((dataKey[0] == "otherProficienciesAndLanguages")) {
 									let savingThrowExpertise;
@@ -708,13 +700,15 @@ function showModal(options) {
 										skillExpertise = dataHead.match(/^Expertise in Skill Checks: (.+)$/im)?.[1];
 										if (savingThrowExpertise || skillExpertise)
 											data = dataHead.replace(/^Expertise in (Saving Throws|Skill Checks): .+$/igm, "").trim() + dataBody;
-									}
+									};
 									savingThrowExpertise?.split(", ").forEach(savingThrow => {
 										characterSheetData[savingThrow.toLowerCamelCase() + "SavingThrowProficiencyLevel"] = 2;
 									});
 									skillExpertise?.split(", ").forEach(skill => {
 										characterSheetData[skill.toLowerCamelCase() + "SkillProficiencyLevel"] = 2;
 									});
+								} else if ((fieldName == "CharacterName 2") && characterSheetData["characterName"]) {
+									return;
 								} else if ((dataKey[0] == "additionalFeaturesAndTraits")) {
 									let delimiterIndex = data.indexOf("\n\n");
 									if (delimiterIndex != -1) {
@@ -728,20 +722,15 @@ function showModal(options) {
 									};
 								} else if (
 									dataKey[0].startsWith("spells") &&
-									(dataKey[1] == (emptyCharacterSheetData[dataKey[0]].length - 1)) &&
-									(characterSheetData[dataKey[0]].length == emptyCharacterSheetData[dataKey[0]].length)
-								) {
-									characterSheetData[dataKey[0]].push([...emptyCharacterSheetData[dataKey[0]][0]]);
-								} else if (
-									dataKey[0].startsWith("spells") &&
 									[
 										"Spells 1022", "Spells 1033", "Spells 1045", "Spells 1059", "Spells 1072", "Spells 1081", "Spells 1090", "Spells 1099", "Spells 10106", "Spells 101013"
-									].includes(fieldName)) {
+									].includes(fieldName)
+								) {
 									let extraSpells = data.split(", ").slice(1).map(spell => {
-										return [spell.includes("prepared"), spell.replace(/^\(u?n?prepared\) /, "")]
-									})
+										return [(fieldName == "Spells 1022") ? null : spell.includes("prepared"), spell.replace(/^\(u?n?prepared\) /, "")]
+									});
 									if (extraSpells.length) {
-										data = data.split(", ")[0];
+										data = data.split(", ", 1)[0];
 										characterSheetData[dataKey[0]] = characterSheetData[dataKey[0]].slice(
 											0,
 											emptyCharacterSheetData[dataKey[0]].length - ((fieldName == "Spells 1033") ? 1 : 0)
@@ -749,13 +738,18 @@ function showModal(options) {
 										extraSpells.forEach(extraSpell => {
 											characterSheetData[dataKey[0]].push(extraSpell);
 										});
-										characterSheetData[dataKey[0]].push([...emptyCharacterSheetData[dataKey[0]][0]]);
 									};
 								};
 
 								if (dataKey.length == 1) characterSheetData[dataKey[0]] = data;
 								else if (dataKey.length == 2) characterSheetData[dataKey[0]][dataKey[1]] = data;
 								else if (dataKey.length == 3) characterSheetData[dataKey[0]][dataKey[1]][dataKey[2]] = data;
+
+								if (
+									((dataKey[0] == "weapons") || dataKey[0].startsWith("spells")) &&
+									JSON.stringify(characterSheetData[dataKey[0]].at(-1)) != JSON.stringify(emptyCharacterSheetData[dataKey[0]][0])
+								)
+									characterSheetData[dataKey[0]].push([...emptyCharacterSheetData[dataKey[0]][0]]);
 							});
 							characterSheetData["lastAutosave"] = Date.now();
 							evt.target.parentElement.close();
@@ -828,14 +822,14 @@ function showModal(options) {
 				let downloadUri = await fetch("editableCharacterSheet.pdf")
 					.then(response => response.arrayBuffer())
 					.then(pdfBytes => PDFLib.PDFDocument.load(pdfBytes))
-					.then(pdfDoc => {
+					.then(pdfDoc => { // inject characterSheetData into PDF
 						pdfDoc.getForm().getFields().forEach(field => {
 							let fieldName = field.getName();
 							let dataKey = pdfKeyMap[fieldName]
 							if (!dataKey) return;
+							if (typeof dataKey != "object") dataKey = [dataKey];
 
 							let data = characterSheetData;
-							if (typeof dataKey != "object") dataKey = [dataKey];
 							for (let key of dataKey) data = data[key];
 
 							if (dataKey[0] == "inspiration") {
@@ -880,7 +874,7 @@ function showModal(options) {
 								).filter(
 									spell => spell[0] || spell[1]
 								).map(
-									spell => (spell[0] ? "(prepared) " : "(unprepared) ") + spell[1]
+									spell => ((fieldName == "Spells 1022") ? "" : (spell[0] ? "(prepared) " : "(unprepared) ")) + spell[1]
 								).join(", ");
 								data += ((data && extraSpells) ? ", " : "") + extraSpells;
 							};
@@ -906,12 +900,6 @@ function showModal(options) {
 				downloadLinkElem.setAttribute("download", fileName);
 
 				modalElem.getElementsByClassName("modal__fileName")[0].innerText = fileName;
-				modalElem.getElementsByClassName("modal__fileIcon")[0].addEventListener("dragstart", evt => {
-					evt.dataTransfer.setData(
-						"DownloadURL",
-						downloadUri.slice("data:".length, "data:application.pdf;".length) + fileName + ";" + downloadUri.slice("data:application.pdf;".length)
-					);
-				});
 				modalElem.getElementsByClassName("modal__fileDownload")[0].addEventListener("click", evt => {
 					evt.target.parentElement.parentElement.close();
 					downloadLinkElem.click();
@@ -1422,14 +1410,14 @@ function inputEventListener(evt) {
 		let tbodyElem = rowElem.parentElement;
 
 		characterSheetData["weapons"][[...tbodyElem.children].indexOf(rowElem)][cellIndex] = elem.value;
-		if (characterSheetData["weapons"].at(-1).join("")) {
-			characterSheetData["weapons"].push(["", "", ""]);
+		if (JSON.stringify(characterSheetData["weapons"].at(-1)) != JSON.stringify(emptyCharacterSheetData["weapons"][0])) {
+			characterSheetData["weapons"].push([...emptyCharacterSheetData["weapons"][0]]);
 			addWeaponRow(characterSheetData["weapons"].at(-1));
 		};
 
 		while (
 			(characterSheetData["weapons"].length > emptyCharacterSheetData["weapons"].length) &&
-			!(characterSheetData["weapons"].at(-2).join(""))
+			(JSON.stringify(characterSheetData["weapons"].at(-2)) == JSON.stringify(emptyCharacterSheetData["weapons"][0]))
 		) {
 			characterSheetData["weapons"].splice(characterSheetData["weapons"].length - 2, 1);
 			tbodyElem.children[tbodyElem.children.length - 2].remove();
@@ -1440,18 +1428,17 @@ function inputEventListener(evt) {
 		let rowElem = cellElem.parentElement;
 		let cellIndex = [...rowElem.children].indexOf(cellElem);
 		let tbodyElem = rowElem.parentElement;
-		let emptyRow = [(tbodyElem.id == "spellsLevel0") ? null : false, ""];
 		let value = (elem.type == "checkbox") ? elem.checked : elem.value;
 
 		characterSheetData[tbodyElem.id][[...tbodyElem.children].indexOf(rowElem)][cellIndex + ((tbodyElem.id == "spellsLevel0") ? 1 : 0)] = value;
-		if (JSON.stringify(characterSheetData[tbodyElem.id].at(-1)) != JSON.stringify(emptyRow)) {
-			characterSheetData[tbodyElem.id].push(emptyRow);
+		if (JSON.stringify(characterSheetData[tbodyElem.id].at(-1)) != JSON.stringify(emptyCharacterSheetData[tbodyElem.id][0])) {
+			characterSheetData[tbodyElem.id].push([...emptyCharacterSheetData[tbodyElem.id][0]]);
 			addSpellRow(tbodyElem.id, characterSheetData[tbodyElem.id].at(-1));
 		};
 
 		while (
 			(characterSheetData[tbodyElem.id].length > emptyCharacterSheetData[tbodyElem.id].length) &&
-			(JSON.stringify(characterSheetData[tbodyElem.id].at(-2)) == JSON.stringify(emptyRow))
+			(JSON.stringify(characterSheetData[tbodyElem.id].at(-2)) == JSON.stringify(emptyCharacterSheetData[tbodyElem.id][0]))
 		) {
 			characterSheetData[tbodyElem.id].splice(characterSheetData[tbodyElem.id].length - 2, 1);
 			tbodyElem.children[tbodyElem.children.length - 2].remove();
