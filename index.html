@@ -112,7 +112,6 @@
                     <span class="spellsContainer__level" title="Spell Level">0</span>
                     <span class="spellsContainer__levelName box__heading">Cantrips</span>
                 </div>
-                <div class="spellsLevel0__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel0"></tbody>
                 </table>
@@ -125,7 +124,6 @@
                     <input type="text" id="spellSlotsExpendedLevel1" class="spellsContainer__slotsExpended"
                         placeholder="Slots Expended">
                 </div>
-                <div class="spellsLevel1__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel1"></tbody>
                 </table>
@@ -136,7 +134,6 @@
                     <input type="text" id="spellSlotsTotalLevel2" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel2" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel2__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel2"></tbody>
                 </table>
@@ -149,7 +146,6 @@
                     <input type="text" id="spellSlotsTotalLevel3" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel3" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel3__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel3"></tbody>
                 </table>
@@ -160,7 +156,6 @@
                     <input type="text" id="spellSlotsTotalLevel4" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel4" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel4__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel4"></tbody>
                 </table>
@@ -171,7 +166,6 @@
                     <input type="text" id="spellSlotsTotalLevel5" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel5" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel5__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel5"></tbody>
                 </table>
@@ -184,7 +178,6 @@
                     <input type="text" id="spellSlotsTotalLevel6" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel6" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel6__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel6"></tbody>
                 </table>
@@ -195,7 +188,6 @@
                     <input type="text" id="spellSlotsTotalLevel7" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel7" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel7__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel7"></tbody>
                 </table>
@@ -206,7 +198,6 @@
                     <input type="text" id="spellSlotsTotalLevel8" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel8" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel8__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel8"></tbody>
                 </table>
@@ -217,7 +208,6 @@
                     <input type="text" id="spellSlotsTotalLevel9" class="spellsContainer__slotsTotal">
                     <input type="text" id="spellSlotsExpendedLevel9" class="spellsContainer__slotsExpended">
                 </div>
-                <div class="spellsLevel9__detailButtonsContainer detailButtonsContainer"></div>
                 <table class="spellsContainer__table">
                     <tbody id="spellsLevel9"></tbody>
                 </table>
@@ -562,6 +552,12 @@
             <span class="box__heading">Attacks & Spellcasting</span>
         </div>
         <div class="featuresAndTraits box">
+            <template id="detailButtonTemplate">
+                <div id="detailButton-" class="detailButton primaryButton">
+                    <span></span>
+                    <i class="fas fa-close" title="Remove"></i>
+                </div>
+            </template>
             <div class="featuresAndTraits__detailButtonsContainer detailButtonsContainer"></div>
             <textarea id="featuresAndTraits"></textarea>
             <span class="box__heading">Features & Traits</span>

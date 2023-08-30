@@ -579,6 +579,7 @@ const pdfKeyMap = {
 let characterSheetData = structuredClone(emptyCharacterSheetData);
 const weaponRowTemplate = document.getElementById("weaponRowTemplate");
 const spellRowTemplate = document.getElementById("spellRowTemplate");
+const detailButtonTemplate = document.getElementById("detailButtonTemplate");
 let searchedDetails = {};
 
 // Utility Functions
@@ -758,7 +759,7 @@ function showModal(options) {
 							});
 							characterSheetData["lastAutosave"] = Date.now();
 							evt.target.parentElement.close();
-							resolve(null);
+							resolve();
 						}).catch(() => {
 							evt.target.setCustomValidity("File contents are invalid. Must be the official editable PDF.");
 							evt.target.reportValidity();
@@ -783,7 +784,7 @@ function showModal(options) {
 						do parentElement = parentElement.parentElement
 						while (parentElement.tagName != "DIALOG");
 						parentElement.close()
-						resolve(null);
+						resolve();
 					});
 
 					characterSheetElem.getElementsByClassName("modal__characterName")[0].innerText =
@@ -914,7 +915,7 @@ function showModal(options) {
 				modalElem.getElementsByClassName("modal__fileDownload")[0].addEventListener("click", evt => {
 					evt.target.parentElement.parentElement.close();
 					downloadLinkElem.click();
-					resolve(null);
+					resolve();
 				});
 				break;
 			case modalTemplates["detailInfo"]:
@@ -940,12 +941,12 @@ function showModal(options) {
 
 		modalElem.getElementsByClassName("modal__button")[0].addEventListener("click", evt => {
 			evt.target.parentElement.parentElement.close();
-			resolve(null);
+			resolve();
 		});
 
 		modalElem = modalElem.body.firstChild;
 		modalElem.addEventListener("close", () => modalElem.remove());
-		modalElem.addEventListener("cancel", () => resolve(null));
+		modalElem.addEventListener("cancel", () => resolve());
 
 		document.body.appendChild(modalElem);
 		modalElem.showModal();
@@ -1125,11 +1126,13 @@ function updateAbilityModifier(abilityName) {
 function addDetailButtonIfNotExist(detailName, detailUrlName, containerElem) {
 	if (document.getElementById("detailButton-" + detailUrlName)) return;
 
-	let detailButtonElem = document.createElement("div");
-	detailButtonElem.id = "detailButton-" + detailUrlName;
-	detailButtonElem.classList.add("featuresAndTraits__detailButton", "detailButton", "primaryButton");
+	let detailButtonElem = detailButtonTemplate.content.cloneNode(true).firstElementChild;
+	detailButtonElem.id += detailUrlName;
 	detailButtonElem.addEventListener("click", evt => {
-		if (evt.target.tagName == "I") return;
+		if (evt.target.tagName == "I") {
+			detailButtonElem.remove();
+			return;
+		}
 		showModal({
 			"template": modalTemplates["detailInfo"],
 			"message": searchedDetails[detailUrlName]["description"],
@@ -1140,15 +1143,7 @@ function addDetailButtonIfNotExist(detailName, detailUrlName, containerElem) {
 		});
 	});
 
-	let detailButtonTextElem = document.createElement("span");
-	detailButtonTextElem.innerText = detailName;
-	detailButtonElem.appendChild(detailButtonTextElem);
-
-	let detailButtonCloseElem = document.createElement("i");
-	detailButtonCloseElem.classList.add("fas", "fa-close");
-	detailButtonCloseElem.title = "Remove";
-	detailButtonCloseElem.addEventListener("click", _ => detailButtonElem.remove());
-	detailButtonElem.appendChild(detailButtonCloseElem);
+	detailButtonElem.getElementsByTagName("span")[0].innerText = detailName;
 
 	containerElem.appendChild(detailButtonElem);
 }

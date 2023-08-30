@@ -625,9 +625,6 @@ input + .detailButton::before {
 .spellsContainer__header input {
 	flex-basis: 0em;
 }
-.spellsContainer .detailButtonsContainer {
-	margin-top: 0.5em;
-}
 .spellsContainer__table {
 	border-spacing: 0.5em;
 }
