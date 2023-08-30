@@ -170,6 +170,7 @@ footer span:empty {
 }
 footer .copyrightNotice {
 	grid-column: 1 / -1;
+	margin-top: 0.25em;
 	text-align: center;
 	font-size: 0.75em;
 }
