@@ -781,12 +781,12 @@ function showModal(options) {
 
 					let nameElem = document.createElement("span");
 					nameElem.classList.add("modal__characterName");
-					nameElem.innerText = existingCharacterSheetData["characterName"] || "Unamed character";
+					nameElem.innerText = existingCharacterSheetData["characterName"].trim() || "Unnamed character";
 					buttonElem.appendChild(nameElem);
 
 					let deleteElem = document.createElement("i");
 					deleteElem.classList.add("fas", "fa-times-circle", "modal__characterSheetDelete")
-					deleteElem.title = "Delete " + existingCharacterSheetData["characterName"];
+					deleteElem.title = "Delete " + existingCharacterSheetData["characterName"].trim();
 					deleteElem.addEventListener("click", evt => {
 						evt.target.parentElement.parentElement.remove();
 						localStorage.removeItem(existingCharacterSheetId);
@@ -795,7 +795,7 @@ function showModal(options) {
 
 					let descriptionElem = document.createElement("span");
 					descriptionElem.classList.add("modal__characterDescription");
-					descriptionElem.innerText = (existingCharacterSheetData["race"] || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"] || "<unknown class and level>");
+					descriptionElem.innerText = (existingCharacterSheetData["race"].trim() || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"].trim() || "<unknown class and level>");
 					buttonElem.appendChild(descriptionElem);
 
 					let timestampElem = document.createElement("span");
@@ -898,7 +898,7 @@ function showModal(options) {
 						return pdfDoc.saveAsBase64({ dataUri: true });
 					});
 
-				let fileName = characterSheetData["characterName"] + ".pdf";
+				let fileName = (characterSheetData["characterName"].trim() || "Unnamed Character") + ".pdf";
 				let downloadLinkElem = document.createElement("a");
 				downloadLinkElem.setAttribute("href", downloadUri);
 				downloadLinkElem.setAttribute("download", fileName);
