@@ -825,7 +825,7 @@ function showModal(options) {
 				});
 				break;
 			case modalTemplates["save"]:
-				let downloadUri = await fetch("fillableCharacterSheet.pdf")
+				let downloadUri = await fetch("editableCharacterSheet.pdf")
 					.then(response => response.arrayBuffer())
 					.then(pdfBytes => PDFLib.PDFDocument.load(pdfBytes))
 					.then(pdfDoc => {
