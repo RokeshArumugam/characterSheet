@@ -1,7 +1,7 @@
 # Character Sheet
 This is a digital character sheet that is heavily inspired by the [D&D 5E character sheet](https://media.wizards.com/2016/dnd/downloads/5E_CharacterSheet_Fillable.pdf) by the Wizards of the Coast.
 
-This character sheet automatically updates ability, saving throw and skill modifiers. It also automatically provides buttons that display information about your class, background, race, feats and subclasses depending on what you type into the sheet.
+This character sheet automatically updates ability, saving throw and skill modifiers. It also automatically provides buttons that display information about your feats, spells, items, class, subclasses, background and race depending on what you type into the sheet.
 
 * Class should be on one line and may end with ', level ' + a number
 * Feats and subclasses should be on one line and end with ':' or ' - '
