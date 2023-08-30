@@ -31,6 +31,16 @@ const modalTemplates = {
 			<span id="modal__heading">Alert</span>
 			<div id="modal__message"></div>
 			<input id="modal__characterSheetFileInput" type="file" accept=".pdf">
+			<template id="modal__characterSheetTemplate">
+				<div class="modal__characterSheet">
+					<div class="modal__characterSheetButton primaryButton">
+						<span class="modal__characterName"></span>
+						<i class="fas fa-times-circle modal__characterSheetDelete" title="Delete "></i>
+						<span class="modal__characterDescription"></span>
+					</div>
+					<span class="modal__characterSheetLastSave"></span>
+				</div>
+			</template>
 			<div id="modal__characterSheetsContainer"></div>
 			<div id="modal__buttonContainer">
 				<button class="modal__button primaryButton">Start a New Character</button>
@@ -757,17 +767,15 @@ function showModal(options) {
 
 				let timeFormatter = new Intl.RelativeTimeFormat("en-gb", { numeric: "auto" })
 				let characterSheetListElem = modalElem.getElementById("modal__characterSheetsContainer");
+				const characterSheetTemplate = modalElem.getElementById("modal__characterSheetTemplate");
 				existingCharacterSheetIds.map(
 					id => [id, JSON.parse(localStorage.getItem(id))]
 				).sort(
 					(a, b) => b[1]["lastAutosave"] - a[1]["lastAutosave"]
 				).forEach(([existingCharacterSheetId, existingCharacterSheetData]) => {
-					let characterSheetElem = document.createElement("div");
-					characterSheetElem.classList.add("modal__characterSheet");
+					let characterSheetElem = characterSheetTemplate.content.cloneNode(true).firstElementChild;
 
-					let buttonElem = document.createElement("div");
-					buttonElem.classList.add("modal__characterSheetButton", "primaryButton");
-					buttonElem.addEventListener("click", evt => {
+					characterSheetElem.getElementsByClassName("modal__characterSheetButton")[0].addEventListener("click", evt => {
 						if (evt.target.classList.contains("modal__characterSheetDelete")) return;
 						characterSheetId = existingCharacterSheetId;
 						characterSheetData = existingCharacterSheetData;
@@ -777,29 +785,21 @@ function showModal(options) {
 						parentElement.close()
 						resolve(null);
 					});
-					characterSheetElem.appendChild(buttonElem);
 
-					let nameElem = document.createElement("span");
-					nameElem.classList.add("modal__characterName");
-					nameElem.innerText = existingCharacterSheetData["characterName"].trim() || "Unnamed character";
-					buttonElem.appendChild(nameElem);
+					characterSheetElem.getElementsByClassName("modal__characterName")[0].innerText =
+						existingCharacterSheetData["characterName"].trim() || "Unnamed character";
 
-					let deleteElem = document.createElement("i");
-					deleteElem.classList.add("fas", "fa-times-circle", "modal__characterSheetDelete")
+					let deleteElem = characterSheetElem.getElementsByClassName("modal__characterSheetDelete")[0]
 					deleteElem.title = "Delete " + existingCharacterSheetData["characterName"].trim();
 					deleteElem.addEventListener("click", evt => {
 						evt.target.parentElement.parentElement.remove();
 						localStorage.removeItem(existingCharacterSheetId);
 					});
-					buttonElem.appendChild(deleteElem);
 
-					let descriptionElem = document.createElement("span");
-					descriptionElem.classList.add("modal__characterDescription");
-					descriptionElem.innerText = (existingCharacterSheetData["race"].trim() || "<unknown race>") + ", " + (existingCharacterSheetData["classAndLevel"].trim() || "<unknown class and level>");
-					buttonElem.appendChild(descriptionElem);
-
-					let timestampElem = document.createElement("span");
-					timestampElem.classList.add("modal__characterSheetLastSave");
+					characterSheetElem.getElementsByClassName("modal__characterDescription")[0].innerText =
+						(existingCharacterSheetData["race"].trim() || "<unknown race>") +
+						", " +
+						(existingCharacterSheetData["classAndLevel"].trim() || "<unknown class and level>");
 
 					let seconds = Math.round((Date.now() - existingCharacterSheetData["lastAutosave"]) / 1000);
 					let timeUnitLimits = [
@@ -812,13 +812,14 @@ function showModal(options) {
 					];
 					for (let i = 0; i < timeUnitLimits.length; i++) {
 						if (seconds >= timeUnitLimits[i][0]) continue;
-						timestampElem.innerText = "Last saved " + timeFormatter.format(
-							-Math.round(seconds / (timeUnitLimits[i - 1] ?? [1, ""])[0]),
-							timeUnitLimits[i][1]
-						);
+						characterSheetElem.getElementsByClassName("modal__characterSheetLastSave")[0].innerText =
+							"Last saved " +
+							timeFormatter.format(
+								-Math.round(seconds / (timeUnitLimits[i - 1] ?? [1, ""])[0]),
+								timeUnitLimits[i][1]
+							);
 						break;
 					};
-					characterSheetElem.appendChild(timestampElem);
 					characterSheetListElem.appendChild(characterSheetElem);
 				});
 				break;
