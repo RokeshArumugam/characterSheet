@@ -755,7 +755,7 @@ function showModal(options) {
 							evt.target.parentElement.close();
 							resolve();
 						}).catch(() => {
-							evt.target.setCustomValidity("File contents are invalid. Must be the official editable PDF.");
+							evt.target.setCustomValidity("File contents are invalid. Must be the official editable PDF (link given above).");
 							evt.target.reportValidity();
 						});
 				});
