@@ -78,7 +78,7 @@ const modalTemplates = {
 	`
 };
 
-const CORS_PROXIES = ["https://corsproxy.io/?"];
+const CORS_PROXIES = ["https://cors.caiusball.com/?", "https://corsproxy.io/?"];
 const pathnamesForDetailType = {
 	"Class": ["(detailUrlName)"],
 	"Background": ["background:(detailUrlName)"],
