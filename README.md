@@ -19,4 +19,4 @@ You can load a character sheet by uploading an editable PDF, or you can use one 
 To save, you can download an editable PDF of this character sheet and upload it the next time you visit this website. Your character sheet also autosaves on your device so as long as you don't clear your browsing data, when you open up this website up again on this device you can access your previously used character sheets.
 
 ## Privacy
-This website uses cookieless Google Analytics ([privacy policy](/privacyPolicy.html)).
+This website uses cookieless Cloudflare Analytics ([privacy policy](/privacyPolicy.html)).
