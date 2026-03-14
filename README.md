@@ -10,7 +10,7 @@
 > ![CSS](https://img.shields.io/badge/CSS-663399?logo=css&logoColor=FFFFFF)
 > ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000000)
 >
-> [Donate](https://donate.stripe.com/fZe5kv5SJ3jZfjG000)
+> [Donate](https://donate.stripe.com/cNi00k83U96J6QVdK3awo0d)
 
 Character Sheet is a digital character sheet that has some web-scraping-powered automations.
 

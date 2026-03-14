@@ -1504,7 +1504,7 @@ document.querySelectorAll("[name='tripleCheckbox'] ~ label").forEach((elem, inde
 
 document.getElementsByClassName("donationButton")[0].addEventListener("click", _ => {
 	alert(
-		"If you like using this digital character sheet and would like to give back in some way, [donations](" + "https://donate.stripe.com/fZe5kv5SJ3jZfjG000" + ") are most welcome!",
+		"If you like using this digital character sheet and would like to give back in some way, [donations](" + "https://donate.stripe.com/cNi00k83U96J6QVdK3awo0d" + ") are most welcome!",
 		'Donations',
 		"fa-heart"
 	);
