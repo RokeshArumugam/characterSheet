@@ -616,7 +616,7 @@ function showModal(options) {
 				let numHashes = line.match("^#+")[0].length;
 				childElem = document.createElement("h" + (numHashes + 1));
 				childElem.innerHTML = sanitizeHtmlAndConvertMarkdownLinks(line.substring(numHashes + 1));
-			} else if (line.startsWith("* ")) {
+			} else if (line.startsWith("* ") || line.startsWith("- ")) {
 				if (parentElements.at(-1).tagName != "UL") {
 					parentElements = [parentElements[0]];
 					parentElements.push(document.createElement("ul"));
@@ -1584,7 +1584,7 @@ fetch("README.md")
 	.then(response => response.text())
 	.then(response => showModal({
 		"template": modalTemplates["welcome"],
-		"message": response.replace(/^.+\n/, "").replace(/^\n#/gm, "#"),
+		"message": response.replace(/^#.+\n+(>.*\n+)*/, "").replace(/^(.+\n+)[^#]*##[^#]*/, "$1").replace(/^\n#/gm, "#"),
 		"heading": "Welcome",
 		"icon": "fa-dice-d20"
 	})).then(_ => {
